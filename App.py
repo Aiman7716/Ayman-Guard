@@ -2,78 +2,58 @@ import streamlit as st
 import tldextract
 import time
 
-# --- 1. إعدادات الصفحة ---
+# --- 1. إعدادات الأمان والتنسيق ---
 st.set_page_config(page_title="درع أيمن الذكي", page_icon="🛡️", layout="centered")
 
-# --- 2. CSS "الحماية القصوى" لمنع التداخل تماماً ---
 st.markdown("""
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
-        html, body, [class*="st-"] { 
-            font-family: 'Cairo', sans-serif !important; 
-            direction: rtl !important; 
-            text-align: right !important; 
-        }
-        .main-header { color: #00d4ff; text-align: center; font-size: 2.5rem; font-weight: bold; }
-        div.stButton > button { 
-            background-color: #ff4b4b !important; color: white !important; 
-            border-radius: 12px !important; width: 100% !important; height: 3.5em !important; font-weight: bold !important; 
-        }
-        /* منع ظهور رموز keyboard_ar نهائياً */
-        symbol, .st-emotion-cache-1kyx60p, .st-emotion-cache-k77z8q { display: none !important; }
+        html, body, [class*="st-"] { font-family: 'Cairo', sans-serif !important; direction: rtl !important; text-align: right !important; }
+        .st-emotion-cache-1kyx60p, symbol { display: none !important; } /* إخفاء التداخل */
+        div.stButton > button { background-color: #ff4b4b !important; color: white !important; border-radius: 12px !important; width: 100% !important; font-weight: bold !important; }
     </style>
 """, unsafe_allow_html=True)
 
-# --- 3. الوظائف البرمجية (المنطق الذكي) ---
-def is_official(url):
-    """وظيفة للتحقق من أن الرابط جهة رسمية أو تعليمية"""
-    url = url.lower().strip()
-    ext = tldextract.extract(url)
-    domain_full = f"{ext.domain}.{ext.suffix}"
-    
-    # القوائم الموثوقة
-    trusted = ['absher.sa', 'iam.gov.sa', 'splonline.com.sa', 'saudipost.sa', 'moj.gov.sa', 'google.com']
-    suffixes = ['.gov.sa', '.edu.sa']
-    
-    if any(url.endswith(s) for s in suffixes) or domain_full in trusted:
-        return True, domain_full
-    return False, domain_full
+# --- 2. محرك التحقق الذكي ---
+def check_official(url):
+    u = url.lower().strip()
+    ext = tldextract.extract(u)
+    domain = f"{ext.domain}.{ext.suffix}"
+    is_gov_edu = u.endswith('.gov.sa') or u.endswith('.edu.sa')
+    is_trusted = domain in ['absher.sa', 'iam.gov.sa', 'google.com', 'najm.sa']
+    return (is_gov_edu or is_trusted), domain
 
-# --- 4. الواجهة الرئيسية ---
-st.markdown('<div class="main-header">🛡️ درع أيمن الذكي</div>', unsafe_allow_html=True)
+# --- 3. الواجهة ---
+st.markdown("<h1 style='text-align: center; color: #00d4ff;'>🛡️ درع أيمن الذكي</h1>", unsafe_allow_html=True)
 
 # حقل الفحص
-check_url = st.text_input("🔍 ضع الرابط هنا للفحص :", placeholder="https://example.gov.sa", key="fحص")
+u_input = st.text_input("🔍 ضع الرابط هنا للفحص :", value="", key="scanner_unique")
 
-if st.button("🚀 افحص وصِد الرابط الآن", key="btn_fحص"):
-    if check_url:
-        official, d_name = is_official(check_url)
+if st.button("🚀 افحص وصِد الرابط الآن"):
+    if u_input and not u_input.startswith("import"): # منع قبول الكود كروابط
+        official, d_name = check_official(u_input)
         with st.spinner('جاري التحقق...'):
-            time.sleep(1)
+            time.sleep(0.5)
             if official:
                 st.balloons()
-                st.success(f"✅ أبشر! هذا رابط رسمي موثوق: ({d_name})")
+                st.success(f"✅ رابط رسمي موثوق: ({d_name})")
             else:
-                st.warning(f"⚠️ الرابط ({d_name}) غير مسجل لدينا كجهة رسمية.")
+                st.warning(f"⚠️ الرابط ({d_name}) غير مسجل كجهة رسمية.")
     else:
-        st.error("⚠️ يرجى إدخال الرابط أولاً.")
+        st.error("⚠️ يرجى إدخال رابط صحيح.")
 
 st.divider()
 
-# --- 5. ساحة البلاغات (مع قفل الحماية) ---
+# --- 4. ساحة البلاغات ---
 st.subheader("📢 ساحة بلاغات المجتمع")
-report_input = st.text_input("أدخل الرابط المحتال للتبليغ عنه :", key="بلاغ_نص")
+r_input = st.text_input("أدخل الرابط المحتال للتبليغ عنه :", value="", key="report_unique")
 
-if st.button("إرسال البلاغ", key="btn_بلاغ"):
-    if report_input:
-        official, d_name = is_official(report_input)
-        
-        # منع التبليغ عن الروابط الرسمية (إصلاح الخطأ السابق)
+if st.button("إرسال البلاغ"):
+    if r_input:
+        official, d_name = check_official(r_input)
         if official:
-            st.error(f"❌ خطأ: لا يمكن التبليغ عن ({d_name}) لأنه رابط رسمي موثق!")
+            st.error(f"❌ لا يمكن التبليغ عن ({d_name}) لأنه جهة رسمية!")
         else:
-            st.success("✅ تم استلام بلاغك بنجاح لمراجعته من قبل المهندس أيمن.")
-    else:
-        st.warning("⚠️ يرجى وضع الرابط المشبوه أولاً.")
+            st.success("✅ تم استلام بلاغك بنجاح لمراجعته.")
 
 st.markdown("<p style='text-align:center; color:#888;'>📊 تطوير المهندس: أيمن 🦾</p>", unsafe_allow_html=True)
