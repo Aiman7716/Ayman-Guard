@@ -5,102 +5,62 @@ import time
 # --- 1. إعدادات الصفحة ---
 st.set_page_config(page_title="درع أيمن الذكي", page_icon="🛡️", layout="centered")
 
-# --- 2. CSS احترافي صلب (يمنع أي تداخل خارجي) ---
+# --- 2. التنسيق الجمالي الاحترافي ---
 st.markdown("""
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
-        
-        /* ضبط الخط والاتجاه */
         html, body, [class*="st-"] { 
             font-family: 'Cairo', sans-serif !important; 
             direction: rtl !important; 
             text-align: right !important; 
         }
-
-        /* تنسيق العنوان الكبير */
-        .header-text {
-            color: #00d4ff;
-            text-align: center;
-            font-size: 2.5rem;
-            font-weight: bold;
-            margin-bottom: 20px;
+        .main-header { color: #00d4ff; text-align: center; font-size: 2.8rem; font-weight: bold; }
+        .stButton > button { 
+            background-color: #ff4b4b !important; color: white !important; 
+            border-radius: 12px !important; width: 100% !important; height: 3.5em !important; font-weight: bold !important; 
         }
-
-        /* تنسيق الأزرار الحمراء لمنع تداخل keyboard_ar */
-        div.stButton > button {
-            background-color: #ff4b4b !important;
-            color: white !important;
-            border-radius: 12px !important;
-            width: 100% !important;
-            height: 3.5em !important;
-            font-weight: bold !important;
-            border: none !important;
-        }
-
-        /* إخفاء أي رموز غريبة أو أيقونات متداخلة */
-        .st-emotion-cache-1kyx60p, .st-emotion-cache-k77z8q, .css-1kyx60p {
-            display: none !important;
-        }
+        /* إخفاء التداخلات البرمجية */
+        .st-emotion-cache-1kyx60p, .css-1kyx60p { display: none !important; }
     </style>
 """, unsafe_allow_html=True)
 
-# --- 3. قاعدة البيانات الذكية ---
-OFFICIAL_DOMAINS = [
-    'absher.sa', 'iam.gov.sa', 'splonline.com.sa', 'moe.gov.sa', 
-    'moj.gov.sa', 'hrsd.gov.sa', 'zatca.gov.sa', 'moh.gov.sa',
-    'saudipost.sa', 'stc.com.sa', 'tawakkalna.gov.sa', 'najm.sa'
-]
+# --- 3. الواجهة ---
+st.markdown('<div class="main-header">🛡️ درع أيمن الذكي</div>', unsafe_allow_html=True)
+st.info("💡 معلومة: الدرع يتعرف الآن تلقائياً على كافة المواقع الحكومية والجامعية السعودية.")
 
-# --- 4. الواجهة الرئيسية ---
-st.markdown('<div class="header-text">🛡️ درع أيمن الذكي</div>', unsafe_allow_html=True)
+# --- 4. محرك الفحص الذكي (الإضافة المطلوبة) ---
+url_input = st.text_input("🔍 ضع رابط الوزارة أو الجامعة هنا :", placeholder="https://example.edu.sa", key="uni_scanner")
 
-# صندوق النصيحة بتصميم نظيف
-st.info("💡 نصيحة درع أيمن: المواقع الرسمية الحكومية تنتهي دائماً بـ (.gov.sa) أو (.sa).")
-
-# حقل الفحص
-url_to_check = st.text_input("🔍 قم بلصق الرابط المشبوه هنا :", placeholder="https://example.com", key="main_scanner")
-
-if st.button("🚀 افحص وصِد الرابط الآن", key="check_btn"):
-    if url_to_check:
-        with st.spinner('جاري التحقق من هوية الرابط...'):
+if st.button("🚀 افحص الرابط الآن", key="run_check"):
+    if url_input:
+        with st.spinner('جاري التحقق من التوثيق الرسمي...'):
             time.sleep(1)
-            ext = tldextract.extract(url_to_check.lower())
-            domain = f"{ext.domain}.{ext.suffix}"
+            ext = tldextract.extract(url_input.lower())
+            domain_suffix = f"{ext.domain}.{ext.suffix}"
             
-            if domain in OFFICIAL_DOMAINS or domain.endswith('.gov.sa'):
+            # القاعدة الذكية للتعرف التلقائي
+            if url_input.lower().endswith('.gov.sa'):
                 st.balloons()
-                st.success(f"✅ هذا رابط رسمي وموثوق: ({domain})")
-            elif ext.suffix in ['tk', 'xyz', 'ml', 'cf', 'gq', 'top']:
-                st.error("🚨 تحذير: هذا النطاق مشبوه وغير آمن!")
+                st.success(f"✅ هذا رابط جهة حكومية سعودية رسمية موثوقة.")
+            elif url_input.lower().endswith('.edu.sa'):
+                st.balloons()
+                st.success(f"✅ هذا رابط صرح تعليمي أو جامعة سعودية معتمدة.")
+            elif domain_suffix in ['absher.sa', 'iam.gov.sa', 'saudipost.sa', 'splonline.com.sa']:
+                st.balloons()
+                st.success(f"✅ هذا رابط رسمي موثق ومسجل لدينا.")
             else:
-                st.warning(f"⚠️ الرابط ({domain}) غير مدرج كجهة رسمية، تعامل معه بحذر.")
+                st.warning("⚠️ تنبيه: هذا الرابط لا ينتهي بالامتدادات الرسمية الموثوقة (.gov.sa) أو (.edu.sa).")
     else:
-        st.warning("⚠️ فضلاً، أدخل الرابط أولاً.")
+        st.error("⚠️ يرجى إدخال الرابط أولاً.")
 
 st.markdown("---")
 
-# --- 5. قسم البلاغات (تم إصلاح التداخل هنا) ---
-st.subheader("📢 ساحة بلاغات المجتمع")
-
-with st.container():
-    st.write("ساعدنا في تحذير الآخرين من الروابط المحتالة:")
-    scam_url = st.text_input("رابط الموقع المشبوه :", key="report_url")
-    scam_type = st.selectbox("نوع الاحتيال:", 
-                            ["انتحال شخصية أبشر", "جائزة وهمية", "تحديث بنكي", "شحنة بريدية"], 
-                            key="report_type")
-    
-    if st.button("✅ تأكيد إرسال البلاغ", key="report_btn"):
-        if scam_url:
-            st.success("تم استلام بلاغك بنجاح! شكراً لمساهمتك في حماية المجتمع.")
-        else:
-            st.error("❌ يرجى كتابة الرابط أولاً.")
-
-st.markdown("<br><br>", unsafe_allow_html=True)
+# --- 5. قسم البلاغات ---
+st.subheader("📢 بلاغات المجتمع")
+with st.expander("أبلغ عن رابط انتحال شخصية"):
+    rep_url = st.text_input("الرابط المشبوه :", key="rep_u")
+    if st.button("إرسال البلاغ", key="rep_b"):
+        st.success("شكراً لك! تم استلام بلاغك بنجاح.")
 
 # التذييل
-st.markdown(f"""
-    <div style='text-align: center; border-top: 1px solid #eee; padding-top: 20px;'>
-        <p>🏛️ <b>روابط سريعة:</b> <a href='https://absher.sa'>أبشر</a> | <a href='https://iam.gov.sa'>نفاذ</a></p>
-        <p style='color: #888;'>📊 تطوير المهندس: أيمن 🦾</p>
-    </div>
-""", unsafe_allow_html=True)
+st.markdown("<p style='text-align:center; color:#888;'>📊 تطوير المهندس: أيمن 🦾</p>", unsafe_allow_html=True)
