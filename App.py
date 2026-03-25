@@ -1,108 +1,132 @@
 import streamlit as st
 import tldextract
+import sqlite3
 import random
+from datetime import datetime
 
-# 1. إعدادات الصفحة والهوية البصرية
+# --- 1. إعداد قاعدة البيانات ---
+def init_db():
+    conn = sqlite3.connect('ayman_guard.db')
+    c = conn.cursor()
+    c.execute('''CREATE TABLE IF NOT EXISTS reports 
+                 (id INTEGER PRIMARY KEY AUTOINCREMENT, url TEXT, date TEXT)''')
+    c.execute('''CREATE TABLE IF NOT EXISTS stats (id INTEGER PRIMARY KEY, scan_count INTEGER)''')
+    c.execute('''INSERT OR IGNORE INTO stats (id, scan_count) VALUES (1, 250)''')
+    conn.commit()
+    conn.close()
+
+def update_scan_count():
+    conn = sqlite3.connect('ayman_guard.db')
+    c = conn.cursor()
+    c.execute("UPDATE stats SET scan_count = scan_count + 1 WHERE id = 1")
+    conn.commit()
+    conn.close()
+
+def get_stats():
+    conn = sqlite3.connect('ayman_guard.db')
+    c = conn.cursor()
+    c.execute("SELECT scan_count FROM stats WHERE id = 1")
+    res = c.fetchone()
+    conn.close()
+    return res[0] if res else 250
+
+def add_report(url):
+    conn = sqlite3.connect('ayman_guard.db')
+    c = conn.cursor()
+    date_str = datetime.now().strftime("%Y-%m-%d %H:%M")
+    c.execute("INSERT INTO reports (url, date) VALUES (?, ?)", (url, date_str))
+    conn.commit()
+    conn.close()
+
+def get_reports():
+    conn = sqlite3.connect('ayman_guard.db')
+    c = conn.cursor()
+    c.execute("SELECT url FROM reports ORDER BY id DESC LIMIT 5")
+    rows = c.fetchall()
+    conn.close()
+    return [row[0] for row in rows]
+
+def clear_db():
+    conn = sqlite3.connect('ayman_guard.db')
+    c = conn.cursor()
+    c.execute("DELETE FROM reports")
+    conn.commit()
+    conn.close()
+
+init_db()
+
+# --- 2. إعدادات الصفحة والتصميم ---
 st.set_page_config(page_title="درع أيمن الرقمي", page_icon="🛡️", layout="centered")
 
-# 2. تصميم الواجهة المتقدم (CSS)
 st.markdown("""
 <style>
     .main { background-color: #0e1117; }
-    h1 { color: #00d4ff; text-align: center; text-shadow: 2px 2px #000; font-family: 'Arial'; }
-    .stButton>button {
-        width: 100%;
-        background-color: #00d4ff;
-        color: #000;
-        font-weight: bold;
-        border-radius: 12px;
-        padding: 12px;
-        border: none;
-        transition: 0.3s;
-    }
-    .stButton>button:hover { background-color: #ff4b4b; color: white; transform: scale(1.02); }
-    .stTextInput>div>div>input {
-        background-color: #1a1c24;
-        color: white;
-        border: 2px solid #00d4ff;
-        border-radius: 12px;
-        text-align: center;
-    }
-    .report-card {
-        background-color: #1a1c24;
-        border-radius: 10px;
-        padding: 15px;
-        border-right: 5px solid #ff4b4b;
-        margin-bottom: 10px;
-        box-shadow: 2px 2px 10px rgba(0,0,0,0.5);
-    }
-    .official-card {
-        background: linear-gradient(90deg, #0e1117 0%, #1a1c24 100%);
-        border: 1px solid #00d4ff;
-        padding: 10px;
-        border-radius: 8px;
-        text-align: center;
-    }
+    .stButton>button { width: 100%; background-color: #00d4ff; color: #000; font-weight: bold; border-radius: 12px; }
+    .report-card { background-color: #1a1c24; border-radius: 10px; padding: 12px; border-right: 5px solid #ff4b4b; margin-bottom: 10px; }
+    .official-card { background: #1a1c24; border: 1px solid #00d4ff; padding: 10px; border-radius: 8px; text-align: center; }
 </style>
 """, unsafe_allow_html=True)
 
-# 3. واجهة المستخدم العلوية
-st.markdown("<h1>🛡️ درع أيمن الذكي</h1>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center; color: #888;'>المنصة الأولى لحماية المجتمع من الاحتيال الرقمي</p>", unsafe_allow_html=True)
-st.markdown("---")
+# --- 3. لوحة التحكم السرية (في القائمة الجانبية) ---
+with st.sidebar:
+    st.header("🔐 إدارة الدرع")
+    admin_pass = st.text_input("كلمة مرور المدير:", type="password")
+    if admin_pass == "ayman123":
+        st.success("أهلاً أيمن!")
+        if st.button("🗑️ مسح البلاغات"):
+            clear_db()
+            st.rerun()
+        manual_count = st.number_input("تعديل العداد:", value=get_stats())
+        if st.button("⚙️ تحديث"):
+            conn = sqlite3.connect('ayman_guard.db')
+            conn.cursor().execute("UPDATE stats SET scan_count = ? WHERE id = 1", (manual_count,))
+            conn.commit()
+            conn.close()
+            st.rerun()
 
-# 4. إدارة البيانات (العداد والبلاغات)
-if 'counter' not in st.session_state:
-    st.session_state.counter = 250
-if 'verified_scams' not in st.session_state:
-    st.session_state.verified_scams = ["facebook-login-secure.tk", "absher-update-verify.xyz"]
+# --- 4. الواجهة الرئيسية ---
+st.markdown("<h1 style='text-align: center; color: #00d4ff;'>🛡️ درع أيمن الذكي</h1>", unsafe_allow_html=True)
+st.info(random.choice(["💡 تأكد من وجود HTTPS دائمًا.", "💡 لا تشارك رمز OTP أبدًا."]))
 
-# 5. نظام النصائح المتغير
-tips = [
-    "💡 نصيحة: تأكد من وجود (HTTPS) وقفل الأمان في شريط العنوان.",
-    "💡 نصيحة: لا تضغط على روابط الجوائز التي تصلك من أرقام مجهولة.",
-    "💡 نصيحة: رمز التوثيق (OTP) سرّي للغاية، لا تطلبه منك أي جهة رسمية.",
-    "💡 نصيحة: روابط الهكر غالباً تنتهي بنطاقات غريبة مثل .tk أو .xyz"
-]
-st.info(random.choice(tips))
-
-# 6. محرك الفحص الأساسي
-url_input = st.text_input("🔍 قم بلصق الرابط المشبوه هنا لفحصه:", placeholder="https://example-scam-link.com")
-
-if st.button("🚀 افحص وصِد الرابط الآن"):
-    st.session_state.counter += 1
-    if url_input:
-        url_lower = url_input.lower().strip()
-        ext = tldextract.extract(url_lower)
-        full_domain = f"{ext.domain}.{ext.suffix}"
-        
-        # قوائم الثقة والنطاقات الرسمية
-        trusted = ['google.com', 'facebook.com', 'whatsapp.com', 'instagram.com', 'moi.gov.sa', 'absher.sa', 'yemencars.com', 'stc.com.sa', 'iam.gov.sa', 'splonline.com.sa']
-        official_suffixes = ['gov', 'gov.sa', 'edu', 'edu.sa', 'org']
-        suspicious_exts = ['tk', 'ml', 'ga', 'cf', 'gq', 'xyz', 'top', 'buzz', 'work']
-
-        # منطق الصيد
-        is_scam = False
-        reason = ""
-
-        if ("google" in url_lower or "whatsapp" in url_lower or "absher" in url_lower or "nafath" in url_lower) and full_domain not in trusted:
-            is_scam = True
-            reason = f"محاولة انتحال صفة موقع رسمي! النطاق الحقيقي هو ({full_domain})."
-        elif ext.suffix in suspicious_exts:
-            is_scam = True
-            reason = f"النطاق ({ext.suffix}) مجهول وغير موثوق، وغالباً ما يستخدمه المخترقون."
-        elif "@" in url_input or len(url_input) > 85:
-            is_scam = True
-            reason = "الرابط يحتوي على رموز توجيه مريبة أو طول مبالغ فيه لإخفاء الهوية."
-
-        # عرض النتائج
-        if full_domain in trusted or ext.suffix in official_suffixes:
-            st.success(f"✅ آمن وموثوق: هذا موقع رسمي ({full_domain}).")
-        elif is_scam:
-            st.error(f"❌ تم صيد رابط وهمي! \n\n **السبب:** {reason}")
-            st.warning("🚨 تحذير: لا تدخل أي بيانات شخصية في هذا الرابط أبداً!")
+# الفحص
+url_in = st.text_input("🔍 الصق الرابط هنا:", placeholder="https://example.com")
+if st.button("🚀 افحص الآن"):
+    update_scan_count()
+    if url_in:
+        ext = tldextract.extract(url_in.lower())
+        full_dom = f"{ext.domain}.{ext.suffix}"
+        if full_dom in ['absher.sa', 'iam.gov.sa', 'google.com']:
+            st.success(f"✅ آمن: ({full_dom})")
+        elif ext.suffix in ['tk', 'xyz', 'ml']:
+            st.error(f"❌ تم صيد رابط وهمي!")
         else:
-            st.info(f"ℹ️ نتيجة الفحص: الرابط يتبع لنطاق ({full_domain}). تأكد من المصدر بعناية.")
+            st.info(f"ℹ️ النطاق هو ({full_dom}).")
+
+# البلاغات
+st.markdown("---")
+st.markdown("### 📢 ساحة البلاغات")
+with st.expander("➕ أبلغ عن رابط"):
+    rep_url = st.text_input("الرابط المشبوه:")
+    if st.button("📤 إرسال"):
+        if rep_url and tldextract.extract(rep_url).domain not in ['google', 'absher']:
+            add_report(rep_url)
+            st.success("تم الحفظ!")
+        else: st.error("خطأ!")
+
+for r in get_reports():
+    st.markdown(f"<div class='report-card'>⚠️ مشبوه: <code>{r}</code></div>", unsafe_allow_html=True)
+
+# المراجع الرسمية
+st.markdown("---")
+st.markdown("### 🏛️ الروابط الرسمية الموثقة")
+c1, c2, c3 = st.columns(3)
+with c1: st.markdown("<div class='official-card'>🇸🇦 <a href='https://absher.sa' style='color:#00d4ff;'>أبشر</a></div>", unsafe_allow_html=True)
+with c2: st.markdown("<div class='official-card'>🔑 <a href='https://iam.gov.sa' style='color:#00d4ff;'>نفاذ</a></div>", unsafe_allow_html=True)
+with c3: st.markdown("<div class='official-card'>📦 <a href='https://splonline.com.sa' style='color:#00d4ff;'>البريد</a></div>", unsafe_allow_html=True)
+
+# التذييل
+st.markdown("---")
+st.write(f"📊 الفحوصات: **{get_stats()}** | تطوير: أيمن 🦾")
     else:
         st.error("⚠️ من فضلك ضع الرابط أولاً!")
 
