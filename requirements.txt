@@ -1,3 +1,2 @@
 streamlit
 tldextract
-pysqlite3-binary
