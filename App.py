@@ -2,81 +2,93 @@ import streamlit as st
 import tldextract
 import time
 
-# --- 1. إعدادات الصفحة والتنسيق العربي ---
+# --- 1. إعدادات الهوية والتنسيق الأصلي ---
 st.set_page_config(page_title="درع أيمن الذكي", page_icon="🛡️", layout="centered")
 
-# CSS لإجبار المتصفح على التنسيق النظيف ومنع تداخل النصوص
+# CSS مصمم بدقة لمنع تداخل النصوص وإخفاء الرموز الغريبة
 st.markdown("""
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
+        
         html, body, [class*="st-"] { 
             font-family: 'Cairo', sans-serif !important; 
             direction: rtl !important; 
             text-align: right !important; 
         }
-        .main-title { 
-            color: #00d4ff; 
-            text-align: center; 
-            font-size: 45px; 
-            font-weight: bold; 
-            margin-bottom: 5px;
+
+        /* تنسيق العنوان الكبير الصافي */
+        .main-header {
+            color: #00d4ff;
+            text-align: center;
+            font-size: 3rem;
+            font-weight: bold;
+            line-height: 1.2;
+            margin-bottom: 30px;
         }
+
+        /* إخفاء أي رموز تقنية تظهر بالخطأ في الواجهة */
+        .st-emotion-cache-1kyx60p, footer, header { display: none !important; }
+        
+        /* تحسين مظهر الأزرار */
         .stButton>button { 
-            width: 100%; border-radius: 10px; background-color: #00d4ff; 
-            color: white; font-weight: bold; border: none; height: 3em;
+            width: 100%; border-radius: 12px; background-color: #00d4ff; 
+            color: white; font-weight: bold; border: none; height: 3.5em;
         }
-        /* إخفاء أي رموز برمجية تظهر بالخطأ */
-        .st-emotion-cache-1kyx60p, .css-1kyx60p { display: none !important; }
     </style>
 """, unsafe_allow_html=True)
 
-# --- 2. حفظ البيانات (حل مشكلة الخطأ الأحمر) ---
-if 'check_count' not in st.session_state:
-    st.session_state.check_count = 250
+# --- 2. إدارة الإحصائيات في الذاكرة (لحل مشكلة الـ Locked Database) ---
+if 'stats' not in st.session_state:
+    st.session_state.stats = 250
 
-# --- 3. الواجهة الرئيسية (التنسيق القديم) ---
-st.markdown("<div class='main-title'>🛡️ درع أيمن</div>", unsafe_allow_html=True)
-st.markdown("<div class='main-title' style='font-size: 35px; margin-top: -15px;'>الذكي</div>", unsafe_allow_html=True)
+# --- 3. الواجهة الرئيسية (التنسيق المفضل لديك) ---
+st.markdown('<div class="main-header">🛡️ درع أيمن<br>الذكي</div>', unsafe_allow_html=True)
 
 # حقل الإدخال
-url_input = st.text_input("🔍 ضع الرابط هنا لفحصه :", placeholder="https://example.com")
+url_in = st.text_input("🔍 ضع الرابط هنا لفحصه :", placeholder="https://example.com")
 
 if st.button("🚀 افحص الآن"):
-    if url_input:
-        st.session_state.check_count += 1
-        with st.spinner('جاري الفحص...'):
+    if url_in:
+        st.session_state.stats += 1
+        with st.spinner('جاري تحليل الرابط...'):
             time.sleep(1)
-            ext = tldextract.extract(url_input.lower())
+            ext = tldextract.extract(url_in.lower())
             domain = f"{ext.domain}.{ext.suffix}"
             
-            # فلتر الحماية
+            # فلتر المواقع الرسمية
             trust = ['absher.sa', 'iam.gov.sa', 'google.com', 'splonline.com.sa', 'moe.gov.sa']
+            
             if domain in trust:
                 st.balloons()
-                st.success(f"✅ رابط آمن وموثوق: ({domain})")
-            elif ext.suffix in ['tk', 'xyz', 'ml', 'cf', 'gq']:
-                st.error("🚨 تحذير: نطاق مشبوه!")
+                st.success(f"✅ هذا الرابط رسمي وآمن: ({domain})")
+            elif ext.suffix in ['tk', 'xyz', 'ml', 'cf', 'gq', 'top']:
+                st.error("🚨 تحذير: هذا النطاق مشبوه وغير آمن!")
             else:
-                st.info(f"ℹ️ نتيجة التحليل: النطاق هو ({domain})")
+                st.info(f"ℹ️ نتيجة الفحص: النطاق هو ({domain})")
     else:
-        st.warning("⚠️ الرجاء إدخال الرابط أولاً.")
+        st.warning("⚠️ فضلاً، أدخل الرابط أولاً.")
 
-st.markdown("---")
+st.markdown("<br><hr>", unsafe_allow_html=True)
 
-# قسم البلاغات
-with st.expander("➕ أبلغ عن رابط"):
-    scam_report = st.text_input("أدخل الرابط المشبوه")
-    if st.button("تأكيد البلاغ"):
-        st.success("تم استلام بلاغك")
+# --- 4. قسم البلاغات ---
+with st.expander("➕ أبلغ عن رابط مشبوه"):
+    scam_url = st.text_input("أدخل الرابط المحتال هنا:")
+    if st.button("تأكيد الإرسال"):
+        if scam_url:
+            st.success("تم تسجيل بلاغك بنجاح. شكراً لك!")
 
-st.markdown("---")
+st.markdown("<br>")
 
-# التذييل (نفس الشكل الأصلي الموثق بالصور)
+# --- 5. التذييل (Footer) - نفس التنسيق المطلوب ---
 st.markdown(f"""
     <div style='text-align: center;'>
-        <p>🏛️ <b>روابط رسمية:</b> 
-        <a href='https://absher.sa' style='color:#007bff; text-decoration:none;'>أبشر</a> | 
-        <a href='https://iam.gov.sa' style='color:#007bff; text-decoration:none;'>نفاذ</a></p>
-        <p style='color: #888;'>📊 الفحوصات: {st.session_state.check_count} | تطوير: أيمن 🦾</p>
+        <p style='font-size: 1.1rem;'>
+            🏛️ <b>روابط رسمية:</b> 
+            <a href='https://absher.sa' style='color:#007bff; text-decoration:none;'>أبشر</a> | 
+            <a href='https://iam.gov.sa' style='color:#007bff; text-decoration:none;'>نفاذ</a>
+        </p>
+        <p style='color: #888; font-size: 0.9rem;'>
+            📊 الفحوصات: {st.session_state.stats} | تطوير المهندس: أيمن 🦾
+        </p>
     </div>
 """, unsafe_allow_html=True)
