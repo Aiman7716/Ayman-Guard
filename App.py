@@ -4,19 +4,18 @@ import os
 
 # --- 1. إدارة البيانات ---
 DB_FILE = "blacklist_database.txt"
+MSG_FILE = "messages.txt" # ملف جديد لحفظ الرسائل
 
 def load_data():
     if os.path.exists(DB_FILE):
-        with open(DB_FILE, "r") as f:
-            return [line.strip() for line in f if line.strip()]
+        with open(DB_FILE, "r") as f: return [line.strip() for line in f if line.strip()]
     return []
 
-def save_all_data(list_data):
-    with open(DB_FILE, "w") as f:
-        for item in list_data:
-            f.write(item + "\n")
+def save_message(name, email, msg):
+    with open(MSG_FILE, "a", encoding="utf-8") as f:
+        f.write(f"الاسم: {name} | البريد: {email} | الرسالة: {msg}\n---\n")
 
-# --- 2. الواجهة الاحترافية ---
+# --- 2. التنسيق البصري ---
 st.set_page_config(page_title="درع أيمن الذكي", layout="centered")
 st.markdown("""
     <style>
@@ -25,78 +24,58 @@ st.markdown("""
         .st-emotion-cache-1kyx60p, .st-emotion-cache-k77z8q, symbol, svg, i, [data-testid="stIcon"], .st-emotion-cache-13ln4jf { display: none !important; }
         .main-title { color: #00d4ff; text-align: center; font-size: 2.5rem; font-weight: bold; }
         div.stButton > button { background-color: #ff4b4b !important; color: white !important; border-radius: 12px !important; width: 100% !important; }
-        .admin-box { background-color: #f0f2f6; padding: 20px; border-radius: 15px; border: 1px dashed #00d4ff; }
+        .contact-box { background-color: #f9f9f9; padding: 20px; border-radius: 15px; border: 1px solid #00d4ff; }
     </style>
 """, unsafe_allow_html=True)
 
-# --- 3. نظام "حساب المدير" ---
-if 'admin_logged_in' not in st.session_state:
-    st.session_state.admin_logged_in = False
-
-# --- 4. واجهة المستخدم العامة ---
+# --- 3. الواجهة الرئيسية ---
 st.markdown('<div class="main-title">🛡️ درع أيمن الذكي</div>', unsafe_allow_html=True)
 
-tab1, tab2 = st.tabs(["🔍 فحص وبلاغ", "🔐 لوحة التحكم"])
+tab1, tab2, tab3 = st.tabs(["🔍 الرئيسية", "📧 تواصل معنا", "🔐 الإدارة"])
 
 with tab1:
-    # قسم الفحص (كما هو في v46)
     st.subheader("🔍 فحص أمان الروابط")
-    scan_input = st.text_input("الصق الرابط للفحص :", key="scan_v47", help=None)
+    scan_input = st.text_input("الصق الرابط للفحص :", key="s_v48", help=None)
     if st.button("🚀 افحص الآن"):
         blacklist = load_data()
-        ext = tldextract.extract(scan_input)
-        d_name = f"{ext.domain}.{ext.suffix}"
-        if d_name in blacklist:
-            st.error(f"🚨 تحذير: هذا الرابط تم التبليغ عنه مسبقاً!")
-        else:
-            st.success(f"✅ الرابط ({d_name}) غير مسجل في البلاغات.")
-
-    st.divider()
-    
-    st.subheader("📢 ساحة البلاغات")
-    rep_url = st.text_input("رابط المحتال للتبليغ :", key="rep_v47", help=None)
-    if st.button("🚩 تسجيل بلاغ"):
-        if rep_url:
-            ext = tldextract.extract(rep_url)
-            d_name = f"{ext.domain}.{ext.suffix}"
-            current_data = load_data()
-            if d_name not in current_data:
-                with open(DB_FILE, "a") as f: f.write(d_name + "\n")
-                st.success(f"✅ تم حفظ البلاغ بنجاح.")
-            else: st.info("ℹ️ الرابط موجود مسبقاً.")
+        d_name = f"{tldextract.extract(scan_input).domain}.{tldextract.extract(scan_input).suffix}"
+        if d_name in blacklist: st.error(f"🚨 تحذير: رابط محتال مسجل مسبقاً!")
+        else: st.success(f"✅ الرابط ({d_name}) يبدو آمناً.")
 
 with tab2:
+    st.markdown('<div class="contact-box">', unsafe_allow_html=True)
+    st.subheader("📩 أرسل رسالة للمطور أيمن")
+    c_name = st.text_input("اسمك الكريم :")
+    c_email = st.text_input("بريدك الإلكتروني :")
+    c_msg = st.text_area("كيف يمكننا مساعدتك؟")
+    if st.button("📤 إرسال الرسالة"):
+        if c_name and c_msg:
+            save_message(c_name, c_email, c_msg)
+            st.success("✅ شكراً لك! وصلت رسالتك للمهندس أيمن.")
+        else: st.warning("⚠️ يرجى ملء الاسم والرسالة.")
+    st.markdown('</div>', unsafe_allow_html=True)
+
+with tab3:
+    if 'admin_logged_in' not in st.session_state: st.session_state.admin_logged_in = False
+    
     if not st.session_state.admin_logged_in:
-        st.subheader("تسجيل دخول المدير")
-        password = st.text_input("أدخل كلمة مرور الإدارة :", type="password")
+        pwd = st.text_input("كلمة مرور الإدارة :", type="password")
         if st.button("دخول"):
-            if password == "ayman7716": # يمكنك تغيير كلمة المرور هنا
+            if pwd == "ayman7716": 
                 st.session_state.admin_logged_in = True
                 st.rerun()
-            else:
-                st.error("❌ كلمة المرور غير صحيحة")
     else:
-        st.markdown('<div class="admin-box">', unsafe_allow_html=True)
         st.subheader("🛠️ لوحة تحكم أيمن")
         if st.button("تسجيل خروج"):
             st.session_state.admin_logged_in = False
             st.rerun()
-            
-        st.write("---")
-        st.write("📊 **البلاغات الحالية في النظام:**")
-        blacklist_list = load_data()
         
-        if not blacklist_list:
-            st.write("لا توجد بلاغات حالياً.")
-        else:
-            for i, domain in enumerate(blacklist_list):
-                col1, col2 = st.columns([3, 1])
-                col1.text(f"{i+1}. {domain}")
-                if col2.button("حذف", key=f"del_{i}"):
-                    blacklist_list.remove(domain)
-                    save_all_data(blacklist_list)
-                    st.success(f"تم حذف {domain}")
-                    st.rerun()
-        st.markdown('</div>', unsafe_allow_html=True)
+        # عرض الرسائل الواردة للمدير فقط
+        st.write("---")
+        st.write("📩 **الرسائل الواردة:**")
+        if os.path.exists(MSG_FILE):
+            with open(MSG_FILE, "r", encoding="utf-8") as f:
+                st.text_area("صندوق الوارد :", value=f.read(), height=200)
+        else: st.write("لا توجد رسائل جديدة.")
 
 st.markdown("<p style='text-align:center; color:#888;'>📊 تطوير المهندس: أيمن 🦾</p>", unsafe_allow_html=True)
