@@ -2,7 +2,7 @@ import streamlit as st
 import tldextract
 import time
 
-# --- 1. إعدادات الأمان والتنسيق (حل مشكلة التشوه البصري) ---
+# --- 1. إعدادات الأمان والتنسيق الصافي ---
 st.set_page_config(page_title="درع أيمن الذكي", layout="centered")
 
 st.markdown("""
@@ -13,27 +13,20 @@ st.markdown("""
             direction: rtl !important; 
             text-align: right !important; 
         }
-        
-        /* 🚨 منع ظهور keyboard_ar نهائياً عبر حظر أيقونات النظام 🚨 */
+        /* منع ظهور keyboard_ar نهائياً عبر حظر الأيقونات */
         .st-emotion-cache-1kyx60p, .st-emotion-cache-k77z8q, symbol, svg, i, 
         [data-testid="stIcon"], .stExpander svg, .st-emotion-cache-6q9sum { 
-            display: none !important; 
-            visibility: hidden !important; 
+            display: none !important; visibility: hidden !important; 
         }
-
         .main-title { color: #00d4ff; text-align: center; font-size: 2.5rem; font-weight: bold; }
-        
         .history-item {
             background-color: #f9f9f9; padding: 10px; border-radius: 8px;
             margin-bottom: 5px; border-right: 4px solid #00d4ff; color: #333;
         }
-
         div.stButton > button {
             background-color: #ff4b4b !important; color: white !important;
             border-radius: 12px !important; width: 100% !important; height: 3.5em !important;
-            border: none !important;
         }
-        
         .trusted-badge {
             background-color: #e3f2fd; border-right: 5px solid #2196f3;
             padding: 15px; border-radius: 10px; color: #0d47a1; font-weight: bold; text-align: center;
@@ -44,7 +37,7 @@ st.markdown("""
 if 'history' not in st.session_state: st.session_state.history = []
 if 'blacklist' not in st.session_state: st.session_state.blacklist = {}
 
-# --- 2. محرك الفحص ---
+# --- 2. محرك الفحص الأمني ---
 def security_scan(url):
     u = url.lower().strip().split('?')[0].replace('https://', '').replace('http://', '').strip('/')
     ext = tldextract.extract(u)
@@ -52,7 +45,25 @@ def security_scan(url):
     
     partner = "alhossam7710140-001-site1.mtempurl.com"
     official = u.endswith('.gov.sa') or u.endswith('.edu.sa')
-    trusted = ['absher.sa', 'iam.gov.sa', 'google.com', 'najm.sa']
+    trusted = ['absher.sa', 'iam.gov.sa', 'google.com', 'najm.sa', 'moi.gov.sa', 'saudipost.sa']
 
     if partner in u: return "PARTNER", domain_full
-    elif official or domain_full in trusted: return "
+    elif official or domain_full in trusted: return "SAFE", domain_full
+    elif domain_full in st.session_state.blacklist or any(h in domain_full for h in ['smarterasp.net', '000webhostapp.com']): 
+        return "DANGER", domain_full
+    else: return "CAUTION", domain_full
+
+# --- 3. الواجهة الرئيسية ---
+st.markdown('<div class="main-title">🛡️ درع أيمن الذكي</div>', unsafe_allow_html=True)
+
+u_input = st.text_input("ضع الرابط للفحص الأمني :", key="v38_scan")
+
+if st.button("🚀 افحص وصِد الرابط الآن"):
+    if u_input:
+        with st.spinner('جاري المسح...'):
+            time.sleep(0.4)
+            status, d_name = security_scan(u_input)
+            st_map = {"PARTNER": "معتمد", "SAFE": "آمن", "DANGER": "خطر", "CAUTION": "تحذير"}
+            st.session_state.history.insert(0, f"{st_map.get(status)}: {d_name}")
+            
+            if status ==
