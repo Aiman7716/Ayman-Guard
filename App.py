@@ -2,9 +2,10 @@ import streamlit as st
 import tldextract
 import time
 
-# --- 1. إعدادات الصفحة والتنسيق الفائق ---
+# --- 1. إعدادات الصفحة والتصميم الاحترافي ---
 st.set_page_config(page_title="درع أيمن الذكي", page_icon="🛡️", layout="centered")
 
+# CSS متطور لإخفاء التشوهات البصرية وتحسين الواجهة
 st.markdown("""
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
@@ -13,94 +14,105 @@ st.markdown("""
             direction: rtl !important; 
             text-align: right !important; 
         }
-        .main-title { color: #00d4ff; text-align: center; font-size: 2.5rem; font-weight: bold; }
+        .main-title { color: #00d4ff; text-align: center; font-size: 3rem; font-weight: bold; margin-bottom: 5px; }
+        .sub-title { color: #666; text-align: center; font-size: 1.1rem; margin-bottom: 25px; }
         
-        /* 🚨 إزالة التشوه البصري keyboard_ar نهائياً 🚨 */
+        /* 🚨 منع ظهور keyboard_ar نهائياً بإخفاء العناصر المسببة لها 🚨 */
         .st-emotion-cache-1kyx60p, .st-emotion-cache-k77z8q, .st-emotion-cache-6q9sum, 
-        symbol, svg, i, [data-testid="stIcon"], .stExpander svg { 
-            display: none !important; 
-            visibility: hidden !important; 
-            height: 0px !important;
-            width: 0px !important;
+        symbol, svg, i, [data-testid="stIcon"], button svg { 
+            display: none !important; visibility: hidden !important; 
+            width: 0 !important; height: 0 !important;
         }
 
-        /* تنسيق السجل ليكون نظيفاً */
-        .history-text {
-            background-color: #ffffff;
-            padding: 10px;
-            border-bottom: 1px solid #eee;
-            color: #333;
-        }
-
+        /* تنسيق الأزرار */
         div.stButton > button {
-            background-color: #ff4b4b !important; color: white !important;
-            border-radius: 12px !important; width: 100% !important; height: 3.5em !important;
+            background: linear-gradient(90deg, #ff4b4b, #ff7676) !important;
+            color: white !important; border-radius: 15px !important;
+            width: 100% !important; height: 3.8em !important;
+            font-size: 1.1rem !important; border: none !important;
+            box-shadow: 0 4px 15px rgba(255, 75, 75, 0.3) !important;
         }
-        .trusted-badge {
-            background-color: #e3f2fd; border-right: 5px solid #2196f3;
-            padding: 15px; border-radius: 5px; color: #0d47a1; font-weight: bold; text-align: center;
+
+        /* تنسيق سجل الفحص */
+        .history-card {
+            background-color: #f8f9fa; border-radius: 10px;
+            padding: 12px; margin-bottom: 8px; border-right: 4px solid #ddd;
+            font-size: 0.95rem; color: #444;
+        }
+        
+        .trusted-box {
+            background-color: #e3f2fd; border-right: 6px solid #2196f3;
+            padding: 20px; border-radius: 10px; color: #0d47a1;
+            font-weight: bold; text-align: center; margin: 15px 0;
         }
     </style>
 """, unsafe_allow_html=True)
 
 if 'history' not in st.session_state: st.session_state.history = []
 
-# --- 2. محرك الفحص ---
-def security_scan(url):
+# --- 2. محرك الفحص الأمني الذكي ---
+def advanced_security_scan(url):
+    # تنظيف الرابط
     u = url.lower().strip().split('?')[0].replace('https://', '').replace('http://', '').strip('/')
     ext = tldextract.extract(u)
     domain_full = f"{ext.domain}.{ext.suffix}"
     
-    partner_link = "alhossam7710140-001-site1.mtempurl.com"
+    # القوائم البرمجية
+    partner_link = "alhossam7710140-001-site1.mtempurl.com" # رابط صديقك
     official_sa = u.endswith('.gov.sa') or u.endswith('.edu.sa')
-    trusted_list = ['absher.sa', 'iam.gov.sa', 'google.com', 'najm.sa', 'moi.gov.sa']
+    trusted_global = ['absher.sa', 'iam.gov.sa', 'google.com', 'najm.sa', 'saudipost.sa']
+    
+    # محرك كشف الاحتيال والاختراق
+    danger_hosts = ['smarterasp.net', '000webhostapp.com', 'free.hr']
+    phishing_keywords = ['login-absher', 'verify-account', 'gift-card', 'bank-update']
 
     if partner_link in u: return "PARTNER", domain_full
-    elif official_sa or domain_full in trusted_list: return "SAFE", domain_full
-    elif any(h in domain_full for h in ['smarterasp.net', '000webhostapp.com']): return "DANGER", domain_full
+    elif official_sa or domain_full in trusted_global: return "SAFE", domain_full
+    elif any(key in u for key in phishing_keywords) or any(h in domain_full for h in danger_hosts): return "DANGER", domain_full
     else: return "CAUTION", domain_full
 
-# --- 3. الواجهة الرئيسية ---
+# --- 3. واجهة المستخدم ---
 st.markdown('<div class="main-title">🛡️ درع أيمن الذكي</div>', unsafe_allow_html=True)
+st.markdown('<div class="sub-title">المنصة الأولى لفحص موثوقية الروابط وحماية المجتمع</div>', unsafe_allow_html=True)
 
-u_input = st.text_input("أدخل الرابط للفحص الأمني الشامل :", key="v33_input")
+user_input = st.text_input("ضع الرابط هنا للفحص :", placeholder="example.com", key="scan_main")
 
-if st.button("🚀 افحص وصِد الاختراق الآن"):
-    if u_input:
-        with st.spinner('جاري المسح...'):
-            time.sleep(0.4)
-            status, d_name = security_scan(u_input)
+if st.button("🚀 افحص وصِد الرابط الآن"):
+    if user_input:
+        with st.spinner('جاري المسح الأمني...'):
+            time.sleep(0.5)
+            status, d_name = advanced_security_scan(user_input)
             
-            # تخزين الحالة بنص عربي بسيط للسجل
-            st_map = {"PARTNER": "معتمد", "SAFE": "آمن", "DANGER": "خطر", "CAUTION": "تحذير"}
-            st.session_state.history.insert(0, f"{st_map.get(status)}: {d_name}")
-            
+            # تسجيل في السجل (بدون أيقونات لمنع التشوه البصري)
+            status_map = {"PARTNER": "معتمد", "SAFE": "آمن", "DANGER": "خطر", "CAUTION": "حذر"}
+            st.session_state.history.insert(0, f"{status_map.get(status)}: {d_name}")
+
             if status == "PARTNER":
                 st.balloons()
-                st.markdown(f'<div class="trusted-badge">✅ تم التحقق: هذا النطاق ({d_name}) جهة تقنية معتمدة.</div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="trusted-badge">✅ تم التحقق: هذا النطاق ({d_name}) جهة تقنية معتمدة لدى درع أيمن.</div>', unsafe_allow_html=True)
             elif status == "SAFE":
                 st.balloons()
                 st.success(f"✅ رابط رسمي وموثوق: {d_name}")
             elif status == "DANGER":
-                st.error(f"🚨 تحذير اختراق: الرابط مشبوه ({d_name})!")
+                st.error(f"🚨 تحذير اختراق: هذا الرابط مشبوه جداً ويصنف كصفحة تصيد ({d_name})!")
             else:
-                st.warning(f"⚠️ كن حذراً: الرابط ({d_name}) غير مدرج في قوائمنا الموثوقة.")
+                st.warning(f"⚠️ كن حذراً: الرابط ({d_name}) غير مدرج في قوائمنا الموثوقة، لا تدخل بياناتك فيه.")
     else:
-        st.error("⚠️ يرجى إدخال الرابط.")
+        st.error("⚠️ يرجى إدخال الرابط أولاً.")
 
-# --- 4. السجل النظيف (بدون أيقونات مسببة للتشوه) ---
+# --- 4. سجل العمليات (نظيف تماماً) ---
 if st.session_state.history:
     st.write("🕒 **آخر عمليات الفحص:**")
     for item in st.session_state.history[:5]:
-        st.markdown(f'<div class="history-text">{item}</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="history-card">{item}</div>', unsafe_allow_html=True)
 
 st.divider()
 
 # --- 5. ساحة البلاغات ---
 st.subheader("📢 ساحة بلاغات المجتمع")
-r_input = st.text_input("رابط المحتال للتبليغ :", key="v33_report")
+report_input = st.text_input("رابط المحتال للتبليغ :", key="report_main")
 if st.button("إرسال البلاغ"):
-    if r_input:
-        st.success("✅ تم استلام بلاغك بنجاح. شكرًا لك يا أيمن.")
+    if report_input:
+        st.success("✅ تم استلام بلاغك بنجاح لمراجعته. شكرًا لك يا أيمن.")
 
-st.markdown("<p style='text-align:center; color:#888;'>📊 تطوير المهندس: أيمن 🦾</p>", unsafe_allow_html=True)
+st.markdown("<p style='text-align:center; color:#888; margin-top:30px;'>📊 تطوير المهندس: أيمن 🦾</p>", unsafe_allow_html=True)
