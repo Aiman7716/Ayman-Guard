@@ -2,78 +2,83 @@ import streamlit as st
 import tldextract
 import time
 
-# --- 1. إعدادات الهوية البصرية ---
+# --- 1. الإعدادات والتنسيق الأصلي (نفس الشكل السابق) ---
 st.set_page_config(page_title="درع أيمن الذكي", page_icon="🛡️", layout="centered")
 
 st.markdown("""
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
         html, body, [class*="st-"] { font-family: 'Cairo', sans-serif; text-align: right; direction: rtl; }
+        
+        /* تنسيق العنوان الرئيسي */
+        .main-title { color: #00d4ff; text-align: center; font-size: 3rem; font-weight: bold; margin-bottom: 0; }
+        .sub-title { text-align: center; color: #555; margin-top: -10px; font-size: 1.2rem; }
+        
+        /* تنسيق الأزرار */
         .stButton>button { 
-            width: 100%; border-radius: 25px; background: #00d4ff; 
-            color: black; font-weight: bold; border: none; height: 3.5em;
+            width: 100%; border-radius: 15px; background: #00d4ff; 
+            color: white; font-weight: bold; border: none; height: 3.5em;
+            font-size: 1.1rem; box-shadow: 0 4px 15px rgba(0,212,255,0.3);
         }
-        .main-title { text-align: center; color: #00d4ff; font-size: 2.5rem; font-weight: bold; }
-        .stat-box { background: #1a1c24; border-radius: 15px; padding: 10px; text-align: center; border: 1px solid #333; }
+        
+        /* تنسيق الروابط الرسمية */
+        .official-link { color: #007bff; text-decoration: none; font-weight: bold; }
     </style>
 """, unsafe_allow_html=True)
 
-# --- 2. إدارة البيانات (بدون قاعدة بيانات معقدة لتجنب القفل) ---
-if 'check_count' not in st.session_state:
-    st.session_state.check_count = 250  # البداية كما طلبت أيمن
+# --- 2. إدارة البيانات الذكية (بدون تعليق) ---
+if 'counter' not in st.session_state:
+    st.session_state.counter = 250
 
-# --- 3. الواجهة الرئيسية ---
-st.markdown("<div class='main-title'>🛡️ درع أيمن الذكي</div>", unsafe_allow_html=True)
-st.markdown("<p style='text-align: center;'>نظامك الذكي لفحص الروابط وكشف محاولات الاحتيال الرقمي</p>", unsafe_allow_html=True)
+# --- 3. واجهة المستخدم (التنسيق المفضل لديك) ---
+st.markdown("<div class='main-title'>🛡️ درع أيمن</div>", unsafe_allow_html=True)
+st.markdown("<div class='main-title' style='font-size: 2.5rem; margin-top:-20px;'>الذكي</div>", unsafe_allow_html=True)
 
-# محرك الفحص
-url_to_check = st.text_input("🔍 الصق الرابط هنا للفحص الآلي:", placeholder="https://example.com")
+# حقل الإدخال
+url_input = st.text_input("🔍 ضع الرابط هنا :", placeholder="https://example.com")
 
-if st.button("🚀 اطلق الدرع"):
-    if url_to_check:
-        st.session_state.check_count += 1
-        with st.spinner('جاري تحليل بروتوكولات الرابط...'):
+if st.button("🚀 افحص الآن"):
+    if url_input:
+        st.session_state.counter += 1
+        with st.spinner('جاري الفحص...'):
             time.sleep(1)
-            ext = tldextract.extract(url_to_check.lower())
+            ext = tldextract.extract(url_input.lower())
             domain = f"{ext.domain}.{ext.suffix}"
             
-            # منطق الحماية
-            officials = ['absher.sa', 'iam.gov.sa', 'google.com', 'splonline.com.sa', 'moe.gov.sa', 'hrsd.gov.sa']
-            scam_tlds = ['tk', 'xyz', 'ml', 'cf', 'gq', 'top', 'ga']
+            # قاعدة بيانات الحماية
+            trust = ['absher.sa', 'iam.gov.sa', 'google.com', 'splonline.com.sa', 'moe.gov.sa']
+            danger = ['tk', 'xyz', 'ml', 'cf', 'gq', 'top', 'ga']
             
-            if domain in officials:
+            if domain in trust:
                 st.balloons()
-                st.success(f"✅ هذا الرابط رسمي وموثوق بنسبة 100% ({domain})")
-            elif ext.suffix in scam_tlds:
-                st.error(f"🚨 تحذير شديد! النطاق ({ext.suffix}) يُستخدم بكثرة في مواقع الاحتيال.")
+                st.success(f"✅ رابط آمن وموثوق: ({domain})")
+            elif ext.suffix in danger:
+                st.error("🚨 تحذير: هذا الرابط مشبوه وغير آمن!")
             else:
-                st.info(f"🔍 نتيجة الفحص: الرابط يتبع لنطاق ({domain}). تأكد من المصدر دائماً.")
+                st.info(f"ℹ️ نتيجة التحليل: النطاق هو ({domain})")
     else:
-        st.warning("⚠️ يرجى إدخال الرابط أولاً.")
+        st.warning("⚠️ يرجى إدخال رابط")
 
-# --- 4. قسم البلاغات ---
 st.markdown("---")
-st.subheader("📢 بلاغات المجتمع")
-with st.expander("🚩 هل اكتشفت رابطاً مشبوهاً؟ أبلغ هنا"):
-    scam_report = st.text_input("ضع الرابط المشبوه:")
-    if st.button("تأكيد الإبلاغ"):
-        if scam_report:
-            st.success("تم تسجيل بلاغك في النظام المؤقت بنجاح!")
-        else:
-            st.warning("أدخل الرابط أولاً.")
 
-# --- 5. روابط سريعة موثوقة ---
-st.markdown("---")
-st.markdown("<p style='text-align: center;'>🏛️ مراجع رسمية آمنة</p>", unsafe_allow_html=True)
-col1, col2, col3 = st.columns(3)
-with col1: st.markdown("<center><a href='https://absher.sa'>أبشر</a></center>", unsafe_allow_html=True)
-with col2: st.markdown("<center><a href='https://iam.gov.sa'>نفاذ</a></center>", unsafe_allow_html=True)
-with col3: st.markdown("<center><a href='https://splonline.com.sa'>سبل</a></center>", unsafe_allow_html=True)
+# قسم البلاغات بنفس الشكل القديم
+with st.expander("➕ أبلغ عن رابط"):
+    scam = st.text_input("أدخل الرابط المشبوه")
+    if st.button("إرسال البلاغ"):
+        st.success("تم استلام بلاغك بنجاح")
 
-# --- 6. التذييل ---
 st.markdown("---")
-st.markdown(f"""
-    <div class='stat-box'>
-        📊 إجمالي العمليات: {st.session_state.check_count} | 🦾 تطوير المهندس: أيمن
-    </div>
-""", unsafe_allow_html=True)
+
+# الروابط الرسمية والإحصائيات بنفس التنسيق المطلوب
+col_stats = st.container()
+with col_stats:
+    st.markdown(f"""
+        <p style='text-align: center; font-size: 1.1rem;'>
+            🏛️ <b>روابط رسمية:</b> 
+            <a href='https://absher.sa' class='official-link'>أبشر</a> | 
+            <a href='https://iam.gov.sa' class='official-link'>نفاذ</a>
+        </p>
+        <p style='text-align: center; color: #666;'>
+            📊 الفحوصات: {st.session_state.counter} | تطوير: أيمن 🦾
+        </p>
+    """, unsafe_allow_html=True)
