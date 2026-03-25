@@ -61,10 +61,17 @@ if st.button("🚀 افحص الرابط الآن"):
             st.info(f"ℹ️ نتيجة الفحص: الرابط يتبع لنطاق ({full_domain}). تأكد من مصدره.")
     else:
         st.error("من فضلك ضع الرابط أولاً!")
-        # إعداد العداد (سيظهر عدد مرات الفحص في كل مرة يفتح فيها الموقع)
-import random
-counter_value = random.randint(150, 200) # هذا عداد وهمي مبدئياً للتشجيع
+        # إعداد عداد حقيقي يصعد مع كل فحص
+if 'counter' not in st.session_state:
+    st.session_state.counter = 150
+
+# زيادة العداد بمقدار 1 عند الضغط على زر الفحص
+if st.button("🚀 افحص الرابط الآن"):
+    st.session_state.counter += 1
+
 st.markdown(f"---")
+st.write(f"📊 تم فحص **{st.session_state.counter}** رابطاً حتى الآن بواسطة درع أيمن.")
+
 st.write(f"📊 تم فحص **{counter_value}** رابطاً حتى الآن بواسطة درع أيمن.")
 
 
