@@ -45,7 +45,7 @@ if st.button("🚀 افحص الرابط الآن"):
         full_domain = f"{domain}.{suffix}"
         
         # القوائم
-        trusted = ['google.com', 'facebook.com', 'whatsapp.com', 'instagram.com', 'youtube.com', 'yemencars.com']
+        trusted = ['google.com', 'facebook.com', 'whatsapp.com', 'instagram.com', 'youtube.com', 'yemencars.com''https://ayman-guard-ntmpb.streamlit.app/']
         suspicious_extensions = ['tk', 'ml', 'ga', 'cf', 'gq', 'xyz']
         shorteners = ['bit.ly', 't.co', 'tinyurl.com']
 
