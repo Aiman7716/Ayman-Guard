@@ -2,103 +2,109 @@ import streamlit as st
 import tldextract
 import time
 
-# --- 1. إعدادات الصفحة الأساسية ---
+# --- 1. إعدادات الهوية والتنسيق (نفس الشكل القديم) ---
 st.set_page_config(page_title="درع أيمن الذكي", page_icon="🛡️", layout="centered")
 
-# --- 2. CSS احترافي لمنع التداخل تماماً ---
+# CSS مخصص لإعادة المظهر الاحترافي ومنع تداخل النصوص
 st.markdown("""
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
         
-        /* ضبط الخط والاتجاه العام */
-        html, body, [class*="st-"] {
-            font-family: 'Cairo', sans-serif !important;
-            direction: rtl !important;
-            text-align: right !important;
+        /* ضبط الخط والاتجاه العربي */
+        html, body, [class*="st-"] { 
+            font-family: 'Cairo', sans-serif !important; 
+            direction: rtl !important; 
+            text-align: right !important; 
         }
 
-        /* تنسيق العنوان الرئيسي لتجنب التداخل */
-        .header-box {
+        /* تنسيق العنوان الكبير (نفس الصورة الأصلية) */
+        .main-title-container {
             text-align: center;
-            padding: 30px 0;
-            color: #00d4ff;
+            margin-bottom: 20px;
         }
-        .main-title { font-size: 3rem; font-weight: bold; margin: 0; }
-        .sub-title { font-size: 1.5rem; margin-top: -10px; opacity: 0.8; }
+        .title-text { 
+            color: #00d4ff; 
+            font-size: 3.5rem; 
+            font-weight: bold; 
+            line-height: 1.1;
+            margin: 0;
+        }
 
-        /* تحسين مظهر الحقول والأزرار */
-        .stButton>button {
-            width: 100%;
-            border-radius: 15px;
-            background-color: #00d4ff;
-            color: white;
+        /* تنسيق الأزرار السماوية */
+        .stButton>button { 
+            width: auto; 
+            min-width: 150px;
+            border-radius: 10px; 
+            background-color: white; 
+            color: black; 
+            border: 1px solid #ddd;
             font-weight: bold;
-            height: 3.5em;
-            font-size: 1.1rem;
-            border: none;
-            margin-top: 10px;
+            height: 3em;
         }
-
-        /* إخفاء أي رموز غريبة ناتجة عن المتصفح */
-        .element-container img { display: inline-block; }
+        
+        /* إخفاء الرموز البرمجية الغريبة التي تظهر في المتصفح */
+        .css-10trblm, .css-1kyx60p, .st-emotion-cache-1kyx60p { display: none !important; }
     </style>
 """, unsafe_allow_html=True)
 
-# --- 3. إدارة البيانات المؤقتة (بدون قاعدة بيانات لتجنب القفل) ---
-if 'counter' not in st.session_state:
-    st.session_state.counter = 250
+# --- 2. إدارة البيانات (تجنب أخطاء sqlite3) ---
+if 'check_count' not in st.session_state:
+    st.session_state.check_count = 250
 
-# --- 4. واجهة المستخدم ---
+# --- 3. الواجهة الرئيسية (محاكاة الصورة 1000565789) ---
 st.markdown("""
-    <div class="header-box">
-        <div class="main-title">🛡️ درع أيمن</div>
-        <div class="sub-title">الذكي</div>
+    <div class="main-title-container">
+        <p class="title-text">🛡️ درع أيمن</p>
+        <p class="title-text" style="font-size: 2.8rem;">الذكي</p>
     </div>
 """, unsafe_allow_html=True)
 
-# حقل الإدخال بتنسيق نظيف
-url_to_check = st.text_input("🔍 ضع الرابط هنا لفحصه الآن:", placeholder="https://example.com")
+# حقل الإدخال
+url_input = st.text_input("🔍 ضع الرابط هنا :", placeholder="https://example.com")
 
+# زر الفحص بنفس الشكل القديم
 if st.button("🚀 افحص الآن"):
-    if url_to_check:
-        st.session_state.counter += 1
-        with st.spinner('جاري التحليل...'):
+    if url_input:
+        st.session_state.check_count += 1
+        with st.spinner('جاري الفحص...'):
             time.sleep(1)
-            ext = tldextract.extract(url_to_check.lower())
+            ext = tldextract.extract(url_input.lower())
             domain = f"{ext.domain}.{ext.suffix}"
             
-            # فلتر المواقع
-            safe_sites = ['absher.sa', 'iam.gov.sa', 'google.com', 'splonline.com.sa', 'moe.gov.sa']
-            scam_tlds = ['tk', 'xyz', 'ml', 'cf', 'gq', 'top', 'ga']
+            # المواقع الرسمية الموثوقة
+            trust_list = ['absher.sa', 'iam.gov.sa', 'google.com', 'splonline.com.sa', 'moe.gov.sa']
             
-            if domain in safe_sites:
+            if domain in trust_list:
                 st.balloons()
-                st.success(f"✅ هذا الموقع رسمي وآمن تماماً: ({domain})")
-            elif ext.suffix in scam_tlds:
-                st.error("🚨 تحذير: هذا الرابط يستخدم نطاقاً مشبوهاً يُستخدم غالباً في الاحتيال!")
+                st.success(f"✅ رابط آمن وموثوق: ({domain})")
+            elif ext.suffix in ['tk', 'xyz', 'ml', 'cf', 'gq', 'top']:
+                st.error("🚨 تحذير: هذا الرابط مشبوه!")
             else:
-                st.info(f"ℹ️ نتيجة الفحص: الرابط يتبع للنطاق ({domain})")
+                st.info(f"ℹ️ نتيجة الفحص: النطاق هو ({domain})")
     else:
-        st.warning("⚠️ فضلاً، أدخل الرابط أولاً.")
+        st.warning("⚠️ يرجى إدخال الرابط")
 
 st.markdown("<br><hr>", unsafe_allow_html=True)
 
-# --- 5. سجل البلاغات (تنسيق مبسط لمنع التداخل) ---
-with st.expander("🚩 أبلغ عن رابط مشبوه"):
-    st.write("ساعدنا في حماية الآخرين من خلال الإبلاغ عن الروابط الاحتيالية.")
-    scam_link = st.text_input("رابط الموقع المحتال :")
+# --- 4. قسم البلاغات (تنسيق نظيف بدون تداخل) ---
+with st.expander("➕ أبلغ عن رابط"):
+    scam_report = st.text_input("أدخل الرابط المشبوه")
     if st.button("إرسال البلاغ"):
-        if scam_link:
-            st.success("تم استلام بلاغك بنجاح، شكراً لك!")
+        if scam_report:
+            st.success("تم استلام بلاغك بنجاح")
 
 st.markdown("<br>")
 
-# --- 6. التذييل (نفس الشكل الأصلي) ---
+# --- 5. التذييل (Footer) - نفس الشكل المطلوب تماماً ---
 st.markdown(f"""
-    <div style='text-align: center; border-top: 1px solid #eee; padding-top: 20px;'>
-        <p>🏛️ <b>روابط رسمية:</b> 
-        <a href='https://absher.sa' style='text-decoration:none; color:#007bff;'>أبشر</a> | 
-        <a href='https://iam.gov.sa' style='text-decoration:none; color:#007bff;'>نفاذ</a></p>
-        <p style='color: #888;'>📊 إجمالي الفحوصات: {st.session_state.counter} | تطوير: أيمن 🦾</p>
+    <div style='text-align: center; border-top: 1px solid #eee; padding-top: 15px;'>
+        <p style='font-size: 1.1rem;'>
+            🏛️ <b>روابط رسمية:</b> 
+            <a href='https://absher.sa' style='color:#007bff; text-decoration:none;'>أبشر</a> | 
+            <a href='https://iam.gov.sa' style='color:#007bff; text-decoration:none;'>نفاذ</a>
+        </p>
+        <p style='color: #666;'>
+            📊 الفحوصات: {st.session_state.check_count} | تطوير: أيمن 🦾
+        </p>
     </div>
 """, unsafe_allow_html=True)
