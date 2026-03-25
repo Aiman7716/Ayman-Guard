@@ -2,7 +2,7 @@ import streamlit as st
 import tldextract
 import time
 
-# --- 1. إعدادات الصفحة والتنسيق الاحترافي ---
+# --- 1. إعدادات الصفحة والتنسيق الفائق ---
 st.set_page_config(page_title="درع أيمن الذكي", page_icon="🛡️", layout="centered")
 
 st.markdown("""
@@ -15,12 +15,23 @@ st.markdown("""
         }
         .main-title { color: #00d4ff; text-align: center; font-size: 2.5rem; font-weight: bold; }
         
-        /* إخفاء شامل وكامل لمنع تداخل كلمة keyboard_ar في السجل */
-        .st-emotion-cache-1kyx60p, .st-emotion-cache-k77z8q, symbol, svg, i, [data-testid="stIcon"], .st-emotion-cache-6q9sum { 
+        /* 🚨 إزالة التشوه البصري keyboard_ar نهائياً 🚨 */
+        .st-emotion-cache-1kyx60p, .st-emotion-cache-k77z8q, .st-emotion-cache-6q9sum, 
+        symbol, svg, i, [data-testid="stIcon"], .stExpander svg { 
             display: none !important; 
             visibility: hidden !important; 
+            height: 0px !important;
+            width: 0px !important;
         }
-        
+
+        /* تنسيق السجل ليكون نظيفاً */
+        .history-text {
+            background-color: #ffffff;
+            padding: 10px;
+            border-bottom: 1px solid #eee;
+            color: #333;
+        }
+
         div.stButton > button {
             background-color: #ff4b4b !important; color: white !important;
             border-radius: 12px !important; width: 100% !important; height: 3.5em !important;
@@ -34,44 +45,35 @@ st.markdown("""
 
 if 'history' not in st.session_state: st.session_state.history = []
 
-# --- 2. محرك الفحص الأمني الذكي ---
+# --- 2. محرك الفحص ---
 def security_scan(url):
     u = url.lower().strip().split('?')[0].replace('https://', '').replace('http://', '').strip('/')
     ext = tldextract.extract(u)
     domain_full = f"{ext.domain}.{ext.suffix}"
     
-    # القوائم
     partner_link = "alhossam7710140-001-site1.mtempurl.com"
     official_sa = u.endswith('.gov.sa') or u.endswith('.edu.sa')
-    trusted_list = ['absher.sa', 'iam.gov.sa', 'google.com', 'najm.sa', 'moi.gov.sa', 'saudipost.sa']
-    
-    # مؤشرات الخطر (الاختراق المؤكد)
-    danger_hosts = ['smarterasp.net', '000webhostapp.com', 'free.hr'] # أزلنا mtempurl مؤقتاً لتعمل كـ "حذر" إلا إذا كانت اختراقاً
-    phishing_keys = ['login-absher', 'verify-bank', 'update-account']
+    trusted_list = ['absher.sa', 'iam.gov.sa', 'google.com', 'najm.sa', 'moi.gov.sa']
 
-    if partner_link in u:
-        return "PARTNER", domain_full
-    elif official_sa or domain_full in trusted_list:
-        return "SAFE", domain_full
-    elif any(key in u for key in phishing_keys) or any(h in domain_full for h in danger_hosts):
-        return "DANGER", domain_full
-    else:
-        # أي رابط آخر غير معروف
-        return "CAUTION", domain_full
+    if partner_link in u: return "PARTNER", domain_full
+    elif official_sa or domain_full in trusted_list: return "SAFE", domain_full
+    elif any(h in domain_full for h in ['smarterasp.net', '000webhostapp.com']): return "DANGER", domain_full
+    else: return "CAUTION", domain_full
 
 # --- 3. الواجهة الرئيسية ---
 st.markdown('<div class="main-title">🛡️ درع أيمن الذكي</div>', unsafe_allow_html=True)
 
-u_input = st.text_input("أدخل الرابط للفحص الأمني :", key="v32_input")
+u_input = st.text_input("أدخل الرابط للفحص الأمني الشامل :", key="v33_input")
 
 if st.button("🚀 افحص وصِد الاختراق الآن"):
     if u_input:
-        with st.spinner('جاري تحليل الرابط...'):
-            time.sleep(0.5)
+        with st.spinner('جاري المسح...'):
+            time.sleep(0.4)
             status, d_name = security_scan(u_input)
             
-            # تسجيل في السجل بنص صافي (يمنع تداخل الكلمات)
-            st.session_state.history.insert(0, f"{status}: {d_name}")
+            # تخزين الحالة بنص عربي بسيط للسجل
+            st_map = {"PARTNER": "معتمد", "SAFE": "آمن", "DANGER": "خطر", "CAUTION": "تحذير"}
+            st.session_state.history.insert(0, f"{st_map.get(status)}: {d_name}")
             
             if status == "PARTNER":
                 st.balloons()
@@ -80,31 +82,25 @@ if st.button("🚀 افحص وصِد الاختراق الآن"):
                 st.balloons()
                 st.success(f"✅ رابط رسمي وموثوق: {d_name}")
             elif status == "DANGER":
-                st.error(f"🚨 تحذير اختراق: هذا الرابط مشبوه جداً ويصنف كصفحة تصيد ({d_name})!")
+                st.error(f"🚨 تحذير اختراق: الرابط مشبوه ({d_name})!")
             else:
-                # الرسالة المطلوبة: كن حذراً
-                st.warning(f"⚠️ كن حذراً: الرابط ({d_name}) غير مدرج في قوائمنا الموثوقة، لا تقم بإدخال بياناتك الشخصية فيه.")
+                st.warning(f"⚠️ كن حذراً: الرابط ({d_name}) غير مدرج في قوائمنا الموثوقة.")
     else:
-        st.error("⚠️ يرجى إدخال الرابط أولاً.")
+        st.error("⚠️ يرجى إدخال الرابط.")
 
-# السجل النظيف
+# --- 4. السجل النظيف (بدون أيقونات مسببة للتشوه) ---
 if st.session_state.history:
-    with st.expander("🕒 آخر عمليات الفحص"):
-        for item in st.session_state.history[:5]:
-            st.text(item)
+    st.write("🕒 **آخر عمليات الفحص:**")
+    for item in st.session_state.history[:5]:
+        st.markdown(f'<div class="history-text">{item}</div>', unsafe_allow_html=True)
 
 st.divider()
 
-# --- 4. ساحة البلاغات ---
+# --- 5. ساحة البلاغات ---
 st.subheader("📢 ساحة بلاغات المجتمع")
-r_input = st.text_input("رابط المحتال للتبليغ :", key="v32_report")
-
+r_input = st.text_input("رابط المحتال للتبليغ :", key="v33_report")
 if st.button("إرسال البلاغ"):
     if r_input:
-        status, _ = security_scan(r_input)
-        if status in ["SAFE", "PARTNER"]:
-            st.error("❌ لا يمكن التبليغ عن جهات موثوقة!")
-        else:
-            st.success("✅ تم استلام بلاغك بنجاح. شكرًا لك يا مهندس أيمن.")
+        st.success("✅ تم استلام بلاغك بنجاح. شكرًا لك يا أيمن.")
 
 st.markdown("<p style='text-align:center; color:#888;'>📊 تطوير المهندس: أيمن 🦾</p>", unsafe_allow_html=True)
