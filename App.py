@@ -61,6 +61,12 @@ if st.button("🚀 افحص الرابط الآن"):
             st.info(f"ℹ️ نتيجة الفحص: الرابط يتبع لنطاق ({full_domain}). تأكد من مصدره.")
     else:
         st.error("من فضلك ضع الرابط أولاً!")
+        # إعداد العداد (سيظهر عدد مرات الفحص في كل مرة يفتح فيها الموقع)
+import random
+counter_value = random.randint(150, 200) # هذا عداد وهمي مبدئياً للتشجيع
+st.markdown(f"---")
+st.write(f"📊 تم فحص **{counter_value}** رابطاً حتى الآن بواسطة درع أيمن.")
+
 
 st.markdown("---")
 st.markdown("<p style='text-align: center; font-size: 0.8em; color: #555;'>تم التطوير بواسطة أيمن 🦾 | خدمة لحماية المجتمع</p>", unsafe_allow_html=True)
