@@ -3,9 +3,9 @@ import tldextract
 import time
 
 # --- 1. إعدادات الصفحة ---
-st.set_page_config(page_title="درع أيمن الذكي", page_icon="🛡️", layout="centered")
+st.set_page_config(page_title="درع أيمن الذكي", page_icon="🛡️")
 
-# --- 2. CSS نقي جداً (فقط للألوان والخطوط) ---
+# --- 2. CSS خارجي فقط للخط والألوان (بعيداً عن الأزرار) ---
 st.markdown("""
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
@@ -14,39 +14,34 @@ st.markdown("""
             direction: rtl !important; 
             text-align: right !important; 
         }
-        .main-title { 
-            color: #00d4ff; text-align: center; font-size: 2.8rem; 
-            font-weight: bold; margin-bottom: 0px; 
-        }
-        .stButton>button { 
-            width: 100%; border-radius: 12px; background-color: #00d4ff; 
-            color: white; font-weight: bold; border: none; height: 3.5em;
+        .title-text { 
+            color: #00d4ff; 
+            text-align: center; 
+            font-size: 3rem; 
+            font-weight: bold; 
         }
     </style>
 """, unsafe_allow_html=True)
 
-# --- 3. إدارة البيانات (بدون قاعدة بيانات لمنع القفل) ---
-if 'count' not in st.session_state:
-    st.session_state.count = 250
+# --- 3. إدارة البيانات (بدون قاعدة بيانات نهائياً) ---
+if 'check_count' not in st.session_state:
+    st.session_state.check_count = 250
 
-# --- 4. الواجهة (التنسيق القديم الأصلي) ---
-# استخدام أعمدة لتوسيط الشعار والنص بشكل احترافي
-st.markdown("<div class='main-title'>🛡️ درع أيمن الذكي</div>", unsafe_allow_html=True)
+# --- 4. الواجهة الرئيسية (التنسيق الأصلي) ---
+st.markdown('<p class="title-text">🛡️ درع أيمن الذكي</p>', unsafe_allow_html=True)
 
-st.write("") # مسافة فارغة
-
-# حقل الإدخال (خارج أي وسوم HTML لمنع ظهور keyboard_ar)
+# استخدام أدوات سستريم ليت الرسمية مباشرة لمنع تداخل keyboard_ar
 url_input = st.text_input("🔍 ضع الرابط هنا لفحصه :", placeholder="https://example.com")
 
 if st.button("🚀 افحص الآن"):
     if url_input:
-        st.session_state.count += 1
-        with st.spinner('جاري الفحص...'):
+        st.session_state.check_count += 1
+        with st.spinner('جاري التحليل...'):
             time.sleep(1)
             ext = tldextract.extract(url_input.lower())
             domain = f"{ext.domain}.{ext.suffix}"
             
-            # المواقع الموثوقة
+            # فلتر المواقع الرسمية
             trust = ['absher.sa', 'iam.gov.sa', 'google.com', 'splonline.com.sa', 'moe.gov.sa']
             
             if domain in trust:
@@ -59,27 +54,23 @@ if st.button("🚀 افحص الآن"):
     else:
         st.warning("⚠️ يرجى إدخال الرابط أولاً.")
 
-st.markdown("---")
+st.divider()
 
-# قسم البلاغات بتنسيق نظيف
-with st.expander("➕ أبلغ عن رابط مشبوه"):
-    report = st.text_input("أدخل الرابط المحتال :")
+# قسم البلاغات
+with st.expander("🚩 أبلغ عن رابط مشبوه"):
+    scam = st.text_input("رابط الموقع المحتال:")
     if st.button("إرسال البلاغ"):
-        if report:
-            st.success("تم استلام بلاغك بنجاح")
+        if scam:
+            st.success("تم تسجيل بلاغك بنجاح")
 
-st.markdown("---")
+st.divider()
 
-# --- 5. التذييل (نفس شكل الصورة 1000565805) ---
+# التذييل (نفس شكل الصورة الموثقة)
 st.markdown(f"""
     <div style='text-align: center;'>
-        <p style='font-size: 1.1rem;'>
-            🏛️ <b>روابط رسمية:</b> 
-            <a href='https://absher.sa' style='color:#007bff; text-decoration:none;'>أبشر</a> | 
-            <a href='https://iam.gov.sa' style='color:#007bff; text-decoration:none;'>نفاذ</a>
-        </p>
-        <p style='color: #888;'>
-            📊 الفحوصات: {st.session_state.count} | تطوير المهندس: أيمن 🦾
-        </p>
+        <p>🏛️ <b>روابط رسمية:</b> 
+        <a href='https://absher.sa' style='color:#007bff; text-decoration:none;'>أبشر</a> | 
+        <a href='https://iam.gov.sa' style='color:#007bff; text-decoration:none;'>نفاذ</a></p>
+        <p style='color: #888;'>📊 الفحوصات: {st.session_state.check_count} | تطوير المهندس: أيمن 🦾</p>
     </div>
 """, unsafe_allow_html=True)
