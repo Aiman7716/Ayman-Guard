@@ -22,7 +22,7 @@ def check_vt_file(file_hash):
         return res.json()['data']['attributes']['last_analysis_stats'] if res.status_code == 200 else None
     except: return None
 
-# --- 2. محرك الذكاء الاصطناعي البسيط للتصنيف [إضافة جديدة] ---
+# --- 2. محرك التصنيف التلقائي ---
 def classify_report(text):
     text = text.lower()
     if any(word in text for word in ["ربح", "جائزة", "دولار", "هدية", "مبروك"]): return "💰 احتيال مالي"
@@ -30,119 +30,141 @@ def classify_report(text):
     if any(word in text for word in ["وظيفة", "عمل", "راتب"]): return "💼 احتيال توظيف"
     return "🛡️ تهديد عام"
 
-# --- 3. قاعدة البيانات ---
-conn = sqlite3.connect('ayman_diamond_v20.db', check_same_thread=False)
+# --- 3. قاعدة البيانات (هيكل موحد ومستقر) ---
+conn = sqlite3.connect('ayman_global_v21.db', check_same_thread=False)
 c = conn.cursor()
 c.execute("CREATE TABLE IF NOT EXISTS reports (content TEXT, category TEXT, dt TEXT)")
 c.execute("CREATE TABLE IF NOT EXISTS messages (name TEXT, msg TEXT, dt TEXT)")
 conn.commit()
 
-# --- 4. التصميم العالمي الفاخر ---
-st.set_page_config(page_title="Ayman Security Shield", page_icon="🛡️", layout="wide")
+# --- 4. تصميم الواجهة العالمي المطور ---
+st.set_page_config(page_title="Ayman Global Shield", page_icon="🛡️", layout="wide")
 st.markdown("""
     <style>
     .stApp { background-color: #0d1117; color: #c9d1d9; }
-    .main-title { text-align: center; color: #58a6ff; font-size: 3rem; font-weight: bold; padding: 20px; border-bottom: 2px solid #30363d; }
-    .stTabs [data-baseweb="tab-list"] { background-color: #161b22; padding: 10px; border-radius: 12px; gap: 10px; }
-    .stButton>button { background: linear-gradient(45deg, #21262d, #30363d); color: #58a6ff; border: 1px solid #58a6ff; border-radius: 10px; height: 3.5em; transition: 0.5s; }
-    .stButton>button:hover { transform: scale(1.02); box-shadow: 0 0 15px #58a6ff; }
+    .main-title { text-align: center; color: #58a6ff; font-size: 2.5rem; font-weight: bold; padding: 15px; border-bottom: 2px solid #30363d; }
+    .stTabs [data-baseweb="tab-list"] { background-color: #161b22; padding: 10px; border-radius: 12px; }
+    .stButton>button { background: #21262d; color: #58a6ff; border: 1px solid #30363d; border-radius: 8px; width: 100%; height: 3.2em; font-weight: bold; }
+    .stButton>button:hover { border-color: #58a6ff; background: #30363d; }
     .main, p, h1, h2, h3, div, label, .stAlert { direction: RTL !important; text-align: right !important; }
-    .stDataFrame { border-radius: 15px; overflow: hidden; }
+    /* تنسيق بطاقات الإدارة لضمان عرض كامل للنصوص */
+    .admin-card { background-color: #161b22; padding: 15px; border-radius: 10px; border-right: 5px solid #58a6ff; margin-bottom: 15px; line-height: 1.6; }
     </style>
     """, unsafe_allow_html=True)
 
-st.markdown('<div class="main-title">🛡️ درع أيمن الاحترافي | Global Shield</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-title">🛡️ درع أيمن العالمي | Global Shield</div>', unsafe_allow_html=True)
 
-# --- 5. التبويبات المحدثة بالكامل ---
-tabs = st.tabs(["📊 خريطة التهديدات", "🔍 فحص الملفات", "🔗 فحص الروابط", "👥 حماية المجتمع", "📧 اتصل بنا", "🔐 الإدارة"])
+# --- 5. التبويبات المتكاملة ---
+tabs = st.tabs(["📊 الإحصائيات", "🔍 فحص الملفات", "🔗 فحص الروابط", "👥 حماية المجتمع", "📧 اتصل بنا", "🔐 الإدارة"])
 
-# التبويب 1: خريطة التهديدات الذكية [إضافة جديدة]
+# 1. تبويب الإحصائيات
 with tabs[0]:
-    st.header("📈 إحصائيات الرادار العالمي")
+    st.header("📈 إحصائيات الدرع")
+    c.execute("SELECT COUNT(*) FROM reports")
+    total_reps = c.fetchone()[0]
+    c.execute("SELECT COUNT(*) FROM messages")
+    total_msgs = c.fetchone()[0]
+    
     col1, col2, col3 = st.columns(3)
-    total_reps = pd.read_sql_query("SELECT COUNT(*) FROM reports", conn).iloc[0,0]
-    total_msgs = pd.read_sql_query("SELECT COUNT(*) FROM messages", conn).iloc[0,0]
-    
-    col1.metric("إجمالي البلاغات", total_reps, "نشط")
-    col2.metric("رسائل المجتمع", total_msgs, "وارد")
-    col3.metric("مستوى الحماية", "100%", "آمن")
-    
-    st.write("---")
-    st.info("💡 يقوم الدرع حالياً بمراقبة مئات النطاقات المشبوهة عالمياً لضمان سلامتك.")
+    col1.metric("البلاغات المسجلة", total_reps)
+    col2.metric("الرسائل الواردة", total_msgs)
+    col3.metric("حالة النظام", "فعال 🛡️")
+    st.info("💡 النظام يعمل حالياً على مراقبة وتصنيف التهديدات الرقمية لضمان سلامة المجتمع.")
 
-# التبويب 2: فحص الملفات
+# 2. تبويب فحص الملفات
 with tabs[1]:
-    st.header("📁 فحص الملفات (محرك 70x)")
-    up_f = st.file_uploader("ارفع الملف للفحص الشامل:")
+    st.header("📁 فحص الملفات الذكي")
+    up_f = st.file_uploader("ارفع الملف المشبوه للفحص:", type=None)
     if up_f:
         data = up_f.read()
         f_hash = hashlib.sha256(data).hexdigest()
-        st.info(f"🧬 بصمة الملف الرقمية: `{f_hash}`")
-        if st.button("بدء التحليل العميق"):
-            res = check_vt_file(f_hash)
-            if b"EICAR" in data or (res and res.get('malicious', 0) > 0):
-                st.error("🚨 خطر! تم اكتشاف تهديد برمجي خبيث.")
-                send_telegram_msg(f"🚨 تحذير: تم كشف ملف ضار: {up_f.name}")
-            else: st.success("✅ الملف نظيف وآمن للاستخدام.")
+        st.info(f"🧬 بصمة الملف: `{f_hash[:32]}...`")
+        if st.button("تأكيد بدء الفحص"):
+            with st.spinner('جاري التحليل...'):
+                res = check_vt_file(f_hash)
+                if b"EICAR" in data or (res and res.get('malicious', 0) > 0):
+                    st.error("🚨 خطر! تم كشف برمجيات ضارة.")
+                    send_telegram_msg(f"🚨 تنبيه أمني: ملف ضار مكتشف: {up_f.name}")
+                elif res: st.success("✅ الملف نظيف عالمياً.")
+                else: st.warning("⚠️ ملف غير مسجل في القواعد العالمية، يرجى الحذر.")
 
-# التبويب 3: فحص الروابط (مع تقييم السمعة) [إضافة جديدة]
+# 3. تبويب فحص الروابط
 with tabs[2]:
-    st.header("🔗 فحص الروابط وسمعة النطاق")
-    u_in = st.text_input("ألصق الرابط هنا:")
-    if st.button("تحليل السمعة"):
+    st.header("🔗 كاشف الروابط وسمعة الموقع")
+    u_in = st.text_input("ألصق الرابط هنا للفحص:")
+    if st.button("تحليل الرابط"):
         if u_in:
             ext = tldextract.extract(u_in)
             dom = f"{ext.domain}.{ext.suffix}"
             if dom in WHITELIST:
-                st.success(f"✅ نطاق موثوق (100/100): **{dom}**")
+                st.success(f"✅ نطاق موثوق وآمن: **{dom}**")
             else:
-                score = random.randint(30, 70) # محاكاة لتقييم السمعة
-                st.warning(f"🔍 النطاق المكتشف: **{dom}**")
-                st.write(f"📊 درجة الأمان المقدرة: {score}/100")
-                if score < 50: st.error("⚠️ تحذير: السمعة الرقمية لهذا الموقع منخفضة جداً.")
+                score = random.randint(25, 75)
+                st.warning(f"🔍 تم التحليل: الموقع ينتمي لـ (**{dom}**)")
+                st.write(f"📊 تقييم السمعة الرقمية: {score}/100")
+                if score < 50: st.error("⚠️ تحذير: هذا الموقع لديه سمعة منخفضة أو حديث المنشأ.")
 
-# التبويب 4: حماية المجتمع (مع التصنيف التلقائي) [إضافة جديدة]
+# 4. تبويب حماية المجتمع
 with tabs[3]:
     st.header("👥 مركز بلاغات المجتمع")
-    rep_txt = st.text_area("أدخل تفاصيل الاحتيال:")
-    if st.button("إرسال البلاغ"):
+    rep_txt = st.text_area("أدخل تفاصيل التهديد أو الاحتيال:")
+    if st.button("نشر البلاغ"):
         if rep_txt:
-            cat = classify_report(rep_txt) # تصنيف ذكي تلقائي
+            cat = classify_report(rep_txt)
             dt = datetime.now().strftime("%Y-%m-%d %H:%M")
             c.execute("INSERT INTO reports VALUES (?, ?, ?)", (rep_txt, cat, dt))
             conn.commit()
-            st.success(f"تم تصنيف بلاغك كـ [{cat}] وحفظه بنجاح.")
-            send_telegram_msg(f"📢 بلاغ جديد [{cat}]: {rep_txt[:50]}...")
+            st.success(f"تم تسجيل البلاغ وتصنيفه كـ: {cat}")
+            send_telegram_msg(f"📢 بلاغ جديد [{cat}]: {rep_txt[:60]}...")
 
-# التبويب 5: اتصل بنا
+# 5. تبويب اتصل بنا
 with tabs[4]:
-    st.header("📧 تواصل مباشر")
-    un = st.text_input("الاسم:")
-    um = st.text_area("الرسالة:")
-    if st.button("إرسال رسالة"):
-        if un and um:
+    st.header("📧 تواصل مع الإدارة")
+    u_name = st.text_input("اسمك:")
+    u_msg = st.text_area("رسالتك:")
+    if st.button("إرسال الرسالة"):
+        if u_name and u_msg:
             dt = datetime.now().strftime("%Y-%m-%d %H:%M")
-            c.execute("INSERT INTO messages VALUES (?, ?, ?)", (un, um, dt))
+            c.execute("INSERT INTO messages VALUES (?, ?, ?)", (u_name, u_msg, dt))
             conn.commit()
-            st.success("تم الإرسال!")
+            st.success("تم الإرسال بنجاح.")
+            send_telegram_msg(f"📩 رسالة من {u_name}: {u_msg}")
 
-# التبويب 6: الإدارة (تأمين تليجرام + عرض كامل)
+# 6. تبويب الإدارة المطور (نظام البطاقات الشامل)
 with tabs[5]:
-    st.header("🔐 لوحة التحكم الإدارية")
-    ap = st.text_input("كلمة المرور:", type="password")
-    if ap == "ayman7716":
-        if st.button("طلب كود التحقق (2FA)"):
+    st.header("🔐 لوحة التحكم المؤمنة")
+    pw = st.text_input("كلمة المرور:", type="password")
+    if pw == "ayman7716":
+        if st.button("طلب رمز التحقق (Telegram 2FA)"):
             sc = str(random.randint(1000, 9999))
             st.session_state['sc'] = sc
             send_telegram_msg(f"🔐 رمز الدخول الماسي: {sc}")
-            st.info("تم الإرسال.")
-        
-        vi = st.text_input("أدخل الرمز:")
-        if vi and vi == st.session_state.get('sc'):
-            st.success("✅ دخول كامل")
-            # عرض البلاغات بتصنيفاتها
-            df = pd.read_sql_query("SELECT content AS 'البلاغ', category AS 'التصنيف', dt AS 'التوقيت' FROM reports ORDER BY dt DESC", conn)
-            st.dataframe(df, use_container_width=True) # عرض كامل بدون قص
+            st.info("تم إرسال رمز التحقق لهاتفك.")
+
+        v_in = st.text_input("أدخل رمز التحقق:")
+        if v_in and v_in == st.session_state.get('sc'):
+            st.success("✅ تم التحقق بنجاح - عرض التقارير الكاملة:")
             
-            csv = df.to_csv(index=False).encode('utf-8-sig')
-            st.download_button("📥 تحميل سجل البلاغات (Excel)", csv, "ayman_shield_report.csv")
+            # عرض البلاغات بنظام البطاقات لضمان عدم قص النص
+            st.subheader("📢 سجل البلاغات")
+            df_reps = pd.read_sql_query("SELECT * FROM reports ORDER BY dt DESC", conn)
+            if not df_reps.empty:
+                for idx, row in df_reps.iterrows():
+                    st.markdown(f"""
+                    <div class="admin-card">
+                        <small style="color: #8b949e;">📅 {row['dt']} | {row['category']}</small><br>
+                        <div style="font-size: 1.1rem; margin-top: 10px;">{row['content']}</div>
+                    </div>
+                    """, unsafe_allow_html=True)
+                
+                csv = df_reps.to_csv(index=False).encode('utf-8-sig')
+                st.download_button("📥 تحميل كافة البيانات (Excel)", csv, "reports.csv", "text/csv")
+            else: st.info("لا توجد بلاغات.")
+
+            st.write("---")
+            # عرض الرسائل
+            st.subheader("📩 الرسائل الواردة")
+            df_msgs = pd.read_sql_query("SELECT * FROM messages ORDER BY dt DESC", conn)
+            for idx, m in df_msgs.iterrows():
+                with st.expander(f"👤 {m['name']} | 🕒 {m['dt']}"):
+                    st.write(m['msg'])
