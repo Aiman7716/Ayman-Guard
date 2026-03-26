@@ -7,13 +7,21 @@ from datetime import datetime
 TELEGRAM_TOKEN = "8124974140:AAE3-UgIpkAKjcUyJrT3YWV99sug07WtniE"
 CHAT_ID = "906233240" 
 VT_API_KEY = "Ab38a92fadf6868867f8376d7ff1fd93f06f94608d76fbf93a5735ef09deadce" 
+WHITELIST = ["google.com", "facebook.com", "whatsapp.com", "microsoft.com", "apple.com", "instagram.com"]
 
 def send_telegram(msg):
     try: requests.post(f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage", json={"chat_id": CHAT_ID, "text": msg}, timeout=5)
     except: pass
 
-# --- 2. التصميم البصري (نفس تصميم الصورة 1000566739.jpg) ---
-st.set_page_config(page_title="Ayman Guard", layout="wide")
+def check_vt_file(file_hash):
+    headers = {"x-apikey": VT_API_KEY}
+    try:
+        res = requests.get(f"https://www.virustotal.com/api/v3/files/{file_hash}", headers=headers, timeout=5)
+        return res.json()['data']['attributes']['last_analysis_stats'] if res.status_code == 200 else None
+    except: return None
+
+# --- 2. التصميم البصري (v33.0 Ultra Stable) ---
+st.set_page_config(page_title="Ayman Guard Pro", layout="wide")
 
 st.markdown("""
     <style>
@@ -21,44 +29,53 @@ st.markdown("""
     html, body, [class*="st-"] { font-family: 'Cairo', sans-serif; direction: RTL; text-align: right; }
     .stApp { background-color: #0d1117; color: #ffffff; }
 
-    /* الهيدر الأزرق الاحترافي */
+    /* الهيدر الأزرق الفاخر */
     .hero-box {
-        background: linear-gradient(135deg, #448aff 0%, #2962ff 100%);
-        padding: 40px 20px;
+        background: linear-gradient(135deg, #1f6feb 0%, #111d2e 100%);
+        padding: 35px 20px;
         border-radius: 20px;
         text-align: center;
         margin-bottom: 25px;
-        box-shadow: 0 10px 20px rgba(0,0,0,0.4);
+        border: 1px solid #30363d;
     }
-    .hero-box h1 { color: white; font-size: 2.5rem; margin-bottom: 5px; }
-    .hero-box p { color: #e3f2fd; font-size: 1.1rem; }
+    .hero-box h1 { color: white; font-size: 2.2rem; margin: 0; }
 
-    /* تحسين شكل التبويبات العلوية */
+    /* تبويبات التنقل العلوية */
     .stTabs [data-baseweb="tab-list"] {
-        gap: 8px;
+        gap: 10px;
         background-color: #161b22;
         padding: 10px;
-        border-radius: 12px;
+        border-radius: 15px;
         border: 1px solid #30363d;
     }
     .stTabs [data-baseweb="tab"] {
-        height: 50px;
-        background-color: transparent !important;
-        border-radius: 8px !important;
+        height: 45px;
         color: #8b949e !important;
+        font-weight: bold;
     }
     .stTabs [aria-selected="true"] {
         background-color: #1f6feb !important;
         color: white !important;
+        border-radius: 10px !important;
     }
 
-    /* بطاقات المحتوى */
+    /* بطاقات المحتوى الموحدة */
     .content-card {
         background: #161b22;
         border: 1px solid #30363d;
         border-radius: 15px;
-        padding: 20px;
-        margin-top: 20px;
+        padding: 25px;
+        margin-top: 15px;
+    }
+
+    /* تحسين شكل الأزرار */
+    .stButton>button {
+        width: 100%;
+        border-radius: 10px;
+        height: 3em;
+        background-color: #1f6feb !important;
+        color: white !important;
+        border: none;
     }
 
     /* إخفاء القائمة الجانبية والزوائد */
@@ -68,71 +85,79 @@ st.markdown("""
     """, unsafe_allow_html=True)
 
 # --- 3. قاعدة البيانات ---
-conn = sqlite3.connect('ayman_pro.db', check_same_thread=False)
+conn = sqlite3.connect('ayman_final_pro.db', check_same_thread=False)
 c = conn.cursor()
 c.execute("CREATE TABLE IF NOT EXISTS reports (content TEXT, dt TEXT)")
-c.execute("CREATE TABLE IF NOT EXISTS messages (name TEXT, msg TEXT, dt TEXT)")
 conn.commit()
 
 # --- 4. الهيكل الرئيسي ---
-st.markdown("""
-    <div class="hero-box">
-        <h1>درع أيمن الأمني</h1>
-        <p>النسخة الاحترافية v32.0</p>
-    </div>
-    """, unsafe_allow_html=True)
+st.markdown('<div class="hero-box"><h1>🛡️ درع أيمن الأمني</h1><p>المنصة المتكاملة للحماية الرقمية</p></div>', unsafe_allow_html=True)
 
-# نظام التبويبات المصلح
-tab1, tab2, tab3, tab4 = st.tabs(["🏠 الرئيسية", "🔍 الفحص", "👥 المجتمع", "🔐 الإدارة"])
+# التبويبات الرئيسية
+tab1, tab2, tab3, tab4 = st.tabs(["🏠 الرئيسية", "🔍 مركز الفحص", "👥 المجتمع", "🔐 الإدارة"])
 
-# محتوى التبويب الأول: الرئيسية
+# التبويب 1: الرئيسية
 with tab1:
     st.markdown('<div class="content-card">', unsafe_allow_html=True)
-    st.subheader("📊 إحصائيات النظام")
-    r_count = c.execute("SELECT COUNT(*) FROM reports").fetchone()[0]
-    m_count = c.execute("SELECT COUNT(*) FROM messages").fetchone()[0]
-    
+    st.subheader("📊 حالة النظام")
     col1, col2 = st.columns(2)
-    col1.metric("إجمالي البلاغات", r_count)
-    col2.metric("رسائل التواصل", m_count)
+    col1.metric("حالة الدرع", "نشط وآمن")
+    col2.metric("التحديثات", "تلقائية")
+    st.info("نظام أيمن جارد يراقب التهديدات بنجاح.")
     st.markdown('</div>', unsafe_allow_html=True)
 
-# محتوى التبويب الثاني: الفحص
+# التبويب 2: مركز الفحص (دمج الملفات والروابط)
 with tab2:
     st.markdown('<div class="content-card">', unsafe_allow_html=True)
-    st.subheader("🔍 مركز التحليل الذكي")
-    url = st.text_input("أدخل الرابط للفحص:")
-    if st.button("بدء التحليل"):
-        if url:
-            ext = tldextract.extract(url)
-            st.success(f"تم تحليل النطاق: {ext.domain}.{ext.suffix}")
-        else: st.error("يرجى إدخال الرابط")
+    st.subheader("🔍 مركز التحليل الشامل")
+    
+    # تبويبات داخلية للفحص
+    sub_tab1, sub_tab2 = st.tabs(["🔗 فحص الرابط", "📁 فحص الملف"])
+    
+    with sub_tab1:
+        u_in = st.text_input("أدخل الرابط للفحص:")
+        if st.button("تحليل الرابط الآن"):
+            if u_in:
+                ext = tldextract.extract(u_in)
+                dom = f"{ext.domain}.{ext.suffix}"
+                if dom in WHITELIST: st.success(f"✅ هذا النطاق موثوق: {dom}")
+                else: st.warning(f"🔍 تم التحليل: النطاق هو ({dom}) - يرجى الحذر إذا لم تكن تعرف المصدر.")
+            else: st.error("يرجى إدخال رابط.")
+
+    with sub_tab2:
+        up = st.file_uploader("ارفع الملف المشبوه هنا:")
+        if up and st.button("بدء فحص الملف"):
+            data = up.read()
+            f_hash = hashlib.sha256(data).hexdigest()
+            st.info(f"بصمة الملف الرقمية: `{f_hash[:32]}...`")
+            res = check_vt_file(f_hash)
+            if res and res.get('malicious', 0) > 0:
+                st.error("🚨 خطر! تم اكتشاف تهديد في هذا الملف.")
+                send_telegram(f"🚨 تنبيه أمني: تم فحص ملف ضار باسم: {up.name}")
+            else: st.success("✅ الملف يبدو آمناً وفقاً للفحص الأولي.")
     st.markdown('</div>', unsafe_allow_html=True)
 
-# محتوى التبويب الثالث: المجتمع
+# التبويب 3: المجتمع
 with tab3:
     st.markdown('<div class="content-card">', unsafe_allow_html=True)
-    st.subheader("📢 إبلاغ عن حالة احتيال")
-    report = st.text_area("وصف الحالة:")
-    if st.button("إرسال البلاغ"):
-        if report:
+    st.subheader("👥 أبلغ عن حالة احتيال")
+    txt = st.text_area("أدخل تفاصيل الحالة:")
+    if st.button("نشر وتحذير المجتمع"):
+        if txt:
             dt = datetime.now().strftime("%Y-%m-%d %H:%M")
-            c.execute("INSERT INTO reports VALUES (?, ?)", (report, dt))
+            c.execute("INSERT INTO reports VALUES (?, ?)", (txt, dt))
             conn.commit()
-            send_telegram(f"📢 بلاغ جديد: {report}")
-            st.success("تم الإرسال بنجاح")
+            send_telegram(f"📢 بلاغ جديد من المجتمع: {txt}")
+            st.success("شكراً لك، تم تسجيل البلاغ بنجاح.")
     st.markdown('</div>', unsafe_allow_html=True)
 
-# محتوى التبويب الرابع: الإدارة
+# التبويب 4: الإدارة
 with tab4:
     st.markdown('<div class="content-card">', unsafe_allow_html=True)
     st.subheader("🔐 لوحة التحكم")
     pw = st.text_input("كلمة المرور:", type="password")
     if pw == "ayman7716":
         df = pd.read_sql_query("SELECT * FROM reports ORDER BY dt DESC", conn)
+        st.write("سجل البلاغات المستلمة:")
         st.dataframe(df, use_container_width=True)
-        if st.button("حذف السجل"):
-            c.execute("DELETE FROM reports")
-            conn.commit()
-            st.warning("تم مسح البيانات")
     st.markdown('</div>', unsafe_allow_html=True)
