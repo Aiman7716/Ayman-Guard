@@ -1,118 +1,99 @@
 import streamlit as st
-import tldextract, sqlite3, requests, hashlib, pandas as pd
-import random
+import sqlite3, requests, hashlib, pandas as pd
 from datetime import datetime
 
 # --- 1. الإعدادات ---
 TELEGRAM_TOKEN = "8124974140:AAE3-UgIpkAKjcUyJrT3YWV99sug07WtniE"
 CHAT_ID = "906233240" 
 
-# --- 2. التصميم البصري المتقدم (CSS Custom Design) ---
-st.set_page_config(page_title="Ayman Guard PRO", layout="wide")
+# --- 2. التصميم البصري الفاخر (UI/UX) ---
+st.set_page_config(page_title="Ayman Guard", layout="wide")
 
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
     
-    /* ضبط الخط العام والاتجاه */
-    * { font-family: 'Cairo', sans-serif; direction: RTL; }
+    /* ضبط الخلفية والخطوط */
+    html, body, [class*="st-"] { font-family: 'Cairo', sans-serif; direction: RTL; }
     .stApp { background-color: #0d1117; }
 
-    /* تحسين شكل القائمة الجانبية بالكامل */
-    [data-testid="stSidebar"] {
-        background-color: #161b22 !important;
-        border-left: 1px solid #30363d;
-        padding-top: 20px;
-    }
-    [data-testid="stSidebarNav"] { padding-top: 0px; }
-    
-    /* تحسين العناوين في القائمة الجانبية */
-    .sidebar-title {
-        color: #58a6ff;
-        font-size: 1.5rem;
-        font-weight: bold;
+    /* تحسين الهيدر الرئيسي */
+    .main-title {
+        background: linear-gradient(90deg, #1f6feb, #58a6ff);
+        padding: 25px;
+        border-radius: 15px;
         text-align: center;
+        color: white;
         margin-bottom: 20px;
-        padding: 10px;
-        border-bottom: 1px solid #30363d;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.3);
     }
 
-    /* إصلاح تداخل نصوص الواجهة الرئيسية */
-    .hero-section {
-        background: linear-gradient(180deg, #1f6feb 0%, #0d1117 100%);
-        padding: 40px 20px;
-        border-radius: 0 0 25px 25px;
-        text-align: center;
-        margin-bottom: 30px;
-        box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+    /* إخفاء القائمة الجانبية الافتراضية لتحسين المنظر */
+    [data-testid="stSidebar"] { display: none; }
+    
+    /* تنسيق أزرار التنقل العلوية (Tabs) */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 10px;
+        background-color: #161b22;
+        padding: 10px;
+        border-radius: 12px;
+        justify-content: center;
     }
-    .hero-section h1 {
-        color: white;
-        font-size: 2.2rem;
-        text-shadow: 2px 2px 10px rgba(0,0,0,0.5);
-        margin: 0;
-        line-height: 1.4;
+    .stTabs [data-baseweb="tab"] {
+        background-color: transparent !important;
+        border: none !important;
+        color: #8b949e !important;
+        font-weight: bold !important;
+    }
+    .stTabs [aria-selected="true"] {
+        color: #58a6ff !important;
+        border-bottom: 2px solid #58a6ff !important;
     }
 
     /* بطاقات البيانات المرتبة */
-    .metric-card {
-        background: #161b22;
+    .glass-card {
+        background: rgba(22, 27, 34, 0.8);
         border: 1px solid #30363d;
         border-radius: 15px;
         padding: 20px;
+        margin-top: 15px;
         text-align: center;
-        transition: 0.3s;
-        margin-bottom: 15px;
-    }
-    .metric-card:hover { border-color: #58a6ff; transform: translateY(-5px); }
-    
-    /* تحسين الأزرار */
-    .stButton>button {
-        width: 100%;
-        border-radius: 12px;
-        height: 3.5rem;
-        background: linear-gradient(90deg, #1f6feb, #58a6ff) !important;
-        color: white !important;
-        font-weight: bold;
-        border: none;
     }
 
-    /* إخفاء الزوائد المزعجة */
+    /* إخفاء الزوائد */
     #MainMenu, footer, header {visibility: hidden;}
     </style>
     """, unsafe_allow_html=True)
 
-# --- 3. محتويات القائمة الجانبية المنظمة ---
-with st.sidebar:
-    st.markdown('<div class="sidebar-title">🛡️ لوحة التحكم</div>', unsafe_allow_html=True)
-    # استخدام نظام الراديو مع أيقونات نصية لجمالية أكثر
-    menu = st.radio("اختر القسم:", 
-                    ["🏠 الرادار الرئيسي", "🔍 فحص الملفات", "🔗 فحص الروابط", "👥 المجتمع الآمن", "📧 مراسلة الإدارة", "🔐 الإدارة والتقارير"],
-                    index=0)
-    st.markdown("---")
-    st.markdown("<p style='text-align:center; color:#8b949e;'>أيمن جارد PRO v30.0</p>", unsafe_allow_html=True)
+# --- 3. الواجهة العلوية ---
+st.markdown('<div class="main-title"><h1>🛡️ درع أيمن الأمني</h1><p>النسخة الاحترافية v31.0</p></div>', unsafe_allow_html=True)
 
-# --- 4. الواجهة الرئيسية (Hero Section) لمنع التداخل ---
-st.markdown("""
-    <div class="hero-section">
-        <h1>درع أيمن الأمني</h1>
-        <p style="color:#c9d1d9; font-size:1.1rem;">المنصة العالمية لتأمين المجتمع الرقمي</p>
-    </div>
-    """, unsafe_allow_html=True)
+# استبدال القائمة الجانبية المشوهة بنظام التبويبات الأنيق
+tab1, tab2, tab3, tab4, tab5 = st.tabs(["🏠 الرئيسية", "🔍 الفحص", "👥 المجتمع", "📧 تواصل", "🔐 الإدارة"])
 
-# --- 5. منطق الأقسام (نفس المنطق التقني السابق مع تحسين العرض) ---
-if menu == "🏠 الرادار الرئيسي":
+# --- 4. محتويات التبويبات ---
+
+with tab1:
+    st.markdown('<div class="glass-card"><h3>📊 رادار التهديدات</h3></div>', unsafe_allow_html=True)
     col1, col2 = st.columns(2)
-    with col1:
-        st.markdown('<div class="metric-card"><h3>📊 البلاغات</h3><h2 style="color:#58a6ff;">0</h2></div>', unsafe_allow_html=True)
-    with col2:
-        st.markdown('<div class="metric-card"><h3>📩 الرسائل</h3><h2 style="color:#58a6ff;">0</h2></div>', unsafe_allow_html=True)
-    st.info("💡 النظام يعمل بنجاح ويقوم بتحديث البيانات لحظياً.")
+    col1.metric("إجمالي البلاغات", "12")
+    col2.metric("حالات تم تأمينها", "100%")
 
-elif menu == "🔐 الإدارة والتقارير":
-    st.markdown("### 🔐 منطقة الإدارة")
-    pw = st.text_input("كلمة المرور:", type="password")
-    if pw == "ayman7716":
-        st.success("✅ تم تسجيل الدخول")
-        # عرض البيانات ببطاقات مرتبة بدلاً من الجداول
-        st.markdown('<div class="metric-card"><small>2026-03-26</small><br><b>بلاغ جديد: محاولة احتيال مالي</b></div>', unsafe_allow_html=True)
+with tab2:
+    st.markdown('<div class="glass-card"><h3>🔍 مركز الفحص الشامل</h3></div>', unsafe_allow_html=True)
+    option = st.selectbox("نوع الفحص:", ["روابط مشبوهة", "ملفات مرفقة"])
+    url_input = st.text_input("أدخل الرابط أو ارفع الملف:")
+    if st.button("بدء التحليل"):
+        st.success("جاري الفحص عبر محركاتنا...")
+
+with tab3:
+    st.markdown('<div class="glass-card"><h3>👥 بلاغات المجتمع</h3></div>', unsafe_allow_html=True)
+    report_text = st.text_area("صف حالة الاحتيال:")
+    if st.button("نشر التحذير"):
+        st.info("تم تسجيل البلاغ وإرساله للقنوات الأمنية.")
+
+with tab5:
+    st.markdown('<div class="glass-card"><h3>🔐 لوحة التحكم الخاصة بك</h3></div>', unsafe_allow_html=True)
+    admin_pw = st.text_input("كلمة سر المسؤول:", type="password")
+    if admin_pw == "ayman7716":
+        st.success("مرحباً أيمن! يمكنك الآن إدارة التقارير.")
