@@ -1,5 +1,6 @@
 import streamlit as st
 import tldextract, sqlite3, requests, hashlib, pandas as pd
+import random
 from datetime import datetime
 from io import BytesIO
 
@@ -20,110 +21,114 @@ def check_vt_file(file_hash):
     except: return None
     return None
 
-# --- 2. قاعدة البيانات (إصلاح خطأ الأسماء) ---
-db = sqlite3.connect('aiman_final_fix.db', check_same_thread=False)
-db.execute("CREATE TABLE IF NOT EXISTS reports (content TEXT, date_fixed TEXT)")
-db.execute("CREATE TABLE IF NOT EXISTS messages (name TEXT, msg TEXT, date_fixed TEXT)")
+# --- 2. الرادار المحلي (كشف الأنماط المشبوهة) ---
+def local_radar_scan(content):
+    # قائمة بكلمات تدل على محاولات اختراق أو أكواد خبيثة
+    danger_patterns = [b"DROP TABLE", b"SELECT * FROM users", b"os.system", b"subprocess.Popen", b"eval(", b"exec("]
+    found_threats = []
+    for pattern in danger_patterns:
+        if pattern in content:
+            found_threats.append(pattern.decode())
+    return found_threats
+
+# --- 3. قاعدة البيانات ---
+db = sqlite3.connect('aiman_v12_pro.db', check_same_thread=False)
+db.execute("CREATE TABLE IF NOT EXISTS reports (content TEXT, dt TEXT)")
+db.execute("CREATE TABLE IF NOT EXISTS messages (name TEXT, msg TEXT, dt TEXT)")
 db.commit()
 
-# --- 3. التصميم المريح للعين (Dark Slate Blue) ---
-st.set_page_config(page_title="درع أيمن v11", page_icon="🛡️")
-
+# --- 4. التصميم الاحترافي الهادئ ---
+st.set_page_config(page_title="درع أيمن v12 Pro", page_icon="🛡️")
 st.markdown("""
     <style>
-    /* خلفية داكنة مريحة جداً */
     .stApp { background-color: #0d1117; color: #c9d1d9; }
-    .main-title { text-align: center; color: #58a6ff; font-size: 2.2rem; font-weight: bold; margin-bottom: 25px; }
-    
-    /* تنسيق التبويبات */
-    .stTabs [data-baseweb="tab-list"] { 
-        gap: 5px; background-color: #161b22; padding: 10px; border-radius: 12px; 
-    }
-    .stTabs [aria-selected="true"] { color: #58a6ff !important; border-bottom: 2px solid #58a6ff !important; }
-
-    /* أزرار وحقول داكنة مريحة */
-    .stButton>button { 
-        background: #21262d; color: #58a6ff; border: 1px solid #30363d; 
-        border-radius: 8px; width: 100%; transition: 0.3s;
-    }
-    input, textarea { background-color: #010409 !important; color: #c9d1d9 !important; border: 1px solid #30363d !important; }
+    .main-title { text-align: center; color: #58a6ff; font-size: 2.5rem; font-weight: bold; margin-bottom: 20px; }
+    .stTabs [data-baseweb="tab-list"] { background-color: #161b22; padding: 10px; border-radius: 12px; }
+    .stButton>button { background: #21262d; color: #58a6ff; border: 1px solid #30363d; border-radius: 8px; width: 100%; }
     .main, p, h1, h2, h3, div, label { direction: RTL !important; text-align: right !important; }
     </style>
     """, unsafe_allow_html=True)
 
-st.markdown('<div class="main-title">🛡️ درع أيمن الاحترافي</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-title">🛡️ درع أيمن الاحترافي Pro</div>', unsafe_allow_html=True)
 
-# --- 4. التبويبات الشاملة ---
 tabs = st.tabs(["🔍 الفحص الذكي", "🔗 فحص الروابط", "👥 حماية المجتمع", "📧 اتصل بنا", "🔐 الإدارة"])
 
-# التبويب 1: الفحص الذكي (المحدث)
+# تبويب الفحص (تمت إضافة الرادار المحلي)
 with tabs[0]:
-    st.subheader("📁 فحص الملفات (عالمي + محلي)")
-    up_f = st.file_uploader("ارفع الملف للفحص الشامل:", type=None)
+    st.subheader("📁 فحص الملفات (عالمي + رادار محلي)")
+    up_f = st.file_uploader("ارفع الملف للفحص:")
     if up_f:
-        file_data = up_f.read()
-        f_hash = hashlib.sha256(file_data).hexdigest()
-        st.info(f"🧬 **البصمة:** `{f_hash}`") # كما في صورتك
-        res = check_vt_file(f_hash)
-        if b"EICAR" in file_data or (res and res.get('malicious', 0) > 0):
-            st.error("🚨 تهديد أمني مكتشف!")
-        elif res: st.success("✅ الملف آمن.")
-        else: st.warning("⚠️ الملف فريد ولم يرفع عالمياً من قبل.")
+        data = up_f.read()
+        f_hash = hashlib.sha256(data).hexdigest()
+        st.info(f"🧬 البصمة: `{f_hash[:30]}...`")
+        
+        # 1. الرادار المحلي
+        local_threats = local_radar_scan(data)
+        # 2. الفحص العالمي
+        vt_res = check_vt_file(f_hash)
+        
+        if b"EICAR" in data or local_threats or (vt_res and vt_res.get('malicious', 0) > 0):
+            st.error(f"🚨 تحذير: تم اكتشاف تهديد! {f' (أنماط مشبوهة: {local_threats})' if local_threats else ''}")
+            send_telegram_msg(f"🚨 إنذار أمني!\nتم كشف ملف ضار: {up_f.name}\nالبصمة: {f_hash[:10]}")
+        elif vt_res: st.success("✅ الملف نظيف عالمياً.")
+        else: st.warning("⚠️ ملف جديد كلياً، لم يسبق رفعه.")
 
-# التبويب 2: فحص الروابط
+# تبويب الروابط
 with tabs[1]:
     st.subheader("🔗 كاشف الروابط")
-    url_v = st.text_input("ألصق الرابط هنا للفحص:")
-    if st.button("تحليل الرابط"):
-        if url_v:
-            ext = tldextract.extract(url_v)
-            st.success(f"🔍 الموقع المكتشف هو: **{ext.domain}.{ext.suffix}**")
+    url = st.text_input("ألصق الرابط:")
+    if st.button("تحليل"):
+        if url:
+            ext = tldextract.extract(url)
+            st.success(f"🔍 النطاق: **{ext.domain}.{ext.suffix}**")
 
-# التبويب 3: حماية المجتمع
+# تبويب المجتمع
 with tabs[2]:
     st.subheader("👥 بلاغات المجتمع")
-    rep_txt = st.text_area("أدخل تفاصيل الاحتيال:")
-    if st.button("نشر وتحذير المجتمع"):
-        if rep_txt:
-            now = datetime.now().strftime("%Y-%m-%d %H:%M")
-            db.execute("INSERT INTO reports VALUES (?, ?)", (rep_txt, now))
+    rep = st.text_area("تفاصيل البلاغ:")
+    if st.button("نشر"):
+        if rep:
+            db.execute("INSERT INTO reports VALUES (?, ?)", (rep, datetime.now().strftime("%Y-%m-%d %H:%M")))
             db.commit()
-            send_telegram_msg(f"📢 بلاغ جديد: {rep_txt}")
-            st.success("تم تسجيل بلاغك بنجاح.")
+            st.success("تم النشر.")
 
-# التبويب 4: اتصل بنا
+# تبويب اتصل بنا
 with tabs[3]:
-    st.subheader("📧 تواصل مع المطور")
-    un = st.text_input("الاسم:")
-    um = st.text_area("رسالتك:")
+    st.subheader("📧 اتصل بنا")
+    n = st.text_input("الاسم:")
+    m = st.text_area("الرسالة:")
     if st.button("إرسال"):
-        if un and um:
-            now = datetime.now().strftime("%Y-%m-%d %H:%M")
-            db.execute("INSERT INTO messages VALUES (?, ?, ?)", (un, um, now))
+        if n and m:
+            db.execute("INSERT INTO messages VALUES (?, ?, ?)", (n, m, datetime.now().strftime("%Y-%m-%d %H:%M")))
             db.commit()
-            send_telegram_msg(f"📩 رسالة من {un}: {um}")
-            st.success("وصلت رسالتك يا بطل!")
+            send_telegram_msg(f"📩 رسالة من {n}: {m}")
+            st.success("تم الإرسال.")
 
-# التبويب 5: الإدارة (إصلاح الخطأ وإضافة Excel)
+# تبويب الإدارة (التحقق بخطوتين عبر تليجرام)
 with tabs[4]:
-    st.subheader("🔐 لوحة التحكم الإدارية")
-    # كلمة المرور كما في صورتك
-    pw = st.text_input("كلمة المرور:", type="password", value="ayman7716")
-    if pw == "ayman7716":
-        # عرض وتحميل البلاغات
-        st.write("### 📢 بلاغات المجتمع")
-        reps = db.execute("SELECT * FROM reports ORDER BY date_fixed DESC").fetchall()
-        if reps:
-            df = pd.DataFrame(reps, columns=["البلاغ", "التاريخ"])
-            st.dataframe(df, use_container_width=True)
-            
-            output = BytesIO()
-            with pd.ExcelWriter(output, engine='xlsxwriter') as writer:
-                df.to_excel(writer, index=False)
-            st.download_button("📥 تحميل سجل البلاغات (Excel)", output.getvalue(), "reports.xlsx")
+    st.subheader("🔐 لوحة التحكم المؤمنة")
+    # مرحلة 1: كلمة المرور
+    adm_pwd = st.text_input("كلمة المرور الإدارية:", type="password")
+    
+    if adm_pwd == "ayman7716":
+        # زر لإرسال كود التحقق لتليجرام
+        if st.button("إرسال كود التحقق إلى تليجرام"):
+            v_code = str(random.randint(1000, 9999))
+            st.session_state['v_code'] = v_code
+            send_telegram_msg(f"🔐 كود الدخول لدرع أيمن هو: {v_code}")
+            st.info("تم إرسال كود التحقق لجوالك عبر تليجرام.")
         
-        st.write("---")
-        st.write("### 📩 الرسائل الواردة")
-        msgs = db.execute("SELECT * FROM messages ORDER BY date_fixed DESC").fetchall()
-        for m in msgs:
-            st.info(f"👤 {m[0]} | 🕒 {m[2]}\n\n{m[1]}")
+        # إدخال الكود
+        user_code = st.text_input("أدخل الكود المرسل لتليجرام:")
+        if user_code and user_code == st.session_state.get('v_code'):
+            st.success("✅ تم التحقق بنجاح!")
+            # عرض البيانات وتصدير Excel
+            all_reps = db.execute("SELECT * FROM reports ORDER BY dt DESC").fetchall()
+            if all_reps:
+                df = pd.DataFrame(all_reps, columns=["البلاغ", "التاريخ"])
+                st.dataframe(df)
+                
+                buf = BytesIO()
+                with pd.ExcelWriter(buf, engine='xlsxwriter') as wr:
+                    df.to_excel(wr, index=False)
+                st.download_button("📥 تحميل سجل البلاغات (Excel)", buf.getvalue(), "aiman_reports.xlsx")
