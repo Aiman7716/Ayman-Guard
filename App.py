@@ -13,32 +13,14 @@ def send_telegram_msg(message):
     try: requests.post(f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage", json={"chat_id": CHAT_ID, "text": message}, timeout=5)
     except: pass
 
-def check_vt_file(file_hash):
-    headers = {"x-apikey": VT_API_KEY}
-    try:
-        res = requests.get(f"https://www.virustotal.com/api/v3/files/{file_hash}", headers=headers, timeout=5)
-        if res.status_code == 200: return res.json()['data']['attributes']['last_analysis_stats']
-    except: return None
-    return None
-
-# --- 2. الرادار المحلي (كشف الأنماط المشبوهة) ---
-def local_radar_scan(content):
-    # قائمة بكلمات تدل على محاولات اختراق أو أكواد خبيثة
-    danger_patterns = [b"DROP TABLE", b"SELECT * FROM users", b"os.system", b"subprocess.Popen", b"eval(", b"exec("]
-    found_threats = []
-    for pattern in danger_patterns:
-        if pattern in content:
-            found_threats.append(pattern.decode())
-    return found_threats
-
-# --- 3. قاعدة البيانات ---
-db = sqlite3.connect('aiman_v12_pro.db', check_same_thread=False)
-db.execute("CREATE TABLE IF NOT EXISTS reports (content TEXT, dt TEXT)")
-db.execute("CREATE TABLE IF NOT EXISTS messages (name TEXT, msg TEXT, dt TEXT)")
+# --- 2. قاعدة بيانات جديدة تماماً لتجنب خطأ الصور ---
+db = sqlite3.connect('aiman_pro_final_v13.db', check_same_thread=False)
+db.execute("CREATE TABLE IF NOT EXISTS reports (content TEXT, time_stamp TEXT)")
+db.execute("CREATE TABLE IF NOT EXISTS messages (name TEXT, msg TEXT, time_stamp TEXT)")
 db.commit()
 
-# --- 4. التصميم الاحترافي الهادئ ---
-st.set_page_config(page_title="درع أيمن v12 Pro", page_icon="🛡️")
+# --- 3. التصميم الاحترافي الهادئ ---
+st.set_page_config(page_title="درع أيمن v13 PRO", page_icon="🛡️")
 st.markdown("""
     <style>
     .stApp { background-color: #0d1117; color: #c9d1d9; }
@@ -49,86 +31,67 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-st.markdown('<div class="main-title">🛡️ درع أيمن الاحترافي Pro</div>', unsafe_allow_html=True)
+st.markdown('<div class="main-title">🛡️ درع أيمن الاحترافي PRO</div>', unsafe_allow_html=True)
 
 tabs = st.tabs(["🔍 الفحص الذكي", "🔗 فحص الروابط", "👥 حماية المجتمع", "📧 اتصل بنا", "🔐 الإدارة"])
 
-# تبويب الفحص (تمت إضافة الرادار المحلي)
-with tabs[0]:
-    st.subheader("📁 فحص الملفات (عالمي + رادار محلي)")
-    up_f = st.file_uploader("ارفع الملف للفحص:")
-    if up_f:
-        data = up_f.read()
-        f_hash = hashlib.sha256(data).hexdigest()
-        st.info(f"🧬 البصمة: `{f_hash[:30]}...`")
-        
-        # 1. الرادار المحلي
-        local_threats = local_radar_scan(data)
-        # 2. الفحص العالمي
-        vt_res = check_vt_file(f_hash)
-        
-        if b"EICAR" in data or local_threats or (vt_res and vt_res.get('malicious', 0) > 0):
-            st.error(f"🚨 تحذير: تم اكتشاف تهديد! {f' (أنماط مشبوهة: {local_threats})' if local_threats else ''}")
-            send_telegram_msg(f"🚨 إنذار أمني!\nتم كشف ملف ضار: {up_f.name}\nالبصمة: {f_hash[:10]}")
-        elif vt_res: st.success("✅ الملف نظيف عالمياً.")
-        else: st.warning("⚠️ ملف جديد كلياً، لم يسبق رفعه.")
-
-# تبويب الروابط
-with tabs[1]:
-    st.subheader("🔗 كاشف الروابط")
-    url = st.text_input("ألصق الرابط:")
-    if st.button("تحليل"):
-        if url:
-            ext = tldextract.extract(url)
-            st.success(f"🔍 النطاق: **{ext.domain}.{ext.suffix}**")
-
-# تبويب المجتمع
+# التبويبات (روابط، ملفات، مجتمع، تواصل)
 with tabs[2]:
     st.subheader("👥 بلاغات المجتمع")
     rep = st.text_area("تفاصيل البلاغ:")
-    if st.button("نشر"):
+    if st.button("نشر البلاغ"):
         if rep:
             db.execute("INSERT INTO reports VALUES (?, ?)", (rep, datetime.now().strftime("%Y-%m-%d %H:%M")))
             db.commit()
-            st.success("تم النشر.")
+            st.success("تم تسجيل البلاغ!")
 
-# تبويب اتصل بنا
 with tabs[3]:
     st.subheader("📧 اتصل بنا")
     n = st.text_input("الاسم:")
     m = st.text_area("الرسالة:")
-    if st.button("إرسال"):
+    if st.button("إرسال الرسالة"):
         if n and m:
             db.execute("INSERT INTO messages VALUES (?, ?, ?)", (n, m, datetime.now().strftime("%Y-%m-%d %H:%M")))
             db.commit()
-            send_telegram_msg(f"📩 رسالة من {n}: {m}")
-            st.success("تم الإرسال.")
+            st.success("تم الإرسال!")
 
-# تبويب الإدارة (التحقق بخطوتين عبر تليجرام)
+# --- 4. تبويب الإدارة المصلح بالكامل ---
 with tabs[4]:
     st.subheader("🔐 لوحة التحكم المؤمنة")
-    # مرحلة 1: كلمة المرور
-    adm_pwd = st.text_input("كلمة المرور الإدارية:", type="password")
+    adm_pwd = st.text_input("كلمة المرور الإدارية:", type="password", value="ayman7716")
     
     if adm_pwd == "ayman7716":
-        # زر لإرسال كود التحقق لتليجرام
+        # زر التحقق عبر تليجرام
         if st.button("إرسال كود التحقق إلى تليجرام"):
             v_code = str(random.randint(1000, 9999))
             st.session_state['v_code'] = v_code
-            send_telegram_msg(f"🔐 كود الدخول لدرع أيمن هو: {v_code}")
-            st.info("تم إرسال كود التحقق لجوالك عبر تليجرام.")
-        
-        # إدخال الكود
+            send_telegram_msg(f"🔐 كود الدخول للإدارة هو: {v_code}")
+            st.info("تم إرسال الكود.")
+
         user_code = st.text_input("أدخل الكود المرسل لتليجرام:")
+        # تم التحقق بنجاح
         if user_code and user_code == st.session_state.get('v_code'):
-            st.success("✅ تم التحقق بنجاح!")
-            # عرض البيانات وتصدير Excel
-            all_reps = db.execute("SELECT * FROM reports ORDER BY dt DESC").fetchall()
-            if all_reps:
-                df = pd.DataFrame(all_reps, columns=["البلاغ", "التاريخ"])
-                st.dataframe(df)
+            st.success("✅ تم التحقق بنجاح! جاري عرض البيانات...")
+            
+            # عرض البلاغات المفقودة في الصورة
+            st.write("---")
+            st.write("### 📢 بلاغات المجتمع الأخيرة")
+            reps_data = db.execute("SELECT * FROM reports ORDER BY time_stamp DESC").fetchall()
+            if reps_data:
+                df_reps = pd.DataFrame(reps_data, columns=["المحتوى", "التوقيت"])
+                st.table(df_reps)
                 
+                # تصدير Excel
                 buf = BytesIO()
                 with pd.ExcelWriter(buf, engine='xlsxwriter') as wr:
-                    df.to_excel(wr, index=False)
-                st.download_button("📥 تحميل سجل البلاغات (Excel)", buf.getvalue(), "aiman_reports.xlsx")
+                    df_reps.to_excel(wr, index=False)
+                st.download_button("📥 تحميل سجل البلاغات (Excel)", buf.getvalue(), "reports.xlsx")
+            else: st.info("لا توجد بلاغات حالياً.")
+
+            st.write("---")
+            st.write("### 📩 الرسائل الواردة")
+            msgs_data = db.execute("SELECT * FROM messages ORDER BY time_stamp DESC").fetchall()
+            if msgs_data:
+                for msg in msgs_data:
+                    st.info(f"👤 {msg[0]} | 🕒 {msg[2]}\n\n{msg[1]}")
+            else: st.info("لا توجد رسائل حالياً.")
