@@ -19,7 +19,7 @@ def check_vt_file(file_hash):
         return res.json()['data']['attributes']['last_analysis_stats'] if res.status_code == 200 else None
     except: return None
 
-# --- 2. التصميم البصري المطور (v34.0 Custom Design) ---
+# --- 2. التصميم البصري (مطابق تماماً لصورة 1000566740.jpg) ---
 st.set_page_config(page_title="Ayman Guard Pro", layout="wide")
 
 st.markdown("""
@@ -28,7 +28,7 @@ st.markdown("""
     html, body, [class*="st-"] { font-family: 'Cairo', sans-serif; direction: RTL; text-align: right; }
     .stApp { background-color: #0d1117; color: #ffffff; }
 
-    /* الهيدر مع الشعار */
+    /* الهيدر الأزرق الموحد مع الشعار */
     .hero-box {
         background: linear-gradient(135deg, #1f6feb 0%, #111d2e 100%);
         padding: 30px 20px;
@@ -36,35 +36,30 @@ st.markdown("""
         text-align: center;
         margin-bottom: 25px;
         border: 1px solid #30363d;
-        box-shadow: 0 10px 20px rgba(0,0,0,0.3);
     }
-    .shield-logo {
-        font-size: 50px;
-        margin-bottom: 10px;
-        filter: drop-shadow(0 0 10px #58a6ff);
-    }
+    .shield-icon { font-size: 55px; filter: drop-shadow(0 0 10px #58a6ff); margin-bottom: 10px; }
     .hero-box h1 { color: white; font-size: 2.2rem; margin: 0; }
 
-    /* التبويبات */
+    /* تبويبات التنقل العلوية المصلحة */
     .stTabs [data-baseweb="tab-list"] {
         gap: 8px;
         background-color: #161b22;
-        padding: 8px;
+        padding: 10px;
         border-radius: 12px;
         border: 1px solid #30363d;
     }
     .stTabs [data-baseweb="tab"] {
-        height: 45px;
+        height: 50px;
         color: #8b949e !important;
         font-weight: bold;
     }
     .stTabs [aria-selected="true"] {
         background-color: #1f6feb !important;
         color: white !important;
-        border-radius: 8px !important;
+        border-radius: 10px !important;
     }
 
-    /* البطاقات */
+    /* بطاقات المحتوى */
     .content-card {
         background: #161b22;
         border: 1px solid #30363d;
@@ -73,101 +68,102 @@ st.markdown("""
         margin-top: 15px;
     }
 
-    /* الأزرار */
-    .stButton>button {
-        width: 100%;
-        border-radius: 10px;
-        height: 3.2em;
-        background-color: #1f6feb !important;
-        color: white !important;
-        border: none;
-        font-weight: bold;
-    }
-
     /* إخفاء الزوائد */
     [data-testid="stSidebar"] { display: none; }
     #MainMenu, footer, header { visibility: hidden; }
     </style>
     """, unsafe_allow_html=True)
 
-# --- 3. قاعدة البيانات ---
-conn = sqlite3.connect('ayman_security_v34.db', check_same_thread=False)
+# --- 3. إدارة قاعدة البيانات ---
+conn = sqlite3.connect('ayman_security_v35.db', check_same_thread=False)
 c = conn.cursor()
 c.execute("CREATE TABLE IF NOT EXISTS reports (content TEXT, dt TEXT)")
-c.execute("CREATE TABLE IF NOT EXISTS contact_msgs (name TEXT, email TEXT, msg TEXT, dt TEXT)")
+c.execute("CREATE TABLE IF NOT EXISTS contact_msgs (name TEXT, msg TEXT, dt TEXT)")
 conn.commit()
 
-# --- 4. واجهة المستخدم الرئيسية ---
+# --- 4. الهيكل الرئيسي للواجهة ---
 st.markdown("""
     <div class="hero-box">
-        <div class="shield-logo">🛡️</div>
+        <div class="shield-icon">🛡️</div>
         <h1>درع أيمن الأمني</h1>
-        <p>Ayman Security Shield PRO v34.0</p>
+        <p>Ayman Security Shield PRO v35.0</p>
     </div>
     """, unsafe_allow_html=True)
 
-tab1, tab2, tab3, tab4, tab5 = st.tabs(["🏠 الرئيسية", "🔍 الفحص", "👥 المجتمع", "📧 تواصل معنا", "🔐 الإدارة"])
+# تعريف التبويبات الخمسة بشكل صحيح
+tabs = st.tabs(["🏠 الرئيسية", "🔍 الفحص", "👥 المجتمع", "📧 تواصل معنا", "🔐 الإدارة"])
 
-# التبويب 1: الرئيسية
-with tab1:
+# --- التبويب 1: الرئيسية ---
+with tabs[0]:
     st.markdown('<div class="content-card">', unsafe_allow_html=True)
-    st.subheader("📊 حالة الحماية")
+    st.subheader("📊 إحصائيات الدرع")
     r_total = c.execute("SELECT COUNT(*) FROM reports").fetchone()[0]
-    st.metric("إجمالي التهديدات المرصودة", r_total)
-    st.info("نظام الدرع يعمل بكفاءة قصوى الآن.")
+    st.metric("إجمالي البلاغات المسجلة", r_total)
+    st.success("✅ جميع الأنظمة تعمل بشكل طبيعي وتحت مراقبتك.")
     st.markdown('</div>', unsafe_allow_html=True)
 
-# التبويب 2: مركز الفحص
-with tab2:
+# --- التبويب 2: مركز الفحص ---
+with tabs[1]:
     st.markdown('<div class="content-card">', unsafe_allow_html=True)
-    sub1, sub2 = st.tabs(["🔗 فحص الرابط", "📁 فحص الملف"])
-    with sub1:
-        u = st.text_input("رابط الموقع:")
-        if st.button("تحليل الرابط"):
-            if u:
-                dom = tldextract.extract(u).registered_domain
-                if dom in WHITELIST: st.success(f"✅ موثوق: {dom}")
-                else: st.warning(f"🔍 نطاق غير معروف: {dom}")
-    with sub2:
-        f = st.file_uploader("ارفع الملف المشبوه:")
-        if f and st.button("فحص بصمة الملف"):
-            h = hashlib.sha256(f.read()).hexdigest()
-            res = check_vt_file(h)
-            if res and res.get('malicious', 0) > 0: st.error("🚨 خطر اكتشاف برمجية ضارة!")
-            else: st.success("✅ الملف نظيف أمنياً.")
+    f_tabs = st.tabs(["🔗 فحص الرابط", "📁 فحص الملف"])
+    with f_tabs[0]:
+        u_in = st.text_input("ضع الرابط هنا:")
+        if st.button("تحليل الآن"):
+            if u_in:
+                domain = tldextract.extract(u_in).registered_domain
+                if domain in WHITELIST: st.success(f"✅ نطاق موثوق جداً: {domain}")
+                else: st.warning(f"🔍 نطاق غير مسجل في القائمة البيضاء: {domain}")
+    with f_tabs[1]:
+        file_up = st.file_uploader("ارفع ملف للفحص:")
+        if file_up and st.button("بدء الفحص العميق"):
+            f_hash = hashlib.sha256(file_up.read()).hexdigest()
+            res = check_vt_file(f_hash)
+            if res and res.get('malicious', 0) > 0: st.error("🚨 خطر! ملف مشبوه.")
+            else: st.success("✅ الملف نظيف برمجياً.")
     st.markdown('</div>', unsafe_allow_html=True)
 
-# التبويب 3: المجتمع
-with tab3:
+# --- التبويب 3: المجتمع ---
+with tabs[2]:
     st.markdown('<div class="content-card">', unsafe_allow_html=True)
-    st.subheader("📢 بلاغ جديد")
-    txt = st.text_area("تفاصيل الحالة:")
-    if st.button("إرسال البلاغ"):
+    st.subheader("📢 بلاغ مجتمعي جديد")
+    txt = st.text_area("تفاصيل حالة الاحتيال:")
+    if st.button("نشر البلاغ"):
         if txt:
             dt = datetime.now().strftime("%Y-%m-%d %H:%M")
             c.execute("INSERT INTO reports VALUES (?, ?)", (txt, dt))
             conn.commit()
-            send_telegram(f"📢 بلاغ مجتمعي: {txt}")
-            st.success("تم تسجيل البلاغ بنجاح.")
+            send_telegram(f"📢 بلاغ جديد: {txt}")
+            st.success("تم تسجيل البلاغ وإرساله للقنوات الأمنية.")
     st.markdown('</div>', unsafe_allow_html=True)
 
-# التبويب 4: تواصل معنا (الجديد)
-with tab4:
+# --- التبويب 4: تواصل معنا ---
+with tabs[3]:
     st.markdown('<div class="content-card">', unsafe_allow_html=True)
-    st.subheader("📧 اتصل بإدارة الدرع")
-    c_name = st.text_input("الاسم الكامل:")
-    c_email = st.text_input("البريد الإلكتروني أو رقم الهاتف:")
-    c_msg = st.text_area("رسالتك أو استفسارك:")
-    if st.button("إرسال الرسالة للإدارة"):
-        if c_name and c_msg:
+    st.subheader("📧 أرسل رسالة للإدارة")
+    name = st.text_input("اسمك:")
+    msg = st.text_area("نص الرسالة:")
+    if st.button("إرسال"):
+        if name and msg:
             dt = datetime.now().strftime("%Y-%m-%d %H:%M")
-            c.execute("INSERT INTO contact_msgs VALUES (?, ?, ?, ?)", (c_name, c_email, c_msg, dt))
+            c.execute("INSERT INTO contact_msgs VALUES (?, ?, ?)", (name, msg, dt))
             conn.commit()
-            send_telegram(f"📩 رسالة جديدة من {c_name}:\n{c_msg}")
-            st.success("شكراً لتواصلك يا أيمن، تم استلام رسالتك.")
-        else: st.error("يرجى ملء الاسم والرسالة.")
+            send_telegram(f"📩 رسالة من {name}: {msg}")
+            st.success("شكراً يا أيمن، تم استلام رسالتك بنجاح.")
     st.markdown('</div>', unsafe_allow_html=True)
 
-# التبويب 5: الإدارة
-with tab4: # تم تعديله ليكون tab5 برمجياً
-    pass # سيظهر المحتوى عند تفعيله من الإعدادات
+# --- التبويب 5: الإدارة (الذي تم إصلاحه) ---
+with tabs[4]:
+    st.markdown('<div class="content-card">', unsafe_allow_html=True)
+    st.subheader("🔐 لوحة التحكم الخاصة بالمسؤول")
+    admin_pw = st.text_input("كلمة مرور المسؤول:", type="password")
+    if admin_pw == "ayman7716":
+        st.write("📋 سجل البلاغات:")
+        df = pd.read_sql_query("SELECT * FROM reports ORDER BY dt DESC", conn)
+        st.dataframe(df, use_container_width=True)
+        
+        st.write("✉️ رسائل التواصل:")
+        df_msgs = pd.read_sql_query("SELECT * FROM contact_msgs ORDER BY dt DESC", conn)
+        st.dataframe(df_msgs, use_container_width=True)
+    elif admin_pw:
+        st.error("❌ كلمة المرور غير صحيحة")
+    st.markdown('</div>', unsafe_allow_html=True)
