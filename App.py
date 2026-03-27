@@ -5,92 +5,101 @@ import sqlite3
 import requests
 from datetime import datetime
 
-# --- 1. التصميم الداكن الصارم (منع اللون الأبيض تماماً) ---
+# --- 1. التصميم الداكن (إعدام اللون الأبيض نهائياً) ---
 st.set_page_config(page_title="Ayman Guard Pro", layout="wide")
 
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
     html, body, [class*="st-"] { font-family: 'Cairo', sans-serif; direction: RTL; text-align: right; }
-    .stApp { background-color: #0b0e14; color: #ffffff; }
+    .stApp { background-color: #0d1117; color: #ffffff; }
     
-    /* تغيير منطقة الرفع للون الكحلي الغامق جداً */
+    /* صبغ منطقة الرفع باللون الكحلي الداكن جداً */
     section[data-testid="stFileUploadDropzone"] {
-        background-color: #0b0e14 !important;
+        background-color: #0d1117 !important;
         border: 2px solid #1f6feb !important;
-        color: #ffffff !important;
-        border-radius: 10px;
+        border-radius: 12px;
     }
     
-    /* توحيد الأزرار باللون الأزرق النيلي */
+    /* توحيد الأزرار باللون الأزرق النيلي الملكي */
     div.stButton > button, .stFormSubmitButton > button { 
         background-color: #1f6feb !important; 
         color: white !important; 
-        border-radius: 8px !important;
-        border: none !important;
+        border-radius: 10px !important;
+        border: 1px solid #388bfd !important;
+        font-weight: bold !important;
     }
-    
-    .hero-banner { background: #161b22; padding: 20px; border-radius: 15px; text-align: center; border: 1px solid #1f6feb; margin-bottom: 20px; }
+
+    .info-box { background: #161b22; padding: 20px; border-radius: 15px; border: 1px solid #30363d; margin-bottom: 20px; }
+    .code-view { background: #000; color: #00ff00; padding: 15px; border-radius: 10px; font-family: monospace; overflow-x: auto; }
     </style>
     """, unsafe_allow_html=True)
 
-# --- 2. إدارة البيانات ---
-DB_NAME = "ayman_stable.db"
-def init_db():
-    conn = sqlite3.connect(DB_NAME, check_same_thread=False)
-    conn.execute('CREATE TABLE IF NOT EXISTS messages (id INTEGER PRIMARY KEY AUTOINCREMENT, sender TEXT, content TEXT, date TEXT)')
-    conn.commit()
-    return conn
-db_conn = init_db()
-
+# --- 2. المحرك الخلفي ---
+DB_NAME = "ayman_core_final.db"
 TOKEN = "8124974140:AAE3-UgIpkAKjcUyJrT3YWV99sug07WtniE"
 CHAT_ID = "906233240"
 
-def send_tele(text):
-    try: requests.post(f"https://api.telegram.org/bot{TOKEN}/sendMessage", data={"chat_id": CHAT_ID, "text": text, "parse_mode": "HTML"}, timeout=5)
+def init_db():
+    conn = sqlite3.connect(DB_NAME, check_same_thread=False)
+    conn.execute('CREATE TABLE IF NOT EXISTS msgs (id INTEGER PRIMARY KEY AUTOINCREMENT, name TEXT, body TEXT, dt TEXT)')
+    conn.commit()
+    return conn
+
+def notify_ayman(txt):
+    try: requests.post(f"https://api.telegram.org/bot{TOKEN}/sendMessage", data={"chat_id": CHAT_ID, "text": txt, "parse_mode": "HTML"}, timeout=5)
     except: pass
 
-# --- 3. الواجهة المبسطة ---
-st.markdown('<div class="hero-banner"><h1>🛡️ درع أيمن</h1><p>نسخة مستقرة وخالية من الأخطاء البصرية</p></div>', unsafe_allow_html=True)
+db = init_db()
 
-tabs = st.tabs(["🔍 فحص", "🎬 تحميل", "📧 تواصل", "🔐 إدارة"])
+# --- 3. الواجهة ---
+st.markdown('<div class="info-box" style="text-align:center;"><h1>🛡️ درع أيمن الأمني</h1><p>الإصدار المستقر v400.0</p></div>', unsafe_allow_html=True)
 
-with tabs[0]: # الفحص (معالجة الملفات كبيانات خام لمنع الخطأ الأحمر)
-    u_file = st.file_uploader("اختر ملفاً للفحص:", type=None)
-    if st.button("بدء الفحص"):
+tabs = st.tabs(["🔍 الفحص الآمن", "🎬 المحمل الذكي", "📧 تواصل معنا", "🔐 الإدارة"])
+
+# --- التبويبات تعمل بمسارات معزولة لمنع الأخطاء ---
+
+with tabs[0]: # فحص الملفات (علاج الشاشة الحمراء)
+    st.write("### 📁 فحص الملفات والنصوص")
+    u_file = st.file_uploader("ارفع أي ملف هنا (APK, TXT, etc):", type=None)
+    if st.button("🚀 فحص الآن"):
         if u_file:
-            st.info(f"تم استلام الملف: {u_file.name}")
-            # قراءة البيانات كـ "Bytes" لمنع خطأ الـ Unicode نهائياً
-            data_preview = str(u_file.getvalue()[:500]) 
-            st.code(data_preview, language="text")
-            send_tele(f"🔍 فحص ملف: {u_file.name}")
-        else: st.error("يرجى اختيار ملف.")
+            st.success(f"تم استقبال الملف: {u_file.name}")
+            # القراءة كبيانات خام (Hex) لمنع خطأ الـ Unicode نهائياً
+            raw_data = u_file.getvalue()
+            preview = str(raw_data[:300]) # عرض أول 300 حرف فقط كبيانات خام
+            st.markdown("🔍 **معاينة البيانات الخام:**")
+            st.markdown(f'<div class="code-view">{preview}</div>', unsafe_allow_html=True)
+            notify_ayman(f"🔍 <b>فحص ملف:</b> {u_file.name}")
+        else: st.error("يرجى رفع ملف أولاً.")
 
-with tabs[1]: # التحميل
+with tabs[1]: # تحميل الفيديو
     v_url = st.text_input("رابط الفيديو:")
-    if st.button("تحميل الآن"):
+    if st.button("🎬 جلب الفيديو"):
         if v_url:
-            with st.spinner("جاري العمل..."):
+            with st.spinner("جاري الجلب..."):
                 try:
-                    with yt_dlp.YoutubeDL({'format':'best','outtmpl':'v.mp4'}) as ydl: ydl.download([v_url])
-                    st.video("v.mp4")
-                    os.remove("v.mp4")
-                except: st.error("تعذر التحميل.")
+                    with yt_dlp.YoutubeDL({'format':'best','outtmpl':'ayman.mp4','quiet':True}) as ydl: ydl.download([v_url])
+                    with open("ayman.mp4", "rb") as f: st.video(f.read())
+                    os.remove("ayman.mp4")
+                except: st.error("عذراً، الرابط غير مدعوم أو محمي.")
 
 with tabs[2]: # تواصل معنا
-    with st.form("c_form", clear_on_submit=True):
+    with st.form("contact", clear_on_submit=True):
         name = st.text_input("الاسم:")
         msg = st.text_area("الرسالة:")
         if st.form_submit_button("إرسال"):
             if name and msg:
-                db_conn.execute("INSERT INTO messages (sender, content, date) VALUES (?, ?, ?)", (name, msg, datetime.now().strftime("%Y-%m-%d")))
-                db_conn.commit()
-                st.success("تم الإرسال.")
-                send_tele(f"📧 رسالة من: {name}\n{msg}")
+                now = datetime.now().strftime("%Y-%m-%d %H:%M")
+                db.execute("INSERT INTO msgs (name, body, dt) VALUES (?, ?, ?)", (name, msg, now))
+                db.commit()
+                st.success("تم الإرسال بنجاح.")
+                notify_ayman(f"📧 <b>رسالة من:</b> {name}\n{msg}")
 
 with tabs[3]: # الإدارة
     pw = st.text_input("كلمة السر:", type="password")
     if pw == "ayman7716":
-        st.subheader("الرسائل الواردة")
-        msgs = db_conn.execute("SELECT * FROM messages ORDER BY id DESC").fetchall()
-        for m in msgs: st.write(f"**{m[1]}**: {m[2]}")
+        st.subheader("📩 الرسائل المستلمة")
+        rows = db.execute("SELECT * FROM msgs ORDER BY id DESC").fetchall()
+        for r in rows:
+            st.markdown(f"**من: {r[1]}** | {r[3]}\n\n{r[2]}\n---")
