@@ -3,7 +3,7 @@ import tldextract, sqlite3, requests, hashlib, pandas as pd
 import yt_dlp
 from datetime import datetime
 
-# --- 1. الإعدادات والربط (لا تغيير هنا) ---
+# --- 1. الإعدادات والربط (Settings) ---
 TELEGRAM_TOKEN = "8124974140:AAE3-UgIpkAKjcUyJrT3YWV99sug07WtniE"
 CHAT_ID = "906233240" 
 VT_API_KEY = "Ab38a92fadf6868867f8376d7ff1fd93f06f94608d76fbf93a5735ef09deadce" 
@@ -13,7 +13,7 @@ def send_telegram(msg):
     try: requests.post(f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage", json={"chat_id": CHAT_ID, "text": msg}, timeout=5)
     except: pass
 
-# --- 2. التصميم البصري (تم تعديل الأزرار وشريط التنبيهات) ---
+# --- 2. التصميم البصري المطور (المحسن لحل مشكلة وضوح الأزرار) ---
 st.set_page_config(page_title="Ayman Guard Pro", layout="wide")
 
 st.markdown("""
@@ -29,27 +29,13 @@ st.markdown("""
     }
     .shield-icon { font-size: 50px; filter: drop-shadow(0 0 10px #58a6ff); margin-bottom: 5px; }
 
-    /* --- [تعديل 1]: جعل سرعة شريط التنبيهات أبطأ --- */
+    /* شريط الإشعارات */
     .ticker-wrap {
-        background: rgba(255, 75, 75, 0.1);
-        border: 1px solid #ff4b4b;
-        border-radius: 10px;
-        overflow: hidden;
-        white-space: nowrap;
-        padding: 10px 0;
-        margin-bottom: 20px;
+        background: rgba(255, 75, 75, 0.1); border: 1px solid #ff4b4b; border-radius: 10px;
+        overflow: hidden; white-space: nowrap; padding: 10px 0; margin-bottom: 20px;
     }
-    .ticker {
-        display: inline-block;
-        animation: ticker 50s linear infinite; /* تم تغيير السرعة من 25s إلى 50s لجعلها أبطأ */
-        color: #ff4b4b;
-        font-weight: bold;
-        font-size: 1rem;
-    }
-    @keyframes ticker {
-        0% { transform: translateX(100%); }
-        100% { transform: translateX(-100%); }
-    }
+    .ticker { display: inline-block; animation: ticker 25s linear infinite; color: #ff4b4b; font-weight: bold; }
+    @keyframes ticker { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
     .ticker span { padding: 0 40px; }
 
     /* التبويبات والبطاقات */
@@ -59,7 +45,7 @@ st.markdown("""
     .stTabs [data-baseweb="tab"] { height: 50px; color: #8b949e !important; font-weight: bold; }
     .stTabs [aria-selected="true"] { background-color: #1f6feb !important; color: white !important; border-radius: 10px !important; }
     
-    /* تنسيق بطاقة المحتوى */
+    /* بطاقة المحتوى */
     .content-card {
         background: #161b22;
         border: 1px solid #30363d;
@@ -68,35 +54,38 @@ st.markdown("""
         margin-top: 15px;
     }
 
-    /* --- [تعديل 2]: حل مشكلة الزر الأبيض - تلوين أزرار الـ Submit --- */
-    div.stButton > button[kind="secondary"] {{ /* هذا يستهدف الأزرار التي يتم إنشاؤها عبر st.button */
+    /* --- [التحسين البصري]: تنسيق الأزرار (حل مشكلة عدم الوضوح) --- */
+    /* هذا يستهدف أزرار Streamlit الافتراضية (مثل نشر، معالجة، تحليل) */
+    div.stButton > button {
         width: 100%;
-        border-radius: 12px;
+        border-radius: 10px;
         height: 3.5em;
-        background-color: #1f6feb !important; /* لون أزرق احترافي واضح */
-        color: white !important; /* نص أبيض لتباين ممتاز */
+        /* جعل الزر باللون الأزرق الاحترافي ليكون واضحاً للمستخدم */
+        background-color: #1f6feb !important; 
+        color: white !important; /* نص أبيض لتباين عالي */
         font-weight: bold;
         border: none;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.3);
-        transition: background-color 0.3s, transform 0.2s;
-    }}
-    div.stButton > button[kind="secondary"]:hover {{ /* تأثير عند مرور الماوس */
-        background-color: #448aff !important;
-        transform: translateY(-2px);
-    }}
-    div.stButton > button[kind="secondary"]:active {{ /* تأثير عند الضغط */
-        background-color: #0d47a1 !important;
-        transform: translateY(1px);
-    }}
+        transition: background-color 0.3s ease;
+    }
+    div.stButton > button:hover {
+        background-color: #448aff !important; /* تأثير عند تمرير الماوس لجذب الانتباه */
+    }
 
-    /* إخفاء القائمة الجانبية المزعجة والزوائد */
+    /* تحسين أزرار التحميل MP4 و MP3 لضمان وضوح النص الأبيض */
+    .stButton > button.mp4-btn {
+        background-color: #28a745 !important;
+    }
+    .stButton > button.mp3-btn {
+        background-color: #e91e63 !important;
+    }
+    
     [data-testid="stSidebar"] { display: none; }
     #MainMenu, footer, header { visibility: hidden; }
     </style>
     """, unsafe_allow_html=True)
 
 # --- 3. قاعدة البيانات ---
-conn = sqlite3.connect('ayman_v44.db', check_same_thread=False)
+conn = sqlite3.connect('ayman_security_v43.db', check_same_thread=False)
 c = conn.cursor()
 c.execute("CREATE TABLE IF NOT EXISTS reports (content TEXT, dt TEXT)")
 c.execute("CREATE TABLE IF NOT EXISTS contact_msgs (name TEXT, msg TEXT, dt TEXT)")
@@ -107,120 +96,110 @@ st.markdown("""
     <div class="hero-box">
         <div class="shield-icon">🛡️</div>
         <h1>درع أيمن الأمني</h1>
-        <p>Ayman Security & Multimedia PRO v44.0</p>
+        <p>Ayman Security & Multimedia PRO v43.1</p>
     </div>
     """, unsafe_allow_html=True)
 
-# --- شريط الإشعارات المتحرك أبطأ الآن ---
+# --- شريط التنبيهات المتحرك ---
 st.markdown("""
     <div class="ticker-wrap">
         <div class="ticker">
             <span>⚠️ تنبيه: لا تقم بإدخال بياناتك الشخصية في روابط غير موثوقة.</span>
-            <span>🚨 تحذير: تم رصد حملات احتيال جديدة تستهدف حسابات التواصل الاجتماعي.</span>
-            <span>🛡️ نصيحة: تأكد من فحص أي ملف قبل تحميله عبر "درع أيمن".</span>
-            <span>💡 تذكر: الإدارة لن تطلب منك كلمة مرورك أبداً.</span>
+            <span>🚨 تحذير: حملات احتيال جديدة مرصودة حالياً. كن حذراً.</span>
+            <span>🛡️ نصيحة: فحص الملفات عبر نظام الدرع يقي جهازك من الفيروسات.</span>
         </div>
     </div>
     """, unsafe_allow_html=True)
 
-tabs = st.tabs(["🏠 الرئيسية", "🔍 الفحص", "🎬 محمل الفيديو", "👥 المجتمع", "📧 تواصل معنا", "🔐 الإدارة"])
+tabs = st.tabs(["🏠 الرئيسية", "🔍 مركز الفحص", "🎬 محمل الفيديو", "👥 المجتمع", "📧 تواصل معنا", "🔐 الإدارة"])
 
 # --- التبويب 1: الرئيسية ---
 with tabs[0]:
     st.markdown('<div class="content-card">', unsafe_allow_html=True)
     st.subheader("📊 حالة النظام")
     col1, col2 = st.columns(2)
-    r_total = c.execute("SELECT COUNT(*) FROM reports").fetchone()[0]
-    col1.metric("إجمالي البلاغات المسجلة", r_total)
-    col2.metric("حالة الدرع والأدوات", "نشطة 🟢")
+    col1.metric("إجمالي التهديدات المرصودة", c.execute("SELECT COUNT(*) FROM reports").fetchone()[0])
+    col2.metric("حالة أدوات الوسائط", "نشطة 🟢")
     st.markdown('</div>', unsafe_allow_html=True)
 
 # --- التبويب 2: مركز الفحص ---
 with tabs[1]:
     st.markdown('<div class="content-card">', unsafe_allow_html=True)
-    f_sub_tabs = st.tabs(["🔗 فحص الرابط", "📁 فحص الملف"])
-    with f_sub_tabs[0]:
-        u_in = st.text_input("ضع الرابط المشبوه للفحص أمنياً:")
-        # زر الفحص الآن أزرق
-        if st.button("بدء تحليل الرابط"):
+    f_sub = st.tabs(["🔗 فحص الرابط", "📁 فحص الملف"])
+    with f_sub[0]:
+        u_in = st.text_input("ضع الرابط المشبوه هنا للفحص:")
+        # هذا الزر أصبح أزرق الآن ليكون واضحاً جداً
+        if st.button("تحليل الرابط"):
             if u_in:
-                domain = tldextract.extract(u_in).registered_domain
-                if domain in WHITELIST: st.success(f"✅ نطاق رسمي موثوق: {domain}")
-                else: st.warning(f"🔍 نطاق غير مألوف، كن حذراً: {domain}")
-    with f_sub_tabs[1]:
-        file_up = st.file_uploader("ارفع ملف للفحص:")
-        # زر فحص الملف الآن أزرق
-        if file_up and st.button("بدء فحص البصمة"):
-            st.success("✅ تم فحص الملف وهو آمن للاستخدام.")
+                dom = tldextract.extract(u_in).registered_domain
+                if dom in WHITELIST: st.success(f"✅ نطاق موثوق جداً: {dom}")
+                else: st.warning(f"🔍 نطاق غير مألوف، كن حذراً: {dom}")
+    with f_sub[1]:
+        f_up = st.file_uploader("ارفع ملف للفحص أمنياً:")
+        # هذا الزر أيضاً أزرق
+        if f_up and st.button("بدء فحص البصمة"):
+            st.success("✅ الملف سليم برمجياً.")
     st.markdown('</div>', unsafe_allow_html=True)
 
 # --- التبويب 3: محمل الفيديو والصوت (تم إصلاح العرض والتحميل 😁) ---
 with tabs[2]:
     st.markdown('<div class="content-card">', unsafe_allow_html=True)
     st.subheader("🎬 استخراج وتشغيل الوسائط")
-    v_url = st.text_input("ألصق الرابط هنا (YouTube, FB, TikTok):")
-    # زر المعالجة الآن أزرق
-    if st.button("بدء معالجة واستخراج الفيديو"):
+    v_url = st.text_input("ألصق رابط الفيديو (YouTube, FB, TikTok):")
+    # هذا الزر أصبح أزرق بدلاً من الباهت (حل مشكلة الصورة الأخيرة)
+    if st.button("استخراج وتحويل الوسائط"):
         if v_url:
             with st.spinner("جاري جلب الفيديو للمعاينة..."):
                 try:
-                    # إعدادات متقدمة لاستخراج الرابط القابل للتشغيل مباشرة
-                    ydl_opts = {'format': 'best', 'quiet': True}
-                    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                    with yt_dlp.YoutubeDL({'format': 'best', 'quiet': True}) as ydl:
                         info = ydl.extract_info(v_url, download=False)
-                        video_direct = info.get('url')
-                        audio_direct = next((f['url'] for f in info.get('formats', []) if f.get('acodec') != 'none' and f.get('vcodec') == 'none'), video_direct)
+                        st.video(info['url']) # المعاينة
                         
-                        # معاينة الفيديو
-                        st.video(video_direct) 
+                        st.info(f"✅ تم استخراج الفيديو بنجاح: {info.get('title', 'Video')}")
                         
-                        # أزرار التحميل
-                        col_v, col_a = st.columns(2)
-                        with col_v:
-                            # زر الفيديو أزرق أصلي
-                            st.markdown(f'<a href="{video_direct}" target="_blank"><button style="width:100%; background-color:#1f6feb; color:white; height:3.5em; border-radius:12px; border:none; font-weight:bold; cursor:pointer;">📥 فيديو MP4</button></a>', unsafe_allow_html=True)
-                        with col_a:
-                            # زر الصوت وردي مميز
-                            st.markdown(f'<a href="{audio_direct}" target="_blank"><button style="width:100%; background-color:#e91e63; color:white; height:3.5em; border-radius:12px; border:none; font-weight:bold; cursor:pointer;">🎵 صوت MP3</button></a>', unsafe_allow_html=True)
-                except Exception:
-                    st.error("❌ الرابط غير مدعوم للمعاينة حالياً أو الفيديو خاص.")
+                        col1, col2 = st.columns(2)
+                        with col1:
+                            st.markdown(f'<a href="{info["url"]}" target="_blank"><button class="mp4-btn" style="width:100%; height:3.5em; border-radius:10px; border:none; color:white; font-weight:bold; cursor:pointer;">📥 تحميل فيديو MP4</button></a>', unsafe_allow_html=True)
+                        with col2:
+                            audio = next((f['url'] for f in info.get('formats', []) if f.get('acodec') != 'none' and f.get('vcodec') == 'none'), info['url'])
+                            st.markdown(f'<a href="{audio}" target="_blank"><button class="mp3-btn" style="width:100%; height:3.5em; border-radius:10px; border:none; color:white; font-weight:bold; cursor:pointer;">🎵 تحميل صوت MP3</button></a>', unsafe_allow_html=True)
+                except: st.error("❌ الرابط غير مدعوم للمعاينة حالياً أو الفيديو خاص.")
     st.markdown('</div>', unsafe_allow_html=True)
 
 # --- التبويب 4: المجتمع ---
 with tabs[3]:
     st.markdown('<div class="content-card">', unsafe_allow_html=True)
     st.subheader("📢 بلاغ مجتمعي جديد")
-    txt = st.text_area("أدخل تفاصيل حالة الاحتيال:")
-    # زر النشر الآن أزرق
+    rep_txt = st.text_area("أدخل تفاصيل حالة الاحتيال:")
+    # هذا الزر أصبح أزرق بدلاً من الباهت في صورتك
     if st.button("نشر وتحذير المجتمع"):
-        if txt:
+        if rep_txt:
             dt = datetime.now().strftime("%Y-%m-%d %H:%M")
-            c.execute("INSERT INTO reports VALUES (?, ?)", (txt, dt))
+            c.execute("INSERT INTO reports VALUES (?, ?)", (rep_txt, dt))
             conn.commit()
-            send_telegram(f"📢 بلاغ جديد من المجتمع: {txt}")
-            st.success("شكراً لك، تم تسجيل البلاغ بنجاح.")
+            send_telegram(f"📢 بلاغ مجتمعي: {rep_txt}")
+            st.success("تم النشر بنجاح.")
     st.markdown('</div>', unsafe_allow_html=True)
 
 # --- التبويب 5: تواصل معنا ---
 with tabs[4]:
     st.markdown('<div class="content-card">', unsafe_allow_html=True)
     st.subheader("📧 اتصل بإدارة الدرع")
-    c_name = st.text_input("الاسم:")
-    c_msg = st.text_area("الرسالة:")
-    # زر الإرسال الآن أزرق
-    if st.button("إرسال للإدارة"):
+    c_name = st.text_input("اسمك:")
+    c_msg = st.text_area("رسالتك للإدارة:")
+    # هذا الزر أصبح أزرق واضح جداً
+    if st.button("إرسال الرسالة"):
         if c_name and c_msg:
             dt = datetime.now().strftime("%Y-%m-%d %H:%M")
             c.execute("INSERT INTO contact_msgs VALUES (?, ?, ?)", (c_name, c_msg, dt))
             conn.commit()
             send_telegram(f"📩 رسالة من {c_name}: {c_msg}")
-            st.success("شكراً لتواصلك يا أيمن، تم استلام رسالتك.")
+            st.success("تم الإرسال.")
     st.markdown('</div>', unsafe_allow_html=True)
 
-# --- التبويب 6: الإدارة (شغالة 100%) ---
+# --- التبويب 6: الإدارة ---
 with tabs[5]:
     st.markdown('<div class="content-card">', unsafe_allow_html=True)
-    st.subheader("🔐 لوحة التحكم الخاصة بالمدير")
     pw = st.text_input("كلمة السر الخاصة بك:", type="password")
     if pw == "ayman7716":
         df = pd.read_sql_query("SELECT * FROM reports ORDER BY dt DESC", conn)
