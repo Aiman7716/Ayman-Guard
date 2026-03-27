@@ -77,7 +77,47 @@ def tab_scanner():
     st.markdown('<div class="content-card">', unsafe_allow_html=True)
     st.subheader("🔍 فحص الروابط والملفات")
     f_mode = st.radio("اختر نوع الفحص:", ["فحص رابط 🔗", "فحص ملف 📁"], horizontal=True)
-    
+
+    # --- بداية ميزة المعاينة الآمنة ---
+def get_site_preview(url):
+    try:
+        # إرسال طلب للموقع لجلب البيانات في الخلفية
+        headers = {'User-Agent': 'Mozilla/5.0'}
+        response = requests.get(url, headers=headers, timeout=5)
+        soup = BeautifulSoup(response.text, 'html.parser')
+        
+        # استخراج العنوان والوصف
+        title = soup.title.string if soup.title else "عنوان غير معروف"
+        description = soup.find('meta', attrs={'name': 'description'})
+        description = description['content'] if description else "لا يوجد وصف مختصر متاح لهذه الصفحة."
+        
+        return {"title": title, "desc": description}
+    except Exception as e:
+        return None
+
+# واجهة المعاينة داخل التبويب
+st.markdown("### 🌐 معاينة الرابط قبل الدخول")
+preview_url = st.text_input("ألصق الرابط هنا لرؤية محتواه:")
+
+if st.button("👁️ عرض معاينة الصفحة"):
+    if preview_url:
+        with st.spinner("جاري فحص محتوى الصفحة..."):
+            data = get_site_preview(preview_url)
+            if data:
+                st.markdown(f"""
+                <div style="background: #1c2128; border: 1px solid #1f6feb; padding: 15px; border-radius: 12px;">
+                    <h4 style="color: #58a6ff; margin-bottom: 5px;">{data['title']}</h4>
+                    <p style="color: #8b949e; font-size: 0.9em;">{data['desc']}</p>
+                    <hr style="border: 0.1px solid #30363d;">
+                    <p style="color: #3fb950; font-size: 0.8em; font-weight: bold;">✅ حالة الرابط: تمت قراءته برمجياً بنجاح</p>
+                </div>
+                """, unsafe_allow_html=True)
+                # إشعار التليجرام (اختياري)
+                send_tele(f"🔍 معاينة رابط آمنة: {preview_url}")
+            else:
+                st.error("تعذر جلب بيانات هذا الموقع. قد يكون محمياً أو الرابط غير صحيح.")
+# --- نهاية ميزة المعاينة الآمنة ---
+
     if f_mode == "فحص رابط 🔗":
         url_input = st.text_input("أدخل الرابط المراد تحليله:")
         if st.button("تحليل الرابط"):
