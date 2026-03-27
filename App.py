@@ -60,10 +60,10 @@ tabs = st.tabs(["🏠 الرئيسية", "🔍 الفحص والمعاينة", "
 
 # 1. الرئيسية
 with tabs[0]:
-    st.markdown("<div style='text-align:center;'><h2>مرحباً بك يا أيمن</h2><p>النظام محمي ومراقب على مدار الساعة.</p></div>", unsafe_allow_html=True)
+    st.markdown("<div style='text-align:center;'><h2>مرحباً ايها الزائر</h2><p>النظام محمي ومراقب على مدار الساعة.</p></div>", unsafe_allow_html=True)
     c1, c2, c3 = st.columns(3)
     c1.metric("حالة الدرع", "نشط ✅")
-    c2.metric("التنبيهات", "تليجرام 📲")
+    c2.metric("التنبيهات", "نشطة 📲")
     c3.metric("الاستقرار", "100% ✨")
 
 # 2. الفحص والمعاينة (بدون أخطاء)
