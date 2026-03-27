@@ -113,7 +113,12 @@ if st.button("👁️ عرض معاينة الصفحة"):
                 </div>
                 """, unsafe_allow_html=True)
                 # إشعار التليجرام (اختياري)
-                                send_to_telegram(f"🔍 معاينة رابط آمنة: {preview_url}")
+                                        # --- تأكد أن هذه الأسطر تبدأ بنفس مستوى السطر الذي فوقها ---
+        st.markdown("", unsafe_allow_html=True) 
+        # إشعار التليجرام (اختياري)
+        send_to_telegram(f"🔍 معاينة رابط آمنة: {preview_url}")
+    else:
+        st.error("تعذر جلب بيانات هذا الموقع...")
 
             else:
                 st.error("تعذر جلب بيانات هذا الموقع. قد يكون محمياً أو الرابط غير صحيح.")
