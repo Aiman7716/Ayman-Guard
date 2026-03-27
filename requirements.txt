@@ -3,3 +3,4 @@ pandas
 requests
 tldextract
 xlsxwriter
+yt-dlp
