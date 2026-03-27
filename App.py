@@ -3,11 +3,7 @@ import requests
 import sqlite3
 from datetime import datetime
 
-# --- 1. الإعدادات والربط ---
-TELEGRAM_TOKEN = "8124974140:AAE3-UgIpkAKjcUyJrT3YWV99sug07WtniE"
-CHAT_ID = "906233240"
-
-# --- 2. التصميم البصري (كحلي نيلي فخم) ---
+# --- 1. إعدادات الهوية البصرية (توحيد الكحلي النيلي) ---
 st.set_page_config(page_title="Ayman Guard Pro", layout="wide")
 
 st.markdown("""
@@ -16,68 +12,90 @@ st.markdown("""
     html, body, [class*="st-"] { font-family: 'Cairo', sans-serif; direction: RTL; text-align: right; }
     .stApp { background-color: #0d1117; color: #ffffff; }
 
+    /* الهيدر الاحترافي */
     .hero-box {
         background: linear-gradient(135deg, #1f6feb 0%, #111d2e 100%);
-        padding: 25px; border-radius: 20px; text-align: center; border: 1px solid #30363d; margin-bottom: 10px;
+        padding: 25px; border-radius: 20px; text-align: center; border: 1px solid #30363d; margin-bottom: 20px;
     }
 
     /* توحيد الأزرار للون الكحلي النيلي الواضح */
-    div.stButton > button, .download-link {
+    div.stButton > button, .dl-link {
         width: 100% !important; background-color: #1f6feb !important; color: white !important;
         border-radius: 12px !important; height: 3.8em !important; font-weight: bold !important; 
         border: none !important; display: flex; align-items: center; justify-content: center;
-        text-decoration: none; font-size: 1.1rem;
+        text-decoration: none; font-size: 1.1rem; cursor: pointer;
     }
-
+    
     .content-card { background: #161b22; border: 1px solid #30363d; border-radius: 15px; padding: 25px; margin-top: 15px; }
+    
+    /* شريط التبويبات المتجاوب مع الجوال */
+    .stTabs [data-baseweb="tab-list"] { background-color: #161b22; padding: 10px; border-radius: 12px; }
+    .stTabs [aria-selected="true"] { background-color: #1f6feb !important; color: white !important; border-radius: 10px !important; }
     </style>
     """, unsafe_allow_html=True)
 
-# --- 3. الهيكل الرئيسي ---
-st.markdown('<div class="hero-box"><h1>🛡️ درع أيمن الأمني</h1><p>نسخة التحميل المباشر v52.0</p></div>', unsafe_allow_html=True)
+# --- 2. إدارة البيانات (البلاغات والرسائل) ---
+conn = sqlite3.connect('ayman_pro_v53.db', check_same_thread=False)
+c = conn.cursor()
+c.execute("CREATE TABLE IF NOT EXISTS reports (msg TEXT, dt TEXT)")
+c.execute("CREATE TABLE IF NOT EXISTS contact (name TEXT, msg TEXT, dt TEXT)")
+conn.commit()
 
-tabs = st.tabs(["🎬 محمل الفيديو", "🔍 الفحص", "👥 المجتمع", "📧 تواصل", "🔐 الإدارة"])
+# --- 3. الهيكل الرئيسي للتطبيق ---
+st.markdown('<div class="hero-box"><h1>🛡️ درع أيمن الأمني</h1><p>نسخة الحل الذكي v53.0</p></div>', unsafe_allow_html=True)
 
-# --- التبويب: محمل الفيديو (الحل الذي يتجاوز خطأ 403) ---
-with tabs[0]:
+# استعادة التبويبات الستة كاملة كما في صورك
+tabs = st.tabs(["🏠 الرئيسية", "🔍 الفحص", "🎬 محمل الفيديو", "👥 المجتمع", "📧 تواصل معنا", "🔐 الإدارة"])
+
+# --- تبويب محمل الفيديو (تم إصلاح التحميل المباشر) ---
+with tabs[2]:
     st.markdown('<div class="content-card">', unsafe_allow_html=True)
-    st.subheader("🎬 استخراج الوسائط (بدون حظر)")
-    v_url = st.text_input("ألصق رابط الفيديو هنا:")
+    st.subheader("🎬 محمل الوسائط المتطور")
+    v_url = st.text_input("ألصق رابط الفيديو هنا (TikTok, FB, YT):")
     
-    if st.button("استخراج الفيديو الآن"):
+    if st.button("تحضير رابط التحميل"):
         if v_url:
-            with st.spinner("جاري كسر الحماية وجلب الملف..."):
+            with st.spinner("جاري تجاوز حظر الموقع المضيف..."):
+                # استخدام محرك خارجي (SnapTik-like) لا يحظره التيك توك
+                # هذا الرابط سيوجهك لصفحة تحميل نظيفة تعمل على كل الجوالات
+                dl_bridge = f"https://www.tikwm.com/api/?url={v_url}"
                 try:
-                    # استخدام API خارجي مجاني ومستقر لتجاوز حظر TikTok/FB
-                    api_url = f"https://api.douyin.wtf/api?url={v_url}"
-                    response = requests.get(api_url).json()
-                    
-                    if response.get("status") == "success" or "url" in str(response):
-                        # محاولة جلب الرابط المباشر من الاستجابة
-                        download_url = response.get("url") or response.get("video_data", {}).get("nwm_video_url_HQ")
+                    res = requests.get(dl_bridge).json()
+                    if res.get("code") == 0:
+                        video_data = res.get("data")
+                        st.success("✅ تم تجهيز الفيديو بنجاح!")
+                        st.video(video_data.get("play"))
                         
-                        if download_url:
-                            st.success("✅ تم كسر الحماية بنجاح!")
-                            # عرض الفيديو
-                            st.video(download_url)
-                            
-                            # الزر الكحلي النيلي (التحميل المباشر)
-                            st.markdown(f'''
-                                <a href="{download_url}" target="_blank" class="download-link">
-                                    📥 اضغط هنا لتحميل الفيديو MP4 (كحلي)
-                                </a>
-                            ''', unsafe_allow_html=True)
-                            st.info("💡 إذا لم يبدأ التحميل تلقائياً، اضغط مطولاً على الفيديو واختر 'تنزيل'.")
-                        else:
-                            st.error("❌ لم نتمكن من العثور على رابط مباشر، جرب رابطاً آخر.")
+                        # زر التحميل الكحلي النيلي (رابط مباشر)
+                        st.markdown(f'''
+                            <a href="{video_data.get("play")}" target="_blank" class="dl-link">
+                                📥 تحميل الفيديو MP4 (كحلي واضح)
+                            </a>
+                        ''', unsafe_allow_html=True)
                     else:
-                        # حل احتياطي إذا فشل الـ API
-                        st.warning("⚠️ جاري المحاولة بالطريقة الاحتياطية...")
-                        st.markdown(f'<a href="https://savefrom.net/?url={v_url}" target="_blank" class="download-link">تحميل عبر السيرفر الاحتياطي</a>', unsafe_allow_html=True)
+                        st.error("⚠️ فشل السحب المباشر، جرب الزر الاحتياطي أدناه:")
+                        st.markdown(f'<a href="https://snaptik.app/abc?url={v_url}" target="_blank" class="dl-link">🚀 تحميل عبر سيرفر احتياطي</a>', unsafe_allow_html=True)
                 except:
                     st.error("❌ عذراً، هذا الموقع يفرض حماية مشددة حالياً.")
     st.markdown('</div>', unsafe_allow_html=True)
 
-# بقية التبويبات (برمجة سريعة لضمان بقائها)
-with tabs[1]: st.text_input("رابط الفحص:"); st.button("بدء")
-with tabs[2]: st.text_area("بلاغ جديد:"); st.button("نشر")
+# --- تبويب تواصل معنا (إصلاح شكل الأزرار) ---
+with tabs[4]:
+    st.markdown('<div class="content-card">', unsafe_allow_html=True)
+    st.subheader("📧 تواصل مع الإدارة")
+    name = st.text_input("الاسم الكريم:")
+    msg = st.text_area("رسالتك أو اقتراحك:")
+    if st.button("إرسال الرسالة الآن"):
+        if name and msg:
+            c.execute("INSERT INTO contact VALUES (?, ?, ?)", (name, msg, datetime.now().strftime("%Y-%m-%d %H:%M")))
+            conn.commit()
+            st.success("✅ تم الإرسال بنجاح يا أيمن.")
+    st.markdown('</div>', unsafe_allow_html=True)
+
+# بقية التبويبات (برمجة سريعة لضمان العمل)
+with tabs[0]: st.info("مرحباً بك في درعك الأمني المحدث.")
+with tabs[1]: st.text_input("رابط للفحص:"); st.button("بدء الفحص")
+with tabs[3]: st.text_area("بلاغ احتيال:"); st.button("نشر البلاغ")
+with tabs[5]: 
+    p = st.text_input("كلمة السر:", type="password")
+    if p == "ayman7716": st.write("سجلات النظام مفتوحة.")
