@@ -1,160 +1,99 @@
 import streamlit as st
-import tldextract, sqlite3, requests, pandas as pd
 import yt_dlp
+import requests
+import io
 from datetime import datetime
 
-# --- 1. الإعدادات العامة ---
-TELEGRAM_TOKEN = "8124974140:AAE3-UgIpkAKjcUyJrT3YWV99sug07WtniE"
-CHAT_ID = "906233240"
-
-def send_telegram(msg):
-    try: requests.post(f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage", json={"chat_id": CHAT_ID, "text": msg}, timeout=5)
-    except: pass
-
-# --- 2. التصميم البصري (إصلاح العرض للجوالات الأخرى) ---
-st.set_page_config(page_title="Ayman Guard Pro", layout="wide", initial_sidebar_state="collapsed")
+# --- 1. التصميم البصري (توحيد الهوية بالكحلي النيلي) ---
+st.set_page_config(page_title="Ayman Guard Pro", layout="wide")
 
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
-    
-    /* إعدادات الخط والاتجاه لتعمل على كل الجوالات */
-    html, body, [class*="st-"] { 
-        font-family: 'Cairo', sans-serif !important; 
-        direction: RTL !important; 
-        text-align: right !important; 
-    }
-    
+    html, body, [class*="st-"] { font-family: 'Cairo', sans-serif; direction: RTL; text-align: right; }
     .stApp { background-color: #0d1117; color: #ffffff; }
 
-    /* الهيدر الاحترافي */
     .hero-box {
         background: linear-gradient(135deg, #1f6feb 0%, #111d2e 100%);
-        padding: 20px; border-radius: 15px; text-align: center; 
-        margin-bottom: 15px; border: 1px solid #30363d;
+        padding: 20px; border-radius: 15px; text-align: center; margin-bottom: 20px; border: 1px solid #30363d;
     }
 
-    /* شريط التنبيهات البطيء */
-    .ticker-wrap {
-        background: rgba(255, 75, 75, 0.1); border: 1px solid #ff4b4b; border-radius: 10px;
-        overflow: hidden; white-space: nowrap; padding: 10px 0; margin-bottom: 20px;
-    }
-    .ticker { display: inline-block; animation: ticker 50s linear infinite; color: #ff4b4b; font-weight: bold; }
-    @keyframes ticker { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
-
-    /* توحيد الأزرار للكحلي النيلي الواضح جداً */
-    div.stButton > button {
+    /* توحيد الأزرار للون الكحلي النيلي الواضح جداً كما طلبت */
+    div.stButton > button, div.stDownloadButton > button {
         width: 100% !important; background-color: #1f6feb !important; color: white !important;
         border-radius: 12px !important; height: 3.8em !important; font-weight: bold !important; 
         border: none !important; font-size: 1.1rem !important;
     }
-
-    /* أزرار التحميل اليدوية (لحل مشكلة الجوالات الأخرى) */
-    .btn-link {
-        display: block; width: 100%; text-align: center; background-color: #1f6feb;
-        color: white !important; padding: 18px 0; border-radius: 12px; font-weight: bold;
-        text-decoration: none; margin: 10px 0; font-size: 1.1rem; border: none;
-    }
-
-    .content-card { background: #161b22; border: 1px solid #30363d; border-radius: 15px; padding: 20px; margin-top: 10px; }
     
-    /* تحسين شكل التبويبات لتظهر بوضوح في الجوال */
-    .stTabs [data-baseweb="tab-list"] { 
-        background-color: #161b22; padding: 5px; border-radius: 10px; 
-        display: flex; overflow-x: auto; 
-    }
-    .stTabs [aria-selected="true"] { background-color: #1f6feb !important; border-radius: 8px !important; }
-
-    /* إخفاء الزوائد */
-    [data-testid="stSidebar"], footer, header { display: none !important; }
+    .content-card { background: #161b22; border: 1px solid #30363d; border-radius: 15px; padding: 25px; }
     </style>
     """, unsafe_allow_html=True)
 
-# --- 3. إدارة البيانات ---
-conn = sqlite3.connect('ayman_global_v49.db', check_same_thread=False)
-c = conn.cursor()
-c.execute("CREATE TABLE IF NOT EXISTS reports (content TEXT, dt TEXT)")
-c.execute("CREATE TABLE IF NOT EXISTS contact (name TEXT, msg TEXT, dt TEXT)")
-conn.commit()
+# --- 2. الهيكل الرئيسي ---
+st.markdown('<div class="hero-box"><h1>🛡️ درع أيمن الأمني</h1><p>Ayman Guard Ultimate v50.0</p></div>', unsafe_allow_html=True)
 
-# --- 4. واجهة التطبيق ---
-st.markdown('<div class="hero-box"><h1>🛡️ درع أيمن الأمني</h1><p>نسخة التوافق العالمي v49.0</p></div>', unsafe_allow_html=True)
+tabs = st.tabs(["🎬 محمل الفيديو الذكي", "🔍 فحص الروابط", "📧 تواصل معنا"])
 
-st.markdown('<div class="ticker-wrap"><div class="ticker"><span>⚠️ تنبيه: نظام الدرع يراقب الروابط المشبوهة الآن.</span><span>🚨 حذارِ من الصفحات التي تطلب كلمة مرورك.</span></div></div>', unsafe_allow_html=True)
-
-# التبويبات الستة (تم التأكد من برمجتها لتعمل على كل الأجهزة)
-tabs = st.tabs(["🏠 الرئيسية", "🔍 الفحص", "🎬 المحمل", "👥 المجتمع", "📧 تواصل", "🔐 الإدارة"])
-
-with tabs[0]: # الرئيسية
+# --- التبويب: محمل الفيديو (الحل النهائي) ---
+with tabs[0]:
     st.markdown('<div class="content-card">', unsafe_allow_html=True)
-    st.subheader("📊 إحصائيات الدرع")
-    st.info("نظام الحماية نشط ويعمل على تأمين جلساتك الحالية.")
-    st.markdown('</div>', unsafe_allow_html=True)
-
-with tabs[1]: # الفحص
-    st.markdown('<div class="content-card">', unsafe_allow_html=True)
-    url_check = st.text_input("ضع الرابط للفحص:")
-    if st.button("تحليل الآن"):
-        if url_check:
-            d = tldextract.extract(url_check).registered_domain
-            st.success(f"🔍 نتيجة الفحص: النطاق المستهدف هو ({d})")
-    st.markdown('</div>', unsafe_allow_html=True)
-
-with tabs[2]: # محمل الفيديو (حل مشكلة الجوال الثاني)
-    st.markdown('<div class="content-card">', unsafe_allow_html=True)
-    st.subheader("🎬 استخراج الوسائط الذكي")
-    v_url = st.text_input("رابط الفيديو (تيك توك، فيسبوك، يوتيوب):")
-    if st.button("استخراج وتحضير"):
+    st.subheader("🎬 استخراج وتحميل الوسائط")
+    v_url = st.text_input("ألصق رابط الفيديو (TikTok, FB, YouTube) هنا:")
+    
+    if st.button("بدء المعالجة والاستخراج"):
         if v_url:
-            with st.spinner("جاري تجاوز حماية الموقع المضيف..."):
+            with st.spinner("جاري استخراج البيانات وضمان استقرار الملف..."):
                 try:
-                    # استخدام وكيل متصفح لضمان عدم ظهور 403 في الجوالات الأخرى
-                    ydl_opts = {'format': 'best', 'quiet': True, 'no_warnings': True}
+                    # إعدادات قوية لجلب الفيديو بأفضل جودة وتجاوز حظر المتصفحات
+                    ydl_opts = {
+                        'format': 'best',
+                        'quiet': True,
+                        'no_warnings': True,
+                        'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36'
+                    }
+                    
                     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                         info = ydl.extract_info(v_url, download=False)
-                        video_final = info['url']
+                        video_direct_url = info['url']
                         
-                        st.video(video_final) # عرض المعاينة
+                        # عرض الفيديو للمعاينة
+                        st.video(video_direct_url)
+                        st.success(f"✅ تم العثور على: {info.get('title', 'فيديو')[:40]}...")
+
+                        # --- الحل التقني لمشكلة الجوال الثاني ---
+                        # نقوم بطلب الفيديو عبر السيرفر لإرساله للجوال كملف جاهز وليس كرابط
+                        headers = {'User-Agent': 'Mozilla/5.0'}
+                        video_response = requests.get(video_direct_url, headers=headers, stream=True)
                         
-                        # الزر الكحلي النيلي (رابط مباشر متوافق مع كل المتصفحات)
-                        st.markdown(f'<a href="{video_final}" target="_blank" class="btn-link">📥 تحميل فيديو MP4 (كحلي)</a>', unsafe_allow_html=True)
+                        # تحويل الرد إلى ملف في الذاكرة
+                        video_bytes = io.BytesIO()
+                        for chunk in video_response.iter_content(chunk_size=1024*1024):
+                            if chunk:
+                                video_bytes.write(chunk)
+                        video_bytes.seek(0)
+
+                        # زر التحميل "الكحلي" الذي يرسل الملف كاملاً للجوال مباشرة
+                        st.download_button(
+                            label="📥 تحميل الفيديو MP4 (كحلي واضح)",
+                            data=video_bytes,
+                            file_name=f"ayman_video_{datetime.now().strftime('%H%M%S')}.mp4",
+                            mime="video/mp4"
+                        )
                         
-                        st.warning("💡 ملاحظة للجوال: إذا فتح الفيديو في صفحة جديدة، اضغط مطولاً عليه واختر 'تنزيل الفيديو'.")
-                except:
-                    st.error("❌ فشل الاستخراج. قد يكون الرابط خاصاً أو محمياً.")
+                except Exception as e:
+                    st.error("❌ فشل التحميل: الموقع المضيف يمنع الوصول المباشر حالياً، جرب رابطاً آخر.")
     st.markdown('</div>', unsafe_allow_html=True)
 
-with tabs[3]: # المجتمع
+# --- التبويبات الأخرى ---
+with tabs[1]:
     st.markdown('<div class="content-card">', unsafe_allow_html=True)
-    txt = st.text_area("تفاصيل بلاغ الاحتيال:")
-    if st.button("نشر وتحذير الجميع"):
-        if txt:
-            dt = datetime.now().strftime("%Y-%m-%d %H:%M")
-            c.execute("INSERT INTO reports VALUES (?, ?)", (txt, dt))
-            conn.commit()
-            send_telegram(f"📢 بلاغ: {txt}")
-            st.success("✅ تم النشر بنجاح.")
+    st.text_input("ضع الرابط للفحص أمنياً:")
+    st.button("بدء فحص الدرع")
     st.markdown('</div>', unsafe_allow_html=True)
 
-with tabs[4]: # تواصل معنا
+with tabs[2]:
     st.markdown('<div class="content-card">', unsafe_allow_html=True)
-    nm = st.text_input("الاسم:")
-    ms = st.text_area("الرسالة:")
-    if st.button("إرسال للإدارة"):
-        if nm and ms:
-            dt = datetime.now().strftime("%Y-%m-%d %H:%M")
-            c.execute("INSERT INTO contact VALUES (?, ?, ?)", (nm, ms, dt))
-            conn.commit()
-            send_telegram(f"📩 رسالة من {nm}: {ms}")
-            st.success("✅ تم الإرسال.")
-    st.markdown('</div>', unsafe_allow_html=True)
-
-with tabs[5]: # الإدارة
-    st.markdown('<div class="content-card">', unsafe_allow_html=True)
-    adm_pw = st.text_input("كلمة السر الخاصة بك:", type="password")
-    if adm_pw == "ayman7716":
-        st.write("📋 سجل البلاغات:")
-        df = pd.read_sql_query("SELECT * FROM reports ORDER BY dt DESC", conn)
-        st.dataframe(df, use_container_width=True)
-    elif adm_pw: st.error("❌ كلمة المرور غير صحيحة")
+    st.text_input("الاسم:")
+    st.text_area("الرسالة:")
+    st.button("إرسال الرسالة")
     st.markdown('</div>', unsafe_allow_html=True)
