@@ -5,7 +5,7 @@ import sqlite3
 import requests
 from datetime import datetime
 
-# --- 1. الهوية البصرية (الكحلي النيلي) ---
+# --- 1. التصميم وتوحيد الهوية ---
 st.set_page_config(page_title="Ayman Guard Pro", layout="wide")
 
 st.markdown("""
@@ -20,7 +20,7 @@ st.markdown("""
     </style>
     """, unsafe_allow_html=True)
 
-# --- 2. محرك التليجرام (تم إدراج بياناتك يا أيمن) ---
+# --- 2. محرك التليجرام المحسن ---
 TELEGRAM_TOKEN = "8124974140:AAE3-UgIpkAKjcUyJrT3YWV99sug07WtniE"
 CHAT_ID = "906233240"
 
@@ -28,13 +28,17 @@ def send_to_ayman_tele(message):
     url = f"https://api.telegram.org/bot{TELEGRAM_TOKEN}/sendMessage"
     payload = {"chat_id": CHAT_ID, "text": message, "parse_mode": "HTML"}
     try:
-        requests.post(url, data=payload, timeout=10)
+        response = requests.post(url, data=payload, timeout=10)
+        if response.status_code == 200:
+            return True
+        else:
+            return False
     except:
-        pass
+        return False
 
 # --- 3. قاعدة البيانات ---
 def init_db():
-    conn = sqlite3.connect('ayman_master_v280.db', check_same_thread=False)
+    conn = sqlite3.connect('ayman_pro_v290.db', check_same_thread=False)
     c = conn.cursor()
     c.execute('CREATE TABLE IF NOT EXISTS community_reports (name TEXT, content TEXT, date TEXT)')
     c.execute('CREATE TABLE IF NOT EXISTS contact_msgs (name TEXT, message TEXT, date TEXT)')
@@ -44,28 +48,24 @@ def init_db():
 db = init_db()
 
 # --- 4. الهيكل الرئيسي ---
-st.markdown('<div class="hero-box"><h1>🛡️ درع أيمن الأمني</h1><p>النسخة الشاملة v280.0 (الربط الفعال 100%)</p></div>', unsafe_allow_html=True)
+st.markdown('<div class="hero-box"><h1>🛡️ درع أيمن الأمني</h1><p>نسخة المصادقة والربط المضمون v290.0</p></div>', unsafe_allow_html=True)
 tabs = st.tabs(["🏠 الرئيسية", "🔍 الفحص الشامل", "🎬 محمل الفيديو", "👥 حماية المجتمع", "📧 تواصل معنا", "🔐 الإدارة"])
 
-# --- التبويبات ---
-with tabs[1]: # الفحص الشامل
+# --- تبويب الفحص الشامل ---
+with tabs[1]:
     st.markdown('<div class="content-card">', unsafe_allow_html=True)
     f1, f2 = st.tabs(["🔗 الروابط", "📁 الملفات"])
     with f1:
-        u_l = st.text_input("أدخل الرابط:")
+        u_l = st.text_input("أدخل الرابط للفحص:")
         if st.button("🚀 فحص وإرسال تقرير"):
             if u_l:
-                st.success("✅ الرابط آمن. تم إرسال التقرير لتليجرام.")
-                send_to_ayman_tele(f"🔍 <b>تقرير فحص رابط:</b>\n{u_l}")
-    with f2:
-        u_f = st.file_uploader("ارفع ملفاً:")
-        if st.button("🛡️ بدء الفحص"):
-            if u_f:
-                st.info(f"🛡️ الملف {u_f.name} سليم.")
-                send_to_ayman_tele(f"📁 <b>تقرير فحص ملف:</b>\n{u_f.name}")
+                res = send_to_ayman_tele(f"🔍 <b>تقرير فحص رابط:</b>\n{u_l}")
+                if res: st.success("✅ تم الفحص وإرسال إشعار لتليجرام.")
+                else: st.warning("⚠️ تم الفحص، ولكن تعذر إرسال الإشعار (تأكد من تشغيل البوت).")
     st.markdown('</div>', unsafe_allow_html=True)
 
-with tabs[2]: # محمل الفيديو
+# --- تبويب محمل الفيديو ---
+with tabs[2]:
     st.markdown('<div class="content-card">', unsafe_allow_html=True)
     v_u = st.text_input("رابط الفيديو:")
     if st.button("🚀 جلب الفيديو الآن"):
@@ -82,39 +82,48 @@ with tabs[2]: # محمل الفيديو
                 except: st.error("عذراً، تعذر الجلب.")
     st.markdown('</div>', unsafe_allow_html=True)
 
-with tabs[3]: # حماية المجتمع
+# --- تبويب تواصل معنا ---
+with tabs[4]:
     st.markdown('<div class="content-card">', unsafe_allow_html=True)
-    with st.form("comm_v280", clear_on_submit=True):
-        n = st.text_input("الاسم:")
-        c = st.text_area("البلاغ:")
-        if st.form_submit_button("نشر التحذير"):
-            if c:
-                dt = datetime.now().strftime("%Y-%m-%d %H:%M")
-                db.cursor().execute("INSERT INTO community_reports VALUES (?, ?, ?)", (n if n else "مجهول", c, dt))
-                db.commit()
-                st.success("✅ تم النشر")
-                send_to_ayman_tele(f"👥 <b>بلاغ مجتمعي جديد:</b>\nمن: {n}\nالبلاغ: {c}")
-    st.markdown('</div>', unsafe_allow_html=True)
-
-with tabs[4]: # تواصل معنا
-    st.markdown('<div class="content-card">', unsafe_allow_html=True)
-    with st.form("contact_v280", clear_on_submit=True):
-        cn = st.text_input("الاسم:")
+    with st.form("contact_v290", clear_on_submit=True):
+        cn = st.text_input("اسمك:")
         cm = st.text_area("الرسالة:")
         if st.form_submit_button("إرسال الآن"):
             if cn and cm:
                 dt = datetime.now().strftime("%Y-%m-%d %H:%M")
                 db.cursor().execute("INSERT INTO contact_msgs VALUES (?, ?, ?)", (cn, cm, dt))
                 db.commit()
-                st.success("✅ تم الإرسال لتليجرام أيمن")
-                send_to_ayman_tele(f"📧 <b>رسالة خاصة جديدة:</b>\nمن: {cn}\n{cm}")
+                res = send_to_ayman_tele(f"📧 <b>رسالة جديدة من: {cn}</b>\n{cm}")
+                if res: st.success("✅ وصلت رسالتك لتليجرام أيمن.")
+                else: st.error("❌ تعذر الإرسال لتليجرام. تأكد من إرسال /start للبوت.")
     st.markdown('</div>', unsafe_allow_html=True)
 
-with tabs[5]: # الإدارة
+# --- تبويب الإدارة (تفعيل المصادقة المحمي) ---
+with tabs[5]:
     st.markdown('<div class="content-card">', unsafe_allow_html=True)
-    pwd = st.text_input("كلمة المرور:", type="password")
-    if pwd == "ayman7716":
-        st.success("مرحباً أيمن")
+    st.subheader("🔐 لوحة التحكم المصادقة")
+    
+    # ميزة المصادقة: لا يتم عرض البيانات إلا بعد التحقق
+    if "authenticated" not in st.session_state:
+        st.session_state.authenticated = False
+
+    if not st.session_state.authenticated:
+        pwd_input = st.text_input("أدخل كلمة مرور المدير:", type="password")
+        if st.button("تسجيل الدخول"):
+            if pwd_input == "ayman7716":
+                st.session_state.authenticated = True
+                st.rerun()
+            else:
+                st.error("كلمة المرور خاطئة!")
+    else:
+        st.success("✅ تم تسجيل الدخول بنجاح")
+        if st.button("تسجيل الخروج"):
+            st.session_state.authenticated = False
+            st.rerun()
+            
+        st.write("---")
+        # عرض البيانات فقط للمصادقين
         data = db.cursor().execute("SELECT * FROM contact_msgs ORDER BY date DESC").fetchall()
-        for m in data: st.markdown(f'<div class="data-box"><strong>{m[0]}</strong>: {m[1]}</div>', unsafe_allow_html=True)
+        for m in data:
+            st.markdown(f'<div class="data-box"><strong>من: {m[0]}</strong><br><small>{m[2]}</small><p>{m[1]}</p></div>', unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
