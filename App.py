@@ -4,6 +4,8 @@ import os
 import sqlite3
 import requests
 from datetime import datetime
+from bs4 import BeautifulSoup
+
 
 # --- 1. الإعدادات الأساسية والتصميم (منع اللون الأبيض تماماً) ---
 st.set_page_config(page_title="Ayman Guard Pro", layout="wide")
