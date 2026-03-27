@@ -102,21 +102,49 @@ with tabs[1]:
     st.markdown('</div>', unsafe_allow_html=True)
 
 # --- 3: محمل الفيديو (الميزة الجديدة 😁) ---
+# --- التبويب 3: محمل الفيديو (إصلاح مشكلة التشغيل 😁) ---
 with tabs[2]:
     st.markdown('<div class="content-card">', unsafe_allow_html=True)
-    st.subheader("🎬 تحميل الفيديوهات")
-    v_url = st.text_input("ألصق رابط الفيديو:")
-    if st.button("استخراج وتحميل"):
+    st.subheader("🎬 مشغل ومحمل الفيديوهات الذكي")
+    v_url = st.text_input("ألصق رابط الفيديو هنا (FB, YT, TikTok):")
+    
+    if st.button("استخراج وتشغيل الفيديو"):
         if v_url:
-            with st.spinner("جاري التحليل..."):
+            with st.spinner("جاري جلب الفيديو للمعاينة..."):
                 try:
-                    ydl_opts = {'format': 'best', 'quiet': True}
+                    # إعدادات متقدمة لاستخراج الرابط المباشر القابل للتشغيل
+                    ydl_opts = {
+                        'format': 'best',
+                        'quiet': True,
+                        'no_warnings': True,
+                    }
                     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                         info = ydl.extract_info(v_url, download=False)
-                        st.video(v_url)
-                        st.markdown(f'<a href="{info["url"]}" target="_blank"><button style="width:100%; background-color:#28a745; color:white; height:3em; border-radius:10px; border:none; cursor:pointer;">📥 اضغط هنا للتحميل المباشر</button></a>', unsafe_allow_html=True)
-                except: st.error("❌ الرابط غير مدعوم حالياً.")
+                        # جلب الرابط المباشر الخام
+                        direct_link = info.get('url')
+                        video_title = info.get('title', 'Video Preview')
+                        
+                        st.write(f"📺 يعرض الآن: **{video_title}**")
+                        
+                        # تشغيل الفيديو باستخدام الرابط المستخرج مباشرة لضمان العمل
+                        st.video(direct_link) 
+                        
+                        st.success("✅ الفيديو جاهز للمعاينة والتحميل")
+                        
+                        # زر التحميل المباشر
+                        st.markdown(f'''
+                            <a href="{direct_link}" target="_blank" style="text-decoration:none;">
+                                <button style="width:100%; background-color:#28a745; color:white; height:3.5em; border-radius:12px; border:none; font-weight:bold; cursor:pointer; margin-top:10px;">
+                                    📥 اضغط هنا للتحميل المباشر للجهاز
+                                </button>
+                            </a>
+                        ''', unsafe_allow_html=True)
+                except Exception as e:
+                    st.error("❌ عذراً، هذا الرابط خاص أو غير مدعوم للمعاينة المباشرة.")
+        else:
+            st.error("يرجى وضع الرابط أولاً")
     st.markdown('</div>', unsafe_allow_html=True)
+
 
 # --- 4: المجتمع وتواصل معنا (دمج ذكي) ---
 with tabs[3]:
