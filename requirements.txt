@@ -4,3 +4,4 @@ requests
 tldextract
 xlsxwriter
 yt-dlp
+beautifulsoup4
