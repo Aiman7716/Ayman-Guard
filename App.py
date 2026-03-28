@@ -5,34 +5,28 @@ import sqlite3
 import requests
 import random
 from datetime import datetime
+import streamlit.components.v1 as components
 
 # --- 1. الإعدادات والتصميم الجمالي ---
 st.set_page_config(page_title="Ayman Guard Pro v20", layout="wide")
 
-# كود التنسيق وإخفاء معالم الموقع (بما في ذلك شريط Hosted with Streamlit السفلي)
+# كود التنسيق وإخفاء معالم الموقع (CSS)
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
     html, body, [class*="st-"] { font-family: 'Cairo', sans-serif; direction: RTL; text-align: right; }
     .stApp { background-color: #0d1117; color: #ffffff; }
     
-    /* 1. إخفاء القوائم والفوتر والهيدر */
+    /* إخفاء القوائم والفوتر والهيدر */
     #MainMenu {visibility: hidden;}
     footer {visibility: hidden;}
     header {visibility: hidden;}
     
-    /* 2. إخفاء علامة "Hosted with Streamlit" الحمراء تماماً بأكثر من طريقة */
+    /* إخفاء العلامات عبر CSS كخط دفاع أول */
     div[data-testid="stStatusWidget"] { display: none !important; }
     .viewerBadge_container__1QS1n { display: none !important; }
-    .viewerBadge_link__1S137 { display: none !important; }
-    #streamlit-connection-status { display: none !important; }
     
-    /* استهداف الحاوية السفلية التي تحتوي على الشعار الأحمر */
-    div[class*="viewerBadge_container"] { display: none !important; }
-    div[class*="stCustomComponentV1"] { display: none !important; }
-    
-    /* 3. تقليل المساحات البيضاء العلوية ليظهر كأنه تطبيق أصلي */
-    .block-container { padding-top: 0rem !important; padding-bottom: 0rem !important; }
+    .block-container { padding-top: 1rem !important; padding-bottom: 0rem !important; }
 
     .hero-section {
         background: linear-gradient(135deg, #1f6feb 0%, #111d2e 100%);
@@ -47,6 +41,22 @@ st.markdown("""
     .scan-box { background: #161b22; border: 1px solid #30363d; padding: 20px; border-radius: 20px; margin-top: 10px; }
     </style>
 """, unsafe_allow_html=True)
+
+# --- كود الجافا سكريبت القوي (لحذف العلامة الحمراء فوراً) ---
+components.html("""
+    <script>
+    function hideBadge() {
+        // حذف العلامة الحمراء وأي شعارات لستريمليت
+        const badges = window.parent.document.querySelectorAll('div[class*="viewerBadge"], [data-testid="stStatusWidget"], footer');
+        badges.forEach(badge => {
+            badge.style.display = 'none';
+            badge.remove();
+        });
+    }
+    // التنفيذ المتكرر لضمان عدم عودتها عند تحديث الصفحة
+    setInterval(hideBadge, 500);
+    </script>
+""", height=0)
 
 # --- 2. محرك الأمان وقواعد البيانات ---
 TOKEN = "8124974140:AAE3-UgIpkAKjcUyJrT3YWV99sug07WtniE"
@@ -72,12 +82,11 @@ def init_db():
 
 db = init_db()
 
-# إدارة الحالة (Session State)
 if 'logged_in' not in st.session_state: st.session_state.logged_in = False
 if 'auth_code' not in st.session_state: st.session_state.auth_code = None
 
 # --- 3. بناء واجهة التبويبات ---
-st.markdown('<div class="hero-section"><h1>🛡️ درع أيمن السيادي</h1><p>الإصدار v20.3 | نسخة التطبيق الاحترافية</p></div>', unsafe_allow_html=True)
+st.markdown('<div class="hero-section"><h1>🛡️ درع أيمن السيادي</h1><p>الإصدار v20.4 | استقرار وأمان احترافي</p></div>', unsafe_allow_html=True)
 
 tabs = st.tabs(["🏠 الرئيسية", "🔍 الفحص والمعاينة", "🎬 التحميل", "👥 المجتمع", "📧 تواصل معنا", "🔐 الإدارة"])
 
@@ -96,7 +105,7 @@ with tabs[1]:
     st.markdown('<div class="scan-box">', unsafe_allow_html=True)
     
     if scan_choice == "فحص ومعاينة الروابط 🔗":
-        u = st.text_input("ألصق الرابط هنا:", key="scan_url_v20")
+        u = st.text_input("ألصق الرابط هنا:", key="url_input_final")
         col1, col2 = st.columns(2)
         if col1.button("🛡️ ابدأ فحص الأمان"):
             if u:
@@ -109,7 +118,7 @@ with tabs[1]:
             if u:
                 st.markdown(f'<a href="{u}" target="_blank"><button style="width:100%; background:#238636; color:white; border:none; padding:15px; border-radius:12px; font-weight:bold;">فتح المعاينة في صفحة جديدة</button></a>', unsafe_allow_html=True)
     else:
-        u_f = st.file_uploader("ارفع الملف للفحص:", key="scan_file_v20")
+        u_f = st.file_uploader("ارفع الملف للفحص:", key="file_input_final")
         if u_f:
             st.info(f"ملف مختار: {u_f.name}")
             if st.button("📁 ابدأ تحليل الملف"):
@@ -117,12 +126,12 @@ with tabs[1]:
                 try:
                     content = u_f.getvalue().decode("latin-1", errors="replace")[:500]
                     st.code(content)
-                except: st.warning("تعذر عرض محتوى الملف.")
+                except: st.warning("الملف لا يدعم العرض النصي.")
     st.markdown('</div>', unsafe_allow_html=True)
 
 # 3. التحميل
 with tabs[2]:
-    v_u = st.text_input("رابط الفيديو للتحميل:", key="dl_url_v20")
+    v_u = st.text_input("رابط الفيديو للتحميل:", key="vid_dl_final")
     if st.button("🚀 تحميل الآن"):
         if v_u:
             with st.spinner("جاري التحميل..."):
@@ -136,7 +145,7 @@ with tabs[2]:
                             st.download_button("📥 حفظ الفيديو", f, "video.mp4")
                         os.remove("ayman_v.mp4")
                 except Exception as e: 
-                    st.error(f"❌ فشل التحميل: {str(e)}")
+                    st.error(f"❌ فشل التحميل")
 
 # 4. المجتمع
 with tabs[3]:
@@ -162,14 +171,13 @@ with tabs[4]:
 with tabs[5]:
     if not st.session_state.logged_in:
         st.subheader("🔐 الدخول المحمي")
-        pwd = st.text_input("كلمة السر:", type="password", key="admin_key_v20")
+        pwd = st.text_input("كلمة السر:", type="password", key="admin_pwd_final")
         if st.button("👤 دخول (طلب كود تليجرام)"):
             if pwd == "ayman7716":
                 st.session_state.auth_code = str(random.randint(1000, 9999))
                 send_to_telegram(f"🔐 كود الدخول: <b>{st.session_state.auth_code}</b>")
                 st.info("تم إرسال الكود.")
-            else:
-                st.error("⚠️ كلمة السر خاطئة")
+            else: st.error("⚠️ كلمة السر خاطئة")
 
         if st.session_state.auth_code:
             vc = st.text_input("أدخل كود التحقق:")
