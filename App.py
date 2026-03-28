@@ -25,6 +25,21 @@ st.markdown("""
     }
     .scan-box { background: #161b22; border: 1px solid #30363d; padding: 20px; border-radius: 20px; margin-top: 10px; }
     </style>
+    # --- كود إخفاء عناصر الموقع لجعل التطبيق يبدو احترافياً ---
+hide_st_style = """
+            <style>
+            #MainMenu {visibility: hidden;}
+            footer {visibility: hidden;}
+            header {visibility: hidden;}
+            /* تقليل الفراغ العلوي ليناسب شاشة التطبيق */
+            .block-container {
+                padding-top: 0rem;
+                padding-bottom: 0rem;
+            }
+            </style>
+            """
+st.markdown(hide_st_style, unsafe_allow_html=True)
+
     """, unsafe_allow_html=True)
 
 # --- 2. محرك الأمان وقواعد البيانات ---
