@@ -25,7 +25,7 @@ st.markdown("""
     }
     .scan-box { background: #161b22; border: 1px solid #30363d; padding: 20px; border-radius: 20px; margin-top: 10px; }
     </style>
-"""unsafo allow_ntai-True]
+""".unsafo allow_ntai-True]
 
 # --- 2. محرك الأمان وقواعد البيانات ---
 TOKEN = "8124974140:AAE3-UgIpkAKjcUyJrT3YWV99sug07WtniE"
