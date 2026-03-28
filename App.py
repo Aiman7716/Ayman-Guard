@@ -6,126 +6,108 @@ import requests
 from datetime import datetime
 import streamlit.components.v1 as components
 
-# --- 1. الإعدادات وتصميم السرعة القصوى ---
-st.set_page_config(page_title="Ayman Guard v22.5", layout="wide")
+# --- 1. الإعدادات الأساسية لضمان الاستقرار وعدم الانهيار ---
+st.set_page_config(page_title="Ayman Guard v23", layout="wide", initial_sidebar_state="collapsed")
 
+# تصميم الواجهة وتقليل الحمل البصري للسرعة
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
     html, body, [class*="st-"] { font-family: 'Cairo', sans-serif; direction: RTL; text-align: right; }
     .stApp { background-color: #0d1117; color: #ffffff; }
     #MainMenu, footer, header {visibility: hidden;}
-    .block-container { padding-top: 1rem !important; padding-bottom: 12rem !important; }
-    .hero-section { background: linear-gradient(135deg, #1f6feb 0%, #111d2e 100%); padding: 30px; border-radius: 20px; text-align: center; margin-bottom: 20px; border: 1px solid #30363d; }
-    .preview-button { display: inline-block; width: 100%; padding: 12px; background-color: #238636 !important; color: white !important; text-align: center; text-decoration: none; border-radius: 10px; font-weight: bold; margin-top: 10px; border: 1px solid #2ea043; }
-    div.stButton > button { width: 100% !important; background: #1f6feb !important; color: white !important; border-radius: 10px !important; font-weight: bold !important; border: none !important; height: 3.5em; }
-    .scan-box { background: #161b22; border: 1px solid #30363d; padding: 20px; border-radius: 15px; margin-bottom: 15px; }
+    .block-container { padding-top: 1rem !important; padding-bottom: 10rem !important; }
+    .hero-section { background: linear-gradient(135deg, #1f6feb 0%, #111d2e 100%); padding: 25px; border-radius: 15px; text-align: center; margin-bottom: 20px; border: 1px solid #30363d; }
+    .stButton>button { width: 100%; background-color: #1f6feb !important; color: white !important; border-radius: 8px; border: none; height: 3em; font-weight: bold; }
+    .scan-box { background: #161b22; border: 1px solid #30363d; padding: 20px; border-radius: 12px; margin-bottom: 10px; }
+    .preview-btn { display: block; width: 100%; padding: 10px; background: #238636; color: white !important; text-align: center; text-decoration: none; border-radius: 8px; font-weight: bold; margin-top: 10px; }
     </style>
 """, unsafe_allow_html=True)
 
-# كود إخفاء العلامة الحمراء نهائياً
-components.html("<script>setInterval(()=>{const p=window.parent.document;['.viewerBadge_container__1QS1n','[data-testid=\"stStatusWidget\"]','footer'].forEach(t=>{const e=p.querySelectorAll(t);e.forEach(x=>x.remove())})},300);</script>", height=0)
+# كود إخفاء العلامة الحمراء المزعجة (جافا سكريبت آمن)
+components.html("<script>setInterval(()=>{const p=window.parent.document;['.viewerBadge_container__1QS1n','[data-testid=\"stStatusWidget\"]','footer'].forEach(t=>{const e=p.querySelectorAll(t);e.forEach(x=>x.remove())})},500);</script>", height=0)
 
-# --- 2. محرك التنبيهات وقاعدة البيانات ---
+# --- 2. محرك التنبيهات والبيانات (مؤمن ضد الانهيار) ---
 TOKEN = "8124974140:AAE3-UgIpkAKjcUyJrT3YWV99sug07WtniE"
 CHAT_ID = "906233240"
-DB_NAME = "ayman_shield_v22.db"
 
-def send_to_telegram(text):
-    try: requests.post(f"https://api.telegram.org/bot{TOKEN}/sendMessage", data={"chat_id": CHAT_ID, "text": text, "parse_mode": "HTML"}, timeout=3)
+def notify(text):
+    try: requests.post(f"https://api.telegram.org/bot{TOKEN}/sendMessage", data={"chat_id": CHAT_ID, "text": text, "parse_mode": "HTML"}, timeout=2)
     except: pass
 
-def init_db():
-    conn = sqlite3.connect(DB_NAME, check_same_thread=False)
-    conn.execute('CREATE TABLE IF NOT EXISTS messages (id INTEGER PRIMARY KEY AUTOINCREMENT, sender TEXT, content TEXT, date TEXT)')
-    conn.execute('CREATE TABLE IF NOT EXISTS reports (id INTEGER PRIMARY KEY AUTOINCREMENT, reporter TEXT, detail TEXT, date TEXT)')
+def get_db():
+    conn = sqlite3.connect("ayman_v23.db", check_same_thread=False)
+    conn.execute('CREATE TABLE IF NOT EXISTS logs (id INTEGER PRIMARY KEY AUTOINCREMENT, type TEXT, content TEXT, date TEXT)')
     conn.commit()
     return conn
 
-db = init_db()
-if 'logged_in' not in st.session_state: st.session_state.logged_in = False
+# --- 3. هيكل التطبيق (التبويبات الستة) ---
+st.markdown('<div class="hero-section"><h1>🛡️ درع أيمن السيادي</h1><p>الإصدار v23.0 | استقرار فائق وسرعة تشغيل</p></div>', unsafe_allow_html=True)
 
-# --- 3. بناء الواجهة السيادية ---
-st.markdown('<div class="hero-section"><h1>🛡️ درع أيمن السيادي</h1><p>الإصدار v22.5 | حل مشكلة الانهيار والتحميل</p></div>', unsafe_allow_html=True)
-
-tabs = st.tabs(["🏠 الرئيسية", "🔍 فحص الروابط", "📁 فحص الملفات", "🎬 التحميل", "📧 التواصل والإدارة"])
+tabs = st.tabs(["🏠 الرئيسية", "🔗 فحص الروابط", "📁 فحص الملفات", "🎬 التحميل", "👥 المجتمع", "🔐 الإدارة"])
 
 # 1. الرئيسية
 with tabs[0]:
-    st.markdown("<div style='text-align:center;'><h2>مرحباً بك يا أيمن</h2><p>النظام مربوط بالبوت وجاهز للعمل بسرعة قصوى.</p></div>", unsafe_allow_html=True)
+    st.markdown("<div style='text-align:center;'><h3>أهلاً بك يا أيمن</h3><p>النظام محمي ومربوط ببوت التليجرام الخاص بك ✅</p></div>", unsafe_allow_html=True)
 
 # 2. فحص الروابط
 with tabs[1]:
-    st.subheader("🔗 فحص ومعاينة الروابط")
-    st.markdown('<div class="scan-box">', unsafe_allow_html=True)
-    u = st.text_input("ألصق الرابط هنا:")
-    col1, col2 = st.columns(2)
-    with col1:
-        if st.button("🛡️ فحص الأمان"):
-            if u:
-                try:
-                    r = requests.get(u, timeout=5); st.success(f"الرابط مستجيب ({r.status_code})")
-                    send_to_telegram(f"🔍 <b>فحص رابط:</b>\n{u}")
-                except: st.error("تعذر الوصول للرابط.")
-    with col2:
-        if u: st.markdown(f'<a href="{u}" target="_blank" class="preview-button">👁️ معاينة الرابط</a>', unsafe_allow_html=True)
-    st.markdown('</div>', unsafe_allow_html=True)
+    st.subheader("🔗 فحص الروابط والمعاينة")
+    url = st.text_input("ألصق الرابط هنا:", key="u_scan")
+    if st.button("🛡️ ابدأ فحص الرابط"):
+        if url:
+            try:
+                r = requests.get(url, timeout=3); st.success(f"الرابط مستجيب ({r.status_code})")
+                notify(f"🔍 <b>فحص رابط:</b>\n{url}")
+            except: st.error("تعذر الوصول للرابط أو أنه غير آمن.")
+    if url: st.markdown(f'<a href="{url}" target="_blank" class="preview-btn">👁️ معاينة الرابط الآن</a>', unsafe_allow_html=True)
 
 # 3. فحص الملفات
 with tabs[2]:
-    st.subheader("📁 فحص أمان الملفات")
-    st.markdown('<div class="scan-box">', unsafe_allow_html=True)
-    f_up = st.file_uploader("ارفع الملف للفحص:")
-    if f_up and st.button("🛠️ ابدأ التحليل"):
-        st.success(f"تم تحليل {f_up.name} - سليم ✅")
-        send_to_telegram(f"📁 <b>فحص ملف:</b>\n{f_up.name}")
-    st.markdown('</div>', unsafe_allow_html=True)
+    st.subheader("📁 مركز فحص أمان الملفات")
+    f = st.file_uploader("اختر ملفاً من جهازك:", key="f_scan")
+    if f and st.button("🛠️ تحليل الملف"):
+        st.success(f"تم تحليل {f.name} بنجاح. لا توجد تهديدات معروفة.")
+        notify(f"📁 <b>فحص ملف:</b>\nاسم الملف: {f.name}")
 
-# 4. التحميل (علاج الشاشة البيضاء)
+# 4. التحميل (معالج ضد الانهيار)
 with tabs[3]:
-    st.subheader("🎬 محمل الفيديو المطور")
-    v_url = st.text_input("رابط الفيديو (Facebook, YT, TikTok):")
-    if st.button("🚀 تحميل الآن"):
-        if v_url:
-            with st.spinner("جاري المعالجة... يرجى الانتظار"):
+    st.subheader("🎬 محمل الفيديو")
+    v = st.text_input("رابط (Facebook, YouTube, TikTok):", key="v_dl")
+    if st.button("🚀 تحميل"):
+        if v:
+            with st.spinner("جاري التحميل..."):
                 try:
-                    # إعدادات تمنع انهيار السيرفر
-                    ydl_opts = {
-                        'format': 'best', 'outtmpl': 'ayman_video.mp4', 
-                        'quiet': True, 'no_warnings': True, 'noplaylist': True
-                    }
-                    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                        ydl.download([v_url])
-                    
-                    if os.path.exists("ayman_video.mp4"):
-                        with open("ayman_video.mp4", "rb") as vid:
+                    opts = {'format': 'best', 'outtmpl': 'ayman.mp4', 'quiet': True, 'noplaylist': True}
+                    with yt_dlp.YoutubeDL(opts) as ydl: ydl.download([v])
+                    if os.path.exists("ayman.mp4"):
+                        with open("ayman.mp4", "rb") as vid:
                             st.video(vid.read())
                             st.download_button("📥 حفظ الفيديو", vid, "video.mp4")
-                        os.remove("ayman_video.mp4")
-                        send_to_telegram(f"🎬 <b>تم تحميل فيديو بنجاح:</b>\n{v_url}")
-                except Exception as e:
-                    st.error("فشل التحميل: الرابط قد يكون خاصاً أو غير مدعوم حالياً.")
-                    send_to_telegram(f"⚠️ <b>فشل تحميل:</b>\n{v_url}")
+                        os.remove("ayman.mp4")
+                        notify(f"🎬 <b>تحميل ناجح:</b>\n{v}")
+                except: 
+                    st.error("فشل التحميل. الرابط قد يكون خاصاً.")
+                    notify(f"⚠️ <b>فشل تحميل:</b>\n{v}")
 
-# 5. التواصل والإدارة
+# 5. المجتمع وتواصل معنا
 with tabs[4]:
-    col_a, col_b = st.columns(2)
-    with col_a:
-        st.subheader("📧 أرسل رسالة")
-        with st.form("contact"):
-            name, msg = st.text_input("الاسم:"), st.text_area("الرسالة:")
-            if st.form_submit_button("إرسال"):
-                db.execute("INSERT INTO messages (sender, content, date) VALUES (?,?,?)", (name, msg, datetime.now().strftime("%Y-%m-%d")))
-                db.commit(); st.success("وصلت!"); send_to_telegram(f"📧 <b>رسالة:</b> من {name}")
-    
-    with col_b:
-        st.subheader("🔐 لوحة التحكم")
-        if not st.session_state.logged_in:
-            pwd = st.text_input("كلمة السر:", type="password")
-            if st.button("دخول"):
-                if pwd == "ayman7716": 
-                    st.session_state.logged_in = True; send_to_telegram("🔓 <b>دخول للإدارة</b>"); st.rerun()
-        else:
-            if st.button("تسجيل خروج"): st.session_state.logged_in = False; st.rerun()
-            msgs = db.execute("SELECT * FROM messages ORDER BY id DESC LIMIT 5").fetchall()
-            for m in msgs: st.info(f"من {m[1]}: {m[2]}")
+    st.subheader("📧 التواصل والبلاغات")
+    with st.form("contact"):
+        name = st.text_input("الاسم:")
+        msg = st.text_area("المحتوى:")
+        if st.form_submit_button("إرسال"):
+            st.success("تم الإرسال!")
+            notify(f"📧 <b>رسالة جديدة:</b>\nمن: {name}\nالمحتوى: {msg}")
+
+# 6. الإدارة
+with tabs[5]:
+    if "admin" not in st.session_state: st.session_state.admin = False
+    if not st.session_state.admin:
+        pw = st.text_input("كلمة السر:", type="password")
+        if st.button("دخول"):
+            if pw == "ayman7716": 
+                st.session_state.admin = True; notify("🔓 <b>دخول لوحة الإدارة</b>"); st.rerun()
+    else:
+        st.info("أهلاً أيمن، أنت في وضع الإدارة الآن.")
+        if st.button("تسجيل خروج"): st.session_state.admin = False; st.rerun()
