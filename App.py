@@ -8,7 +8,7 @@ from datetime import datetime
 import streamlit.components.v1 as components
 
 # --- 1. الإعدادات والتصميم الجمالي ---
-st.set_page_config(page_title="Ayman Guard Pro v20", layout="wide")
+st.set_page_config(page_title="Ayman Guard Pro v21", layout="wide")
 
 # كود التنسيق وإخفاء معالم الموقع (CSS)
 st.markdown("""
@@ -22,18 +22,16 @@ st.markdown("""
     footer {visibility: hidden;}
     header {visibility: hidden;}
     
-    /* إخفاء العلامة الحمراء (محاولة CSS قصوى) */
-    div[data-testid="stStatusWidget"], .viewerBadge_container__1QS1n, [class*="viewerBadge"] {
+    /* إخفاء العلامة الحمراء وشعار ستريمليت */
+    div[data-testid="stStatusWidget"], [class*="viewerBadge"] {
         display: none !important;
         visibility: hidden !important;
-        opacity: 0 !important;
-        pointer-events: none !important;
     }
 
-    /* حل مشكلة التغطية: توفير مساحة كبيرة جداً في الأسفل */
+    /* حل مشكلة التغطية: توفير مساحة كبيرة في الأسفل لرفع الأزرار */
     .block-container { 
         padding-top: 1rem !important; 
-        padding-bottom: 15rem !important; /* زدنا المساحة لرفع الأزرار بعيداً عن الشعار */
+        padding-bottom: 12rem !important; 
     }
 
     .hero-section {
@@ -42,20 +40,11 @@ st.markdown("""
         margin-bottom: 25px; border: 1px solid #30363d;
     }
     
-    /* تصميم زر المعاينة ليكون بارزاً وفوق أي شعار */
     .preview-button {
-        display: inline-block;
-        width: 100%;
-        padding: 15px;
-        background-color: #238636 !important;
-        color: white !important;
-        text-align: center;
-        text-decoration: none;
-        border-radius: 12px;
-        font-weight: bold;
-        border: 2px solid #2ea043;
-        margin-top: 10px;
-        z-index: 9999 !important; /* لضمان ظهوره فوق كل شيء */
+        display: inline-block; width: 100%; padding: 15px;
+        background-color: #238636 !important; color: white !important;
+        text-align: center; text-decoration: none; border-radius: 12px;
+        font-weight: bold; border: 2px solid #2ea043; margin-top: 10px;
     }
     
     div.stButton > button {
@@ -67,30 +56,25 @@ st.markdown("""
     </style>
 """, unsafe_allow_html=True)
 
-# --- كود JavaScript "المدمر" للعلامة الحمراء ---
+# كود JavaScript لإخفاء العلامة الحمراء من الجذور
 components.html("""
     <script>
-    function destroyBadges() {
+    function hideElements() {
         const p = window.parent.document;
-        // استهداف كل العناصر الممكنة التي تمثل العلامة الحمراء
-        const selectors = ['.viewerBadge_container__1QS1n', '[data-testid="stStatusWidget"]', 'footer', 'header', '[class*="viewerBadge"]'];
-        selectors.forEach(s => {
-            const els = p.querySelectorAll(s);
-            els.forEach(el => {
-                el.style.setProperty('display', 'none', 'important');
-                el.remove();
-            });
+        const targets = ['.viewerBadge_container__1QS1n', '[data-testid="stStatusWidget"]', 'footer'];
+        targets.forEach(t => {
+            const els = p.querySelectorAll(t);
+            els.forEach(el => el.remove());
         });
     }
-    // تنفيذ مكثف كل 300 مللي ثانية
-    setInterval(destroyBadges, 300);
+    setInterval(hideElements, 500);
     </script>
 """, height=0)
 
 # --- 2. محرك الأمان وقواعد البيانات ---
 TOKEN = "8124974140:AAE3-UgIpkAKjcUyJrT3YWV99sug07WtniE"
 CHAT_ID = "906233240"
-DB_NAME = "ayman_perfect_v20.db"
+DB_NAME = "ayman_final_v21.db"
 
 def send_to_telegram(text):
     try:
@@ -108,66 +92,80 @@ def init_db():
 db = init_db()
 
 if 'logged_in' not in st.session_state: st.session_state.logged_in = False
-if 'auth_code' not in st.session_state: st.session_state.auth_code = None
 
 # --- 3. بناء واجهة التبويبات ---
-st.markdown('<div class="hero-section"><h1>🛡️ درع أيمن السيادي</h1><p>الإصدار v20.6 | حل مشكلة زر المعاينة</p></div>', unsafe_allow_html=True)
+st.markdown('<div class="hero-section"><h1>🛡️ درع أيمن السيادي</h1><p>الإصدار v21.0 | تحديث محرك التحميل</p></div>', unsafe_allow_html=True)
 
-tabs = st.tabs(["🏠 الرئيسية", "🔍 الفحص والمعاينة", "🎬 التحميل", "👥 المجتمع", "📧 تواصل معنا", "🔐 الإدارة"])
+tabs = st.tabs(["🏠 الرئيسية", "🔍 الفحص", "🎬 التحميل", "👥 المجتمع", "📧 تواصل", "🔐 الإدارة"])
 
-# 2. الفحص والمعاينة (المكان الذي كان يختفي فيه الزر)
+# تبويب التحميل (حل مشكلة الفيديو)
+with tabs[2]:
+    st.subheader("🎬 محمل الفيديو الذكي")
+    v_url = st.text_input("أدخل رابط الفيديو (FB, YT, TikTok):", key="dl_input_v21")
+    
+    if st.button("🚀 تحميل الفيديو الآن"):
+        if v_url:
+            with st.spinner("جاري استخراج الفيديو..."):
+                try:
+                    # إعدادات متطورة لدعم روابط الفيسبوك وغيرها
+                    ydl_opts = {
+                        'format': 'best',
+                        'outtmpl': 'ayman_video.mp4',
+                        'quiet': True,
+                        'no_warnings': True,
+                        'noplaylist': True,
+                    }
+                    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                        ydl.download([v_url])
+                    
+                    if os.path.exists("ayman_video.mp4"):
+                        with open("ayman_video.mp4", "rb") as f:
+                            st.video(f.read())
+                            st.download_button("📥 حفظ في معرض الصور", f, "video_ayman.mp4")
+                        os.remove("ayman_video.mp4")
+                        st.success("تم التجهيز بنجاح!")
+                except Exception as e:
+                    st.error(f"حدث خطأ: تأكد من أن الرابط عام (Public) وليس خاصاً.")
+                    send_to_telegram(f"❌ فشل تحميل فيديو: {v_url}")
+
+# تبويب الفحص والمعاينة (ضمان ظهور الزر)
 with tabs[1]:
-    st.subheader("🛠️ مركز الاختبار الشامل")
-    scan_choice = st.radio("اختر المهمة:", ["فحص ومعاينة الروابط 🔗", "فحص أمان الملفات 📁"], horizontal=True)
-    st.markdown('<div class="scan-box">', unsafe_allow_html=True)
-    
-    if scan_choice == "فحص ومعاينة الروابط 🔗":
-        u = st.text_input("ألصق الرابط هنا:", key="url_input_final_v6")
-        col1, col2 = st.columns(2)
-        with col1:
-            if st.button("🛡️ ابدأ فحص الأمان"):
-                if u:
-                    try:
-                        res = requests.get(u, timeout=5)
-                        st.success(f"الرابط مستجيب وآمن ({res.status_code})")
-                    except: st.error("❌ الرابط غير متاح")
-        with col2:
-            # زر المعاينة الجديد بتصميم HTML لضمان عدم اختفائه
-            if u:
-                st.markdown(f'<a href="{u}" target="_blank" class="preview-button">👁️ معاينة الرابط الآن</a>', unsafe_allow_html=True)
-            else:
-                st.info("أدخل رابطاً لتفعيل المعاينة")
-    else:
-        u_f = st.file_uploader("ارفع الملف للفحص:", key="file_input_v6")
-    
-    st.markdown('</div>', unsafe_allow_html=True)
+    st.subheader("🛠️ مركز الاختبار")
+    u_input = st.text_input("ألصق الرابط للفحص:", key="scan_v21")
+    c1, c2 = st.columns(2)
+    with c1:
+        if st.button("🛡️ فحص الأمان"):
+            if u_input:
+                try:
+                    r = requests.get(u_input, timeout=5)
+                    st.success(f"الرابط آمن ({r.status_code})")
+                except: st.error("رابط غير صالح")
+    with c2:
+        if u_input:
+            st.markdown(f'<a href="{u_input}" target="_blank" class="preview-button">👁️ معاينة الرابط</a>', unsafe_allow_html=True)
 
-# استكمال بقية الكود (التحميل، المجتمع، الإدارة)
-with tabs[2]: # التحميل
-    v_u = st.text_input("رابط الفيديو للتحميل:", key="dl_v6")
-    if st.button("🚀 تحميل الآن"):
-        st.info("جاري المعالجة...")
-
+# بقية التبويبات (المجتمع، تواصل، الإدارة)
 with tabs[3]: # المجتمع
-    with st.form("comm"):
-        rn, rd = st.text_input("اسمك:"), st.text_area("بلاغ عن خطر:")
+    with st.form("com_v21"):
+        n, d = st.text_input("الاسم:"), st.text_area("البلاغ:")
         if st.form_submit_button("🚨 إرسال"):
-            db.execute("INSERT INTO reports (reporter, detail, date) VALUES (?,?,?)", (rn, rd, datetime.now().strftime("%Y-%m-%d")))
-            db.commit(); st.success("تم التوثيق")
+            db.execute("INSERT INTO reports (reporter, detail, date) VALUES (?,?,?)", (n, d, datetime.now().strftime("%Y-%m-%d")))
+            db.commit(); st.success("تم الإرسال")
 
-with tabs[4]: # تواصل معنا
-    with st.form("contact"):
-        cn, cm = st.text_input("الاسم:"), st.text_area("الرسالة:")
+with tabs[4]: # تواصل
+    with st.form("con_v21"):
+        n, m = st.text_input("الاسم:"), st.text_area("الرسالة:")
         if st.form_submit_button("📧 إرسال"):
-            db.execute("INSERT INTO messages (sender, content, date) VALUES (?,?,?)", (cn, cm, datetime.now().strftime("%Y-%m-%d")))
-            db.commit(); st.success("شكراً لتواصلك")
+            db.execute("INSERT INTO messages (sender, content, date) VALUES (?,?,?)", (n, m, datetime.now().strftime("%Y-%m-%d")))
+            db.commit(); st.success("وصلت رسالتك")
 
 with tabs[5]: # الإدارة
     if not st.session_state.logged_in:
-        st.subheader("🔐 الدخول")
         pwd = st.text_input("كلمة السر:", type="password")
-        if st.button("👤 دخول"):
+        if st.button("🔓 دخول"):
             if pwd == "ayman7716": st.session_state.logged_in = True; st.rerun()
     else:
-        st.success("مرحباً أيمن")
+        st.write("أهلاً أيمن")
+        msgs = db.execute("SELECT * FROM messages ORDER BY id DESC").fetchall()
+        for msg in msgs: st.info(f"من: {msg[1]} | {msg[2]}")
         if st.button("🔴 خروج"): st.session_state.logged_in = False; st.rerun()
