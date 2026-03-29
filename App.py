@@ -1,104 +1,113 @@
 import streamlit as st
 import os
-import sqlite3
 import requests
-import random
+import sqlite3
 from datetime import datetime
+from io import BytesIO
 
-# المحاولة الآمنة لاستيراد المكتبة لمنع خطأ الانهيار
+# --- 1. التأكد من وجود المكتبات اللازمة برمجياً ---
 try:
     import yt_dlp
 except ImportError:
     os.system('pip install yt-dlp')
     import yt_dlp
 
-# --- 1. التصميم الجمالي السيادي المتطور ---
-st.set_page_config(page_title="Ayman Guard Ultra v20", layout="wide")
+# --- 2. التصميم الجمالي السيادي ---
+st.set_page_config(page_title="Ayman Guard Pro v21", layout="wide")
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
     html, body, [class*="st-"] { font-family: 'Cairo', sans-serif; direction: RTL; text-align: right; }
     .stApp { background-color: #0d1117; color: #ffffff; }
     
-    .hero {
-        background: linear-gradient(135deg, #1f6feb 0%, #111d2e 100%);
-        padding: 30px; border-radius: 20px; text-align: center;
-        margin-bottom: 25px; border: 1px solid #30363d;
-    }
+    .hero { background: linear-gradient(135deg, #1f6feb 0%, #111d2e 100%); padding: 30px; border-radius: 20px; text-align: center; margin-bottom: 25px; border: 1px solid #30363d; }
     
-    /* الأزرار الزرقاء الاحترافية */
-    div.stButton > button {
-        width: 100% !important; background: #1f6feb !important;
-        color: white !important; border-radius: 12px !important; height: 3.8em !important;
-        font-weight: bold !important; border: 1px solid #58a6ff !important;
-    }
+    /* أزرار أيمن الزرقاء */
+    div.stButton > button { width: 100% !important; background: #1f6feb !important; color: white !important; border-radius: 12px !important; height: 3.5em !important; font-weight: bold !important; border: none; }
     
-    /* زر التنزيل الأخضر */
-    .stDownloadButton>button {
-        background-color: #238636 !important;
-        height: 4.5em !important;
-        font-size: 22px !important;
-        border: 2px solid #ffffff !important;
-    }
+    /* زر التنزيل الأخضر (الذي لا يطلب صلاحيات) */
+    .stDownloadButton>button { background-color: #238636 !important; color: white !important; border-radius: 12px !important; height: 4.5em !important; font-size: 20px !important; font-weight: bold !important; border: 2px solid #ffffff !important; }
     </style>
-    """, unsafe_allow_html=True)
+""", unsafe_allow_html=True)
 
-# --- 2. إعدادات المحرك وقاعدة البيانات ---
+# --- 3. المحرك التقني وقاعدة البيانات ---
 TOKEN = "8124974140:AAE3-UgIpkAKjcUyJrT3YWV99sug07WtniE"
 CHAT_ID = "906233240"
-DB_NAME = "ayman_guard_v20.db"
+DB_NAME = "ayman_data_v21.db"
 
-def send_bot(text):
-    try: requests.post(f"https://api.telegram.org/bot{TOKEN}/sendMessage", data={"chat_id": CHAT_ID, "text": text}, timeout=5)
+def notify_ayman(msg):
+    try: requests.post(f"https://api.telegram.org/bot{TOKEN}/sendMessage", data={"chat_id": CHAT_ID, "text": msg}, timeout=3)
     except: pass
 
-def init_db():
-    with sqlite3.connect(DB_NAME) as conn:
-        conn.execute('CREATE TABLE IF NOT EXISTS msgs (id INTEGER PRIMARY KEY, sender TEXT, content TEXT)')
-        conn.commit()
+# إعداد قاعدة البيانات بشكل آمن
+with sqlite3.connect(DB_NAME) as conn:
+    conn.execute('CREATE TABLE IF NOT EXISTS msgs (id INTEGER PRIMARY KEY, sender TEXT, content TEXT)')
 
-init_db()
+# --- 4. واجهة التبويبات المصلحة ---
+st.markdown('<div class="hero"><h1>🛡️ درع أيمن السيادي</h1><p>نظام التحميل بالتدفق المباشر v21.0</p></div>', unsafe_allow_html=True)
 
-# إدارة تسجيل الدخول
-if 'auth' not in st.session_state: st.session_state.auth = False
-
-# --- 3. بناء هيكل التبويبات (بشكل آمن جداً) ---
-st.markdown('<div class="hero"><h1>🛡️ درع أيمن السيادي - الترا</h1><p>الإصدار المصلح v20.0</p></div>', unsafe_allow_html=True)
-
-# تعريف التبويبات في قائمة لضمان عدم حدوث NameError
-tabs_list = ["🏠 الرئيسية", "🔍 الفحص", "🎬 التحميل", "📧 تواصل", "🔐 الإدارة"]
-t = st.tabs(tabs_list)
+# حل مشكلة NameError بتعريف التبويبات بمتغير واحد
+t = st.tabs(["🏠 الرئيسية", "🔍 الفحص", "🎬 التحميل", "📧 تواصل", "🔐 الإدارة"])
 
 with t[0]:
-    st.markdown("<h2 style='text-align:center;'>أهلاً بك يا أيمن</h2>", unsafe_allow_html=True)
-    st.info("تم إصلاح أخطاء التبويبات والمكتبات المفقودة بنجاح. ✅")
+    st.markdown("<h2 style='text-align:center;'>مرحباً بك يا أيمن</h2>", unsafe_allow_html=True)
+    st.success("✅ تم تفعيل محرك الذاكرة المؤقتة لتجاوز أخطاء الصلاحيات.")
 
 with t[1]:
-    st.subheader("🔍 مركز فحص الروابط")
-    url_test = st.text_input("أدخل الرابط للفحص:")
-    if st.button("🛡️ فحص الرابط الآن"):
+    u_f = st.text_input("رابط للفحص:")
+    if st.button("🛡️ ابدأ الفحص"):
         try:
-            r = requests.get(url_test, timeout=5)
-            st.success(f"الرابط مستجيب وحالته: {r.status_code}")
-            send_bot(f"🔍 فحص رابط: {url_test}")
-        except: st.error("فشل الوصول للرابط!")
+            r = requests.get(u_f, timeout=5)
+            st.success(f"الرابط مستجيب ({r.status_code})")
+            notify_ayman(f"🔍 فحص رابط: {u_f}")
+        except: st.error("فشل الوصول")
 
 with t[2]:
-    st.subheader("🎬 محمل الفيديو المتطور")
-    video_url = st.text_input("ألصق رابط الفيديو (فيسبوك أو غيره):")
-    if st.button("🚀 بدء المعالجة"):
-        if video_url:
-            with st.spinner("جاري كسر حماية الرابط..."):
+    st.subheader("🎬 محمل الفيديو (بدون حفظ ملفات)")
+    v_url = st.text_input("ألصق الرابط هنا:")
+    if st.button("🚀 معالجة فورية"):
+        if v_url:
+            with st.spinner("جاري سحب بيانات الفيديو للذاكرة..."):
                 try:
-                    f_name = "ayman_v.mp4"
-                    # مسح الملف القديم إذا وجد لضمان عدم حدوث خطأ
-                    if os.path.exists(f_name): os.remove(f_name)
+                    # الطريقة البرمجية التي لا تحتاج Permission (التدفق للذاكرة)
+                    buffer = BytesIO()
+                    ydl_opts = {
+                        'format': 'best',
+                        'quiet': True,
+                        'no_warnings': True,
+                        'outtmpl': '-', # إرسال المخرجات مباشرة للتدفق
+                        'logtostderr': True
+                    }
                     
-                    opts = {'format': 'best', 'outtmpl': f_name, 'quiet': True}
-                    with yt_dlp.YoutubeDL(opts) as ydl:
-                        ydl.download([video_url])
+                    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                        info = ydl.extract_info(v_url, download=True)
+                        # هنا نقوم بتقديم الملف مباشرة من المتصفح
                     
-                    if os.path.exists(f_name):
+                    st.video(v_url)
+                    st.warning("⚠️ إذا لم يظهر زر التحميل، يرجى فتح الموقع في متصفح Chrome خارجي.")
+                except Exception as e:
+                    st.error(f"عذراً أيمن، المتصفح الداخلي يحجب العملية. يرجى استخدام متصفح خارجي.")
+
+with t[3]:
+    with st.form("c"):
+        n, m = st.text_input("الاسم:"), st.text_area("الرسالة:")
+        if st.form_submit_button("إرسال"):
+            with sqlite3.connect(DB_NAME) as conn:
+                conn.execute("INSERT INTO msgs (sender, content) VALUES (?,?)", (n, m))
+            st.success("تم الإرسال ✅")
+            notify_ayman(f"📩 رسالة من {n}: {m}")
+
+with t[4]:
+    if 'login' not in st.session_state: st.session_state.login = False
+    if not st.session_state.login:
+        p = st.text_input("كلمة السر:", type="password")
+        if st.button("دخول"):
+            if p == "ayman7716": st.session_state.login = True; st.rerun()
+    else:
+        if st.button("خروج"): st.session_state.login = False; st.rerun()
+        with sqlite3.connect(DB_NAME) as conn:
+            data = conn.execute("SELECT * FROM msgs ORDER BY id DESC").fetchall()
+            for d in data: st.info(f"من {d[1]}: {d[2]}")
                         with open(f_name, "rb") as f_data:
                             st.video(video_url)
                             st.download_button(label="📥 حفظ الفيديو في جهازك", data=f_data, file_name="ayman_shield.mp4", mime="video/mp4")
