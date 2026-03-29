@@ -93,60 +93,56 @@ with tabs[0]:
     st.image("https://img.freepik.com/free-vector/cyber-security-concept_23-2148532223.jpg", use_column_width=True)
     
     # --- التبويب 2: مركز الوسائط (الإصدار المستقر العام) ---
+with# استبدل قسم "مركز الوسائط" بهذا الكود المطور والمقاوم للحظر:
+
 with tabs[1]:
-    st.subheader("🎬 محرك تحميل الفيديو")
-    v_url = st.text_input("ألصق الرابط هنا (YouTube, FB, etc):", key="v_input")
+    st.subheader("🎬 محرك تحميل الفيديو السيادي")
+    v_url = st.text_input("ألصق الرابط هنا (تأكد أنه يبدأ بـ https مباشرة):")
     
     if st.button("🚀 جلب وتحميل الفيديو"):
         if v_url:
-            with st.spinner("جاري استخراج الفيديو..."):
+            # تنظيف الرابط من أي رموز زائدة في البداية
+            clean_url = v_url.strip().lstrip('/') 
+            
+            with st.spinner("جاري فك التشفير وجلب الرابط المباشر..."):
                 try:
-                    # تنظيف الرابط من أي مسافات زائدة
-                    target_url = v_url.strip()
-                    
-                    # إعدادات yt-dlp القياسية لتحميل أفضل جودة MP4
                     ydl_opts = {
-                        'format': 'best[ext=mp4]/best',
+                        'format': 'best', 
                         'quiet': True,
                         'no_warnings': True,
+                        # هذه الهوية ضرورية جداً لتجاوز حماية تيك توك الجديدة
+                        'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+                        'extract_flat': False,
                     }
-                    
                     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                        info = ydl.extract_info(target_url, download=False)
-                        video_direct_url = info.get('url')
-                        video_title = info.get('title', 'Ayman_Video')
+                        info = ydl.extract_info(clean_url, download=False)
+                        # جلب الرابط المباشر بدقة
+                        direct_link = info.get('url')
                         
                         st.session_state.video_data = {
-                            "url": video_direct_url,
-                            "title": video_title
+                            "url": direct_link,
+                            "title": info.get('title', 'Ayman_Guard_Video')
                         }
-                        st.success("✅ تم جلب الرابط بنجاح!")
-                        
+                        st.success("✅ الفيديو جاهز الآن!")
                 except Exception as e:
-                    st.error("❌ فشل المحرك في هذا الرابط. قد يكون الرابط خاصاً أو محمياً.")
+                    st.error("❌ فشل المحرك. تأكد من جودة الاتصال أو تحديث مكتبة yt-dlp.")
 
-    # عرض المعاينة وزر التحميل إذا وجدنا البيانات
     if st.session_state.video_data:
         st.divider()
-        st.markdown(f"📌 **العنوان:** {st.session_state.video_data['title']}")
-        
-        # المعاينة المباشرة
+        # عرض الفيديو باستخدام الرابط المباشر المستخرج
         st.video(st.session_state.video_data['url'])
         
-        # زر التحميل المباشر
+        # زر التحميل المباشر لتحويله لملف في الاستوديو
         try:
-            # محاولة سحب الفيديو كملف للتحميل المباشر
-            video_bytes = requests.get(st.session_state.video_data['url'], timeout=10).content
+            video_file = requests.get(st.session_state.video_data['url']).content
             st.download_button(
-                label="📥 حفظ في الاستوديو (MP4)",
-                data=video_bytes,
+                label="📥 حفظ في الاستوديو",
+                data=video_file,
                 file_name=f"{st.session_state.video_data['title']}.mp4",
-                mime="video/mp4",
-                use_container_width=True
+                mime="video/mp4"
             )
         except:
-            # إذا فشل السحب المباشر، نعطي المستخدم الرابط الخام
-            st.warning("⚠️ التحميل المباشر مقيد، يمكنك الضغط مطولاً على الفيديو للحفظ.")
+            st.info("💡 إذا لم يعمل الزر، اضغط مطولاً على الفيديو واختر 'تنزيل'.")
 
 
 
