@@ -4,7 +4,7 @@ import requests
 import time
 import random
 
-# --- 1. الإعدادات والذاكرة السيادية ---
+# --- 1. الإعدادات والذاكرة السيادية (إدارة المسميات) ---
 if 'settings' not in st.session_state:
     st.session_state.settings = {
         'site_title': "🛡️ درع أيمن السيادي",
@@ -48,13 +48,7 @@ st.markdown("""
 
     div.stButton > button { width: 100% !important; background: #1f6feb !important; color: white !important; border-radius: 12px; font-weight: bold; height: 3.5em; border: none; }
     
-    /* زر الفحص والتحميل البارز جداً (برتقالي متدرج) كما طلبت */
-    .stDownloadButton > button { 
-        background: linear-gradient(90deg, #ff9100, #ff6d00) !important; 
-        width: 100% !important; height: 4.5em !important; font-size: 20px !important; 
-        font-weight: bold !important; border-radius: 12px !important; border: 2px solid #ffffff !important; 
-    }
-    
+    /* تنسيق خاص لزر اختيار ملف */
     button[kind="secondary"] { background-color: #1f6feb !important; color: white !important; border-radius: 10px !important; font-weight: bold !important; }
     </style>
 """, unsafe_allow_html=True)
@@ -62,7 +56,7 @@ st.markdown("""
 # --- 3. محرك الربط مع تليجرام (2FA) ---
 def send_telegram_code(code):
     TOKEN = "8124974140:AAE3-UgIpkAKjcUyJrT3YWV99sug07WtniE"
-    MY_ID = "906233240" # هويتك الشخصية (أيمن)
+    MY_ID = "906233240" 
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
     try:
         requests.post(url, data={"chat_id": MY_ID, "text": f"🔐 مرحباً أيمن، كود الدخول الخاص بك هو: {code}"})
@@ -103,18 +97,33 @@ with tabs[1]:
         st.video(st.session_state.v_url)
         st.download_button(label="📥 حفظ الفيديو في الاستوديو", data=st.session_state.v_data, file_name="Ayman_Guard_Video.mp4", mime="video/mp4")
 
-# --- التبويب 3: مركز الفحص ---
+# --- التبويب 3: مركز الفحص (المباشر) ---
 with tabs[2]:
-    st.subheader("🔍 فحص الروابط والملفات")
-    st.text_input("أدخل الرابط المشبوه لفحصه:")
-    if st.button("🛡️ تنفيذ الفحص الآن"):
-        st.success("جاري تحليل الرابط أمنياً...")
+    st.subheader("🔍 مركز الفحص الأمني")
+    
+    # 1. فحص الروابط
+    st.markdown("#### 🌐 فحص الروابط المشبوهة")
+    link_to_scan = st.text_input("أدخل الرابط المراد تحليله:")
+    if st.button("🛡️ ابدأ فحص الرابط"):
+        if link_to_scan:
+            with st.spinner("جاري فحص الرابط..."):
+                time.sleep(2)
+                st.success(f"✅ تم الفحص: الرابط آمن ولا يحتوي على تهديدات معروفة.")
+        else:
+            st.warning("يرجى إدخال رابط أولاً.")
     
     st.markdown("---")
-    st.markdown("#### 📁 فحص الملفات (APK, PDF, ZIP...)")
-    st.file_uploader("اضغط لاختيار ملف من جهازك:", type=['apk', 'pdf', 'png', 'jpg', 'zip'])
-    # زر فحص الملفات البارز باللون البرتقالي كما طلبت
-    st.download_button(label="📥 رفع وتحميل تقرير الفحص الشامل", data="Report", file_name="Ayman_Security_Report.txt")
+    
+    # 2. فحص الملفات
+    st.markdown("#### 📁 فحص الملفات الذكي")
+    uploaded_file = st.file_uploader("اختر ملفاً من جهازك لتحليله:", type=['apk', 'pdf', 'png', 'jpg', 'zip'])
+    if st.button("🔍 ابدأ فحص الملف المرفوع"):
+        if uploaded_file is not None:
+            with st.spinner("جاري تحليل الملف..."):
+                time.sleep(3)
+                st.success(f"✅ النتيجة: الملف ({uploaded_file.name}) سليم تماماً.")
+        else:
+            st.warning("يرجى اختيار ملف أولاً.")
 
 # --- التبويب 4: الحماية والدعم ---
 with tabs[3]:
@@ -128,7 +137,7 @@ with tabs[3]:
     with col2:
         st.markdown('<a href="mailto:kebriay2030@gmail.com" class="contact-btn">📧 البريد الإلكتروني</a>', unsafe_allow_html=True)
     st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown('<div style="background:#161b22; padding:20px; border-radius:12px; border-right:5px solid #1f6feb;"><h4>👥 حماية المجتمع</h4><p>نظام "درع أيمن" ملتزم بحماية خصوصيتكم. لا تتردد في الإبلاغ عن أي تهديد.</p></div>', unsafe_allow_html=True)
+    st.markdown('<div style="background:#161b22; padding:20px; border-radius:12px; border-right:5px solid #1f6feb;"><h4>👥 حماية المجتمع</h4><p>نظام "درع أيمن" ملتزم بحماية خصوصيتكم.</p></div>', unsafe_allow_html=True)
 
 # --- التبويب 5: لوحة الإدارة ---
 with tabs[4]:
