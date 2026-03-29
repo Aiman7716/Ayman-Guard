@@ -91,52 +91,79 @@ with tabs[0]:
     with c2: st.markdown(f'<div class="feature-card"><h2>🚀</h2><h4>تحميل ذكي</h4><p>أسرع محرك جلب وسائط</p></div>', unsafe_allow_html=True)
     with c3: st.markdown(f'<div class="feature-card"><h2>🤖</h2><h4>بوت رسمي</h4><p>تحكم كامل عبر تليجرام</p></div>', unsafe_allow_html=True)
     st.image("https://img.freepik.com/free-vector/cyber-security-concept_23-2148532223.jpg", use_column_width=True)
-    
-    # --- التبويب 2: مركز الوسائط (الإصدار المستقر) ---
+    # --- التبويب 2: مركز الوسائط الذهبي (حجم الزر الكامل) ---
 with tabs[1]:
     st.subheader("🎬 محرك تحميل الفيديو")
-    v_url = st.text_input("ألصق الرابط هنا (TikTok, YouTube, FB):")
+    v_url = st.text_input("ألصق الرابط هنا (YouTube, FB, etc):", key="v_input")
     
     if st.button("🚀 جلب وتحميل الفيديو"):
         if v_url:
-            with st.spinner("جاري المعالجة..."):
+            with st.spinner("جاري استخراج الفيديو..."):
                 try:
-                    # تنظيف الرابط من أي شوائب كتابية
-                    target = v_url.strip().replace("/https", "https").lstrip('/')
-                    
-                    ydl_opts = {
-                        'format': 'best',
-                        'quiet': True,
-                        'no_warnings': True,
-                    }
+                    target_url = v_url.strip().replace("/https", "https").lstrip('/')
+                    ydl_opts = {'format': 'best[ext=mp4]/best', 'quiet': True}
                     
                     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                        info = ydl.extract_info(target, download=False)
+                        info = ydl.extract_info(target_url, download=False)
                         st.session_state.video_data = {
-                            "url": info['url'], 
+                            "url": info.get('url'),
                             "title": info.get('title', 'Ayman_Video')
                         }
-                        st.success("✅ الفيديو جاهز!")
-                        
+                        st.success("✅ تم جلب الرابط بنجاح!")
                 except Exception as e:
-                    st.error("❌ عذراً، هذا الرابط محمي جداً أو السيرفر مضغوط.")
+                    st.error("❌ فشل المحرك. الرابط قد يكون محمياً أو خاصاً.")
 
-    # عرض المعاينة والتحميل
     if st.session_state.video_data:
         st.divider()
+        st.markdown(f"📌 **العنوان:** {st.session_state.video_data['title']}")
+        
+        # عرض الفيديو (يأخذ عرض الصفحة تلقائياً)
         st.video(st.session_state.video_data['url'])
         
         try:
-            # محاولة جلب الفيديو للتحميل المباشر
-            v_content = requests.get(st.session_state.video_data['url'], timeout=10).content
+            video_bytes = requests.get(st.session_state.video_data['url'], timeout=15).content
+            
+            # --- تنسيق CSS لجعل الزر بنفس عرض الفيديو تماماً ---
+            st.markdown("""
+                <style>
+                /* استهداف حاوية زر التحميل لجعلها تملأ العرض */
+                .stDownloadButton {
+                    display: flex;
+                    justify-content: center;
+                    width: 100%;
+                }
+                .stDownloadButton > button {
+                    width: 100% !important; /* الزر سيأخذ عرض الفيديو تماماً */
+                    background-color: #FFD700 !important;
+                    color: black !important;
+                    font-weight: bold !important;
+                    font-size: 18px !important;
+                    padding: 15px !important;
+                    border-radius: 12px !important;
+                    border: none !important;
+                    box-shadow: 0px 4px 15px rgba(255, 215, 0, 0.4) !important;
+                    transition: 0.3s;
+                }
+                .stDownloadButton > button:hover {
+                    background-color: #e6c200 !important;
+                    transform: scale(1.01); /* حركة بسيطة عند اللمس */
+                }
+                </style>
+            """, unsafe_allow_html=True)
+
+            # زر التحميل
             st.download_button(
                 label="📥 حفظ في الاستوديو (MP4)",
-                data=v_content,
-                file_name="Ayman_Guard.mp4",
-                mime="video/mp4"
+                data=video_bytes,
+                file_name=f"Ayman_Video_{int(time.time())}.mp4",
+                mime="video/mp4",
+                use_container_width=True # تفعيل خاصية العرض الكامل برمجياً أيضاً
             )
+            st.balloons()
+            
         except:
-            st.warning("⚠️ التحميل المباشر مقيد، يمكنك الحفظ من مشغل الفيديو أعلاه.")
+            st.warning("⚠️ التحميل المباشر مقيد، جرب الحفظ من المشغل أعلاه.")
+
 
 
 
