@@ -7,13 +7,13 @@ import random
 # --- 1. المحرك الذكي للذاكرة (حفظ كافة التسميات) ---
 if 'settings' not in st.session_state:
     st.session_state.settings = {
-        'site_title': "🛡️ درع أيمن السيادي",
+        'site_title': "🛡️ درع أيمن الرقمي",
         'site_sub': "نظام الحماية والاتصال الرسمي V37.0",
         'welcome_msg': "مرحباً بك في أقوى نظام حماية رقمي لعام 2026",
         'btn_bot_text': "🤖 ابدأ المحادثة مع بوت الدرع",
         'btn_wa_text': "📱 واتساب الرسمي",
         'btn_mail_text': "📧 البريد الإلكتروني",
-        'admin_password': "Ayman2026",
+        'admin_password': "aiman7716",
         'theme_color': "#1f6feb"
     }
 
@@ -31,7 +31,6 @@ st.markdown(f"""
     html, body, [class*="st-"] {{ font-family: 'Cairo', sans-serif; direction: RTL; text-align: right; }}
     .stApp {{ background-color: #0d1117; color: #ffffff; }}
     
-    /* الهيدر المطور (الرئيسية الجذابة) */
     .hero-box {{
         background: linear-gradient(135deg, {color} 0%, #0a0e14 100%);
         padding: 50px 20px; border-radius: 25px; text-align: center;
@@ -39,7 +38,6 @@ st.markdown(f"""
         box-shadow: 0 15px 50px rgba(0,0,0,0.7); animation: fadeIn 1.5s;
     }}
     
-    /* بطاقات العرض في الرئيسية */
     .feature-card {{
         background: rgba(22, 27, 34, 0.8); padding: 30px; border-radius: 20px;
         border: 1px solid #30363d; text-align: center; margin-bottom: 20px;
@@ -47,7 +45,6 @@ st.markdown(f"""
     }}
     .feature-card:hover {{ transform: translateY(-10px); border-color: white; }}
 
-    /* الأزرار السيادية */
     div.stButton > button {{ 
         width: 100% !important; background: {color} !important; 
         color: white !important; border-radius: 15px; font-weight: bold; 
@@ -61,7 +58,6 @@ st.markdown(f"""
     }}
     .contact-link:hover {{ opacity: 0.8; transform: scale(1.02); }}
 
-    /* إصلاح تداخل النصوص في الجوال */
     .stTextInput > label, .stColorPicker > label {{ margin-bottom: 10px !important; font-weight: bold !important; color: {color} !important; }}
     @keyframes fadeIn {{ from {{ opacity: 0; }} to {{ opacity: 1; }} }}
     </style>
@@ -125,7 +121,7 @@ with tabs[2]:
     st.file_uploader("ارفع ملفاً للتحليل:", type=['apk','pdf','zip'])
     if st.button("🔍 فحص الملف"): st.success("الملف سليم ✅")
 
-# --- التبويب 4: الدعم (أزرار التواصل القابلة للتعديل) ---
+# --- التبويب 4: الدعم ---
 with tabs[3]:
     st.subheader("📞 قنوات التواصل الرسمية")
     st.markdown(f'<a href="https://t.me/Aiman_Guard_2026_bot" class="contact-link" style="background:#0088cc;">{st.session_state.settings["btn_bot_text"]}</a>', unsafe_allow_html=True)
@@ -133,7 +129,7 @@ with tabs[3]:
     with col1: st.markdown(f'<a href="https://wa.me/966556868717" class="contact-link" style="background:#25d366;">{st.session_state.settings["btn_wa_text"]}</a>', unsafe_allow_html=True)
     with col2: st.markdown(f'<a href="mailto:kebriay2030@gmail.com" class="contact-link" style="background:#ea4335;">{st.session_state.settings["btn_mail_text"]}</a>', unsafe_allow_html=True)
 
-# --- التبويب 5: الإدارة السيادية (تعديلات كاملة وشاملة) ---
+# --- التبويب 5: الإدارة السيادية (تم الإصلاح هنا) ---
 with tabs[4]:
     if not st.session_state.is_admin:
         st.subheader("🔐 الدخول الآمن")
@@ -143,38 +139,42 @@ with tabs[4]:
                 code = str(random.randint(100000, 999999))
                 if send_security_msg(code):
                     st.session_state.auth_code = code
-                    st.success("أرسلنا الكود لتليجرام")
+                    st.success("✅ أرسلنا الكود لتليجرام")
+                    time.sleep(1)
+                    st.rerun() # تحديث الصفحة فوراً لإظهار خانة الكود
+            else: st.error("❌ كلمة المرور خاطئة")
         
         if st.session_state.auth_code:
-            v_code = st.text_input("أدخل الكود:")
+            v_code = st.text_input("أدخل الكود المستلم:")
             if st.button("✅ دخول"):
                 if v_code == st.session_state.auth_code:
                     st.session_state.is_admin = True
                     st.rerun()
+                else: st.error("❌ الكود غير صحيح.")
     else:
-        st.success("🔓 مرحباً أيمن، أنت الآن في غرفة التحكم الكاملة.")
+        st.success("🔓 مرحباً أيمن، أنت الآن في غرفة التحكم.")
         if st.button("🚪 خروج آمن"):
             st.session_state.is_admin = False
             st.rerun()
         
         st.divider()
-        st.subheader("⚙️ تعديل نصوص الموقع والترحيب")
-        st.session_state.settings['site_title'] = st.text_input("عنوان الموقع الرئيسي:", st.session_state.settings['site_title'])
-        st.session_state.settings['site_sub'] = st.text_input("الوصف الفرعي للموقع:", st.session_state.settings['site_sub'])
-        st.session_state.settings['welcome_msg'] = st.text_area("رسالة الترحيب في الرئيسية:", st.session_state.settings['welcome_msg'])
+        st.subheader("⚙️ تعديلات الموقع")
+        st.session_state.settings['site_title'] = st.text_input("عنوان الموقع:", st.session_state.settings['site_title'])
+        st.session_state.settings['site_sub'] = st.text_input("الوصف:", st.session_state.settings['site_sub'])
+        st.session_state.settings['welcome_msg'] = st.text_area("الترحيب:", st.session_state.settings['welcome_msg'])
         
         st.divider()
-        st.subheader("🔗 تعديل تسميات أزرار التواصل")
+        st.subheader("🔗 تسميات الأزرار")
         c1, c2, c3 = st.columns(3)
-        with c1: st.session_state.settings['btn_bot_text'] = st.text_input("اسم زر البوت:", st.session_state.settings['btn_bot_text'])
-        with c2: st.session_state.settings['btn_wa_text'] = st.text_input("اسم زر واتساب:", st.session_state.settings['btn_wa_text'])
-        with c3: st.session_state.settings['btn_mail_text'] = st.text_input("اسم زر البريد:", st.session_state.settings['btn_mail_text'])
+        with c1: st.session_state.settings['btn_bot_text'] = st.text_input("زر البوت:", st.session_state.settings['btn_bot_text'])
+        with c2: st.session_state.settings['btn_wa_text'] = st.text_input("زر واتساب:", st.session_state.settings['btn_wa_text'])
+        with c3: st.session_state.settings['btn_mail_text'] = st.text_input("زر البريد:", st.session_state.settings['btn_mail_text'])
 
         st.divider()
-        st.subheader("🎨 التنسيق اللوني وكلمة المرور")
-        st.session_state.settings['theme_color'] = st.color_picker("اختر لون هوية الموقع:", st.session_state.settings['theme_color'])
-        st.session_state.settings['admin_password'] = st.text_input("تغيير كلمة المرور:", st.session_state.settings['admin_password'], type="password")
+        st.subheader("🎨 التنسيق وكلمة المرور")
+        st.session_state.settings['theme_color'] = st.color_picker("لون الهوية:", st.session_state.settings['theme_color'])
+        st.session_state.settings['admin_password'] = st.text_input("كلمة مرور جديدة:", st.session_state.settings['admin_password'], type="password")
         
-        if st.button("💾 حفظ كافة التعديلات وتحديث الموقع"):
-            st.success("✅ تم حفظ التغييرات فوراً!")
+        if st.button("💾 حفظ وتطبيق التعديلات"):
+            st.success("✅ تم تحديث النظام!")
             st.rerun()
