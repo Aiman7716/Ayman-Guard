@@ -91,58 +91,59 @@ with tabs[0]:
     with c2: st.markdown(f'<div class="feature-card"><h2>🚀</h2><h4>تحميل ذكي</h4><p>أسرع محرك جلب وسائط</p></div>', unsafe_allow_html=True)
     with c3: st.markdown(f'<div class="feature-card"><h2>🤖</h2><h4>بوت رسمي</h4><p>تحكم كامل عبر تليجرام</p></div>', unsafe_allow_html=True)
     st.image("https://img.freepik.com/free-vector/cyber-security-concept_23-2148532223.jpg", use_column_width=True)
-
-# --- التبويب 2: محرك الوسائط V50 (التحميل المباشر) ---
-# --- التبويب 2: محرك الوسائط V50 (التحميل المباشر والنهائي) ---
+# --- التبويب 2: محرك الوسائط العالمي V60 ---
 with tabs[1]:
-    st.subheader("🎬 محرك تحميل الفيديو السيادي")
-    v_url = st.text_input("ألصق الرابط هنا:")
+    st.subheader("🎬 محرك تحميل الفيديو السيادي (Universal)")
+    v_url = st.text_input("ألصق الرابط هنا (TikTok, YouTube, etc):")
     
-    if st.button("🚀 معالجة وتجهيز الملف"):
+    if st.button("🚀 جلب الفيديو الآن"):
         if v_url:
-            # تنظيف الرابط آلياً من الشرطة الزائدة التي تظهر في صورتك
-            clean_url = v_url.strip().lstrip('/') 
-            
-            with st.spinner("جاري سحب الفيديو وتجهيزه..."):
+            clean_url = v_url.strip().lstrip('/')
+            with st.spinner("جاري كسر التشفير وجلب الملف الأصلي..."):
                 try:
-                    ydl_opts = {
-                        'format': 'best',
-                        'quiet': True,
-                        'no_warnings': True,
-                        'nocheckcertificate': True,
-                        'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
-                    }
+                    # محرك متطور: يحاول الجلب عبر API خارجي لتجنب حظر السيرفر
+                    api_url = f"https://api.tiklydown.eu.org/api/download?url={clean_url}"
+                    response = requests.get(api_url, timeout=15).json()
                     
-                    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                        info = ydl.extract_info(clean_url, download=False)
-                        video_direct_url = info.get('url')
-                        video_title = info.get('title', 'Ayman_Video')
-                        
-                        # سحب محتوى الفيديو كبيانات (Bytes) لتجاوز حظر المشغل
-                        video_response = requests.get(video_direct_url, stream=True, timeout=25)
+                    if 'video' in response:
+                        # جلب رابط الفيديو بدون علامة مائية
+                        video_link = response['video'].get('noWatermark') or response['video'].get('url')
+                        video_data = requests.get(video_link, timeout=20).content
                         
                         st.session_state.video_data = {
-                            "content": video_response.content,
-                            "title": video_title
+                            "content": video_data,
+                            "title": response.get('title', 'Ayman_Video'),
+                            "preview": video_link
                         }
-                        st.success("✅ الملف جاهز تماماً للحفظ!")
-                        st.balloons()
-                except Exception as e:
-                    st.error("❌ تيك توك يرفض الطلب حالياً. جرب فيديو آخر.")
+                        st.success("✅ تم جلب الفيديو بنجاح وبدون علامة مائية!")
+                    else:
+                        # إذا فشل الـ API، نعود للمحرك التقليدي كخطة احتياطية
+                        ydl_opts = {'format': 'best', 'quiet': True, 'no_warnings': True}
+                        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                            info = ydl.extract_info(clean_url, download=False)
+                            v_content = requests.get(info['url'], timeout=15).content
+                            st.session_state.video_data = {"content": v_content, "title": info['title'], "preview": info['url']}
+                            st.success("✅ تم الجلب عبر المحرك الاحتياطي")
 
-    # إذا تم تجهيز البيانات، يظهر زر التحميل فقط (لتجن vision مشكلة المشغل المكسور)
+                except Exception as e:
+                    st.error("❌ عذراً، هذا الرابط محمي جداً أو السيرفر مشغول. حاول لاحقاً.")
+
+    # عرض النتائج
     if st.session_state.video_data and "content" in st.session_state.video_data:
         st.divider()
-        st.info(f"📁 اسم الملف: {st.session_state.video_data['title']}")
+        # إعادة المعاينة
+        st.video(st.session_state.video_data['content']) 
         
-        # زر التحميل السيادي الذي يحفظ الفيديو في الاستوديو مباشرة
+        # زر التحميل بالحجم الكامل (ميغابايت وليس كيلوبايت)
+        file_size = len(st.session_state.video_data['content']) / (1024 * 1024)
         st.download_button(
-            label="📥 اضغط هنا لحفظ الفيديو في الاستوديو",
+            label=f"📥 حفظ في الاستوديو (الحجم: {file_size:.2f} MB)",
             data=st.session_state.video_data['content'],
             file_name=f"{st.session_state.video_data['title']}.mp4",
             mime="video/mp4",
             use_container_width=True
         )
+
 
 
 
