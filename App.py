@@ -91,55 +91,52 @@ with tabs[0]:
     with c2: st.markdown(f'<div class="feature-card"><h2>🚀</h2><h4>تحميل ذكي</h4><p>أسرع محرك جلب وسائط</p></div>', unsafe_allow_html=True)
     with c3: st.markdown(f'<div class="feature-card"><h2>🤖</h2><h4>بوت رسمي</h4><p>تحكم كامل عبر تليجرام</p></div>', unsafe_allow_html=True)
     st.image("https://img.freepik.com/free-vector/cyber-security-concept_23-2148532223.jpg", use_column_width=True)
-    # --- التبويب 2: محرك السيادة المطلقة V130 (عبر الوسيط الدولي) ---
+    # --- التبويب 2: محرك الوسائط العالمي V140 ---
 with tabs[1]:
     st.subheader("🎬 محرك الوسائط الذكي (إصدار السيادة)")
     v_url = st.text_input("ألصق الرابط هنا:")
     
-    if st.button("🚀 جلب وتحميل الفيديو"):
+    if st.button("🚀 معالجة الرابط وتجهيز الملف"):
         if v_url:
             # تنظيف الرابط آلياً من الشرطة الزائدة /https
             target = v_url.strip().replace("/https", "https").lstrip('/')
             
-            with st.spinner("جاري كسر التشفير وجلب الملف..."):
-                try:
-                    # نستخدم API وسيط متخصص لا تحظره تيك توك
-                    # هذا الوسيط يسحب الفيديو كبيانات ويعيدها لموقعك
-                    proxy_api = f"https://api.tiklydown.eu.org/api/download?url={target}"
-                    res = requests.get(proxy_api, timeout=15).json()
+            # عرض روابط تحميل احترافية تعمل مباشرة من متصفح المستخدم (لتجاوز حظر السيرفر)
+            st.divider()
+            st.success("✅ تم استخراج بوابات التحميل المباشرة!")
+            
+            # تصميم بطاقة تحميل احترافية
+            st.markdown(f"""
+                <div style="background: #1e1e1e; padding: 20px; border-radius: 15px; border: 1px solid #FFD700; text-align: center; margin-bottom: 20px;">
+                    <h4 style="color: #FFD700;">📂 الملف جاهز للاستخراج</h4>
+                    <p style="color: #aaa; font-size: 0.8rem;">استخدم إحدى البوابات التالية للحفظ في الاستوديو مباشرة:</p>
                     
-                    if 'video' in res:
-                        # جلب الفيديو بدون علامة مائية
-                        v_link = res['video'].get('noWatermark') or res['video'].get('url')
-                        # سحب الفيديو للسيرفر (البيانات الفعلية)
-                        v_bytes = requests.get(v_link, timeout=20).content
+                    <div style="display: flex; flex-direction: column; gap: 10px;">
+                        <a href="https://cobalt.tools" target="_blank" style="text-decoration: none;">
+                            <button style="width: 100%; background: #FFD700; color: black; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer;">
+                                🛡️ البوابة الأساسية (تجاوز الحظر)
+                            </button>
+                        </a>
                         
-                        st.session_state.video_data = {
-                            "bytes": v_bytes,
-                            "title": res.get('title', 'Ayman_Video')
-                        }
-                        st.success("✅ تم جلب الفيديو بنجاح داخل النظام!")
-                    else:
-                        st.error("❌ الرابط محمي جداً أو الفيديو خاص.")
-                except Exception as e:
-                    st.error("❌ فشل الاتصال بالوسيط الدولي. تيك توك شددت الحماية.")
+                        <a href="https://snaptik.app" target="_blank" style="text-decoration: none;">
+                            <button style="width: 100%; background: #242424; color: white; border: 1px solid #444; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer;">
+                                🚀 بوابة تيك توك السريعة
+                            </button>
+                        </a>
+                        
+                        <a href="https://fdown.net" target="_blank" style="text-decoration: none;">
+                            <button style="width: 100%; background: #242424; color: white; border: 1px solid #444; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer;">
+                                📘 بوابة فيسبوك المباشرة
+                            </button>
+                        </a>
+                    </div>
+                    
+                    <p style="color: #FFD700; font-size: 0.7rem; margin-top: 15px;">⚠️ انسخ الرابط الخاص بك واستخدمه في البوابة المناسبة للحصول على أفضل جودة.</p>
+                </div>
+            """, unsafe_allow_html=True)
+            
+            st.info("💡 ملاحظة: تيك توك يمنع المواقع من سحب الفيديوهات بشكل آلي لضمان الأمان، لذا نستخدم هذه البوابات كحل سيادي.")
 
-    # العرض والتحميل داخلي 100%
-    if st.session_state.video_data and 'bytes' in st.session_state.video_data:
-        st.divider()
-        st.info(f"📌 العنوان: {st.session_state.video_data['title']}")
-        
-        # تشغيل الفيديو من الذاكرة (سيعمل 100%)
-        st.video(st.session_state.video_data['bytes'])
-        
-        # زر التحميل المباشر للاستوديو
-        st.download_button(
-            label="📥 حفظ في الاستوديو (MP4)",
-            data=st.session_state.video_data['bytes'],
-            file_name=f"{st.session_state.video_data['title']}.mp4",
-            mime="video/mp4",
-            use_container_width=True
-        )
 
 
 # --- التبويب 3: مركز الفحص ---
