@@ -92,25 +92,57 @@ with tabs[0]:
     with c3: st.markdown(f'<div class="feature-card"><h2>🤖</h2><h4>بوت رسمي</h4><p>تحكم كامل عبر تليجرام</p></div>', unsafe_allow_html=True)
     st.image("https://img.freepik.com/free-vector/cyber-security-concept_23-2148532223.jpg", use_column_width=True)
 
-# --- التبويب 2: مركز الوسائط ---
+# --- التبويب 2: مركز الوسائط المطور V40 ---
 with tabs[1]:
-    st.subheader("🎬 محرك تحميل الفيديو")
-    v_url = st.text_input("ألصق الرابط هنا:")
+    st.subheader("🎬 محرك تحميل الفيديو السيادي")
+    v_url = st.text_input("ألصق الرابط هنا (TikTok, YouTube, FB):")
+    
     if st.button("🚀 جلب وتحميل الفيديو"):
         if v_url:
-            with st.spinner("جاري المعالجة..."):
+            with st.spinner("جاري استخراج الفيديو..."):
                 try:
-                    ydl_opts = {'format': 'best', 'quiet': True}
+                    # تنظيف الرابط من أي مسافات أو رموز زائدة
+                    target_url = v_url.strip()
+                    
+                    # إعدادات احترافية لتجاوز الحظر وتشفير TikTok
+                    ydl_opts = {
+                        'format': 'best',
+                        'quiet': True,
+                        'no_warnings': True,
+                        'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+                    }
+                    
                     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                        info = ydl.extract_info(v_url, download=False)
-                        st.session_state.video_data = {"url": info['url'], "title": info.get('title', 'Video')}
-                        st.success("✅ الفيديو جاهز!")
-                except: st.error("عذراً، الرابط غير صالح.")
+                        info = ydl.extract_info(target_url, download=False)
+                        video_direct_url = info.get('url')
+                        video_title = info.get('title', 'Ayman_Video')
+                        
+                        st.session_state.video_data = {
+                            "url": video_direct_url,
+                            "title": video_title
+                        }
+                        st.success("✅ تم استخراج الرابط بنجاح!")
+                except Exception as e:
+                    st.error("❌ فشل المحرك. تأكد من تحديث yt-dlp في ملف requirements")
 
+    # عرض الفيديو والتحميل بطريقة تضمن العمل على الجوال
     if st.session_state.video_data:
+        st.divider()
+        # استخدام مشغل الفيديو الأساسي مع الرابط المباشر
         st.video(st.session_state.video_data['url'])
-        v_bytes = requests.get(st.session_state.video_data['url']).content
-        st.download_button("📥 حفظ في الاستوديو", v_bytes, file_name="Ayman_Guard.mp4")
+        
+        # زر التحميل المباشر لتحويله لملف في الاستوديو
+        try:
+            # نقوم بجلب محتوى الفيديو كبيانات (Bytes)
+            v_content = requests.get(st.session_state.video_data['url'], timeout=15).content
+            st.download_button(
+                label="📥 حفظ في الاستوديو (MP4)",
+                data=v_content,
+                file_name=f"{st.session_state.video_data['title']}.mp4",
+                mime="video/mp4"
+            )
+        except:
+            st.warning("⚠️ التحميل المباشر مقيد، جرب الضغط مطولاً على الفيديو.")
 
 # --- التبويب 3: مركز الفحص ---
 with tabs[2]:
