@@ -7,13 +7,13 @@ import random
 # --- 1. المحرك الذكي للذاكرة (حفظ كافة التسميات) ---
 if 'settings' not in st.session_state:
     st.session_state.settings = {
-        'site_title': "🛡️ درع أيمن الرقمي",
+        'site_title': "🛡️ درع أيمن السيادي",
         'site_sub': "نظام الحماية والاتصال الرسمي V37.0",
         'welcome_msg': "مرحباً بك في أقوى نظام حماية رقمي لعام 2026",
         'btn_bot_text': "🤖 ابدأ المحادثة مع بوت الدرع",
         'btn_wa_text': "📱 واتساب الرسمي",
         'btn_mail_text': "📧 البريد الإلكتروني",
-        'admin_password': "aiman7716",
+        'admin_password': "Ayman2026",
         'theme_color': "#1f6feb"
     }
 
@@ -83,7 +83,7 @@ st.markdown(f"""
 
 tabs = st.tabs(["🏠 الرئيسية", "🎬 مركز الوسائط", "🔍 الفحص", "🛡️ الدعم", "⚙️ الإدارة"])
 
-# --- التبويب 1: الرئيسية الجذابة ---
+# --- التبويب 1: الرئيسية ---
 with tabs[0]:
     st.markdown(f"<h2 style='text-align:center;'>✨ {st.session_state.settings['welcome_msg']}</h2>", unsafe_allow_html=True)
     c1, c2, c3 = st.columns(3)
@@ -92,25 +92,57 @@ with tabs[0]:
     with c3: st.markdown(f'<div class="feature-card"><h2>🤖</h2><h4>بوت رسمي</h4><p>تحكم كامل عبر تليجرام</p></div>', unsafe_allow_html=True)
     st.image("https://img.freepik.com/free-vector/cyber-security-concept_23-2148532223.jpg", use_column_width=True)
 
-# --- التبويب 2: مركز الوسائط ---
+# --- التبويب 2: مركز الوسائط المطور V38 (تم الاستبدال هنا) ---
 with tabs[1]:
-    st.subheader("🎬 محرك تحميل الفيديو")
-    v_url = st.text_input("ألصق الرابط هنا:")
+    st.subheader("🎬 محرك تحميل الفيديو السيادي")
+    v_url = st.text_input("ألصق الرابط هنا (TikTok, YouTube, FB):")
+    
     if st.button("🚀 جلب وتحميل الفيديو"):
         if v_url:
-            with st.spinner("جاري المعالجة..."):
+            with st.spinner("جاري كسر القيود وجلب الفيديو..."):
                 try:
-                    ydl_opts = {'format': 'best', 'quiet': True}
+                    # إعدادات متطورة لجلب أفضل جودة متوافقة مع الجوال
+                    ydl_opts = {
+                        'format': 'best[ext=mp4]/best', # إجبار صيغة mp4 لتعمل على كل الجوالات
+                        'quiet': True,
+                        'no_warnings': True,
+                    }
                     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                         info = ydl.extract_info(v_url, download=False)
-                        st.session_state.video_data = {"url": info['url'], "title": info.get('title', 'Video')}
-                        st.success("✅ الفيديو جاهز!")
-                except: st.error("عذراً، الرابط غير صالح.")
+                        video_direct_url = info['url']
+                        video_title = info.get('title', 'Ayman_Video')
+                        
+                        # تخزين البيانات في الجلسة
+                        st.session_state.video_data = {
+                            "url": video_direct_url,
+                            "title": video_title
+                        }
+                        st.success("✅ الفيديو جاهز الآن!")
+                except Exception as e:
+                    st.error(f"❌ فشل المحرك في جلب هذا الرابط. تأكد أن الفيديو عام وليس خاصاً.")
 
+    # عرض المعاينة والتحميل في حال النجاح
     if st.session_state.video_data:
+        st.divider()
+        st.write(f"📌 **العنوان:** {st.session_state.video_data['title']}")
+        
+        # استخدام حاوية لضمان عرض الفيديو بشكل صحيح
         st.video(st.session_state.video_data['url'])
-        v_bytes = requests.get(st.session_state.video_data['url']).content
-        st.download_button("📥 حفظ في الاستوديو", v_bytes, file_name="Ayman_Guard.mp4")
+        
+        try:
+            # محاولة تحميل ملف الفيديو لتقديمه كزر تحميل مباشر (هذا يحل مشكلة الحفظ في الاستوديو)
+            response = requests.get(st.session_state.video_data['url'], timeout=10)
+            if response.status_code == 200:
+                st.download_button(
+                    label="📥 حفظ في الاستوديو (تحميل مباشر)",
+                    data=response.content,
+                    file_name=f"{st.session_state.video_data['title']}.mp4",
+                    mime="video/mp4"
+                )
+            else:
+                st.warning("⚠️ الرابط المباشر للمعاينة متاح، لكن التحميل يتطلب محاولة أخرى.")
+        except:
+            st.info("💡 إذا لم يعمل زر التحميل المباشر، اضغط مطولاً على الفيديو واختر 'Download Video'.")
 
 # --- التبويب 3: مركز الفحص ---
 with tabs[2]:
@@ -129,7 +161,7 @@ with tabs[3]:
     with col1: st.markdown(f'<a href="https://wa.me/966556868717" class="contact-link" style="background:#25d366;">{st.session_state.settings["btn_wa_text"]}</a>', unsafe_allow_html=True)
     with col2: st.markdown(f'<a href="mailto:kebriay2030@gmail.com" class="contact-link" style="background:#ea4335;">{st.session_state.settings["btn_mail_text"]}</a>', unsafe_allow_html=True)
 
-# --- التبويب 5: الإدارة السيادية (تم الإصلاح هنا) ---
+# --- التبويب 5: الإدارة السيادية ---
 with tabs[4]:
     if not st.session_state.is_admin:
         st.subheader("🔐 الدخول الآمن")
@@ -141,7 +173,7 @@ with tabs[4]:
                     st.session_state.auth_code = code
                     st.success("✅ أرسلنا الكود لتليجرام")
                     time.sleep(1)
-                    st.rerun() # تحديث الصفحة فوراً لإظهار خانة الكود
+                    st.rerun()
             else: st.error("❌ كلمة المرور خاطئة")
         
         if st.session_state.auth_code:
