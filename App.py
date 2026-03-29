@@ -1,9 +1,10 @@
 import streamlit as st
 import yt_dlp
 import requests
+import base64
 
-# --- 1. التنسيق السيادي الرسمي (UI) ---
-st.set_page_config(page_title="Ayman Guard Pro v29", layout="wide")
+# --- 1. التنسيق السيادي الرسمي ---
+st.set_page_config(page_title="Ayman Guard Pro v30", layout="wide")
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
@@ -23,26 +24,28 @@ st.markdown("""
         font-weight: bold; height: 3.5em; border: none; 
     }
     
-    /* زر الحفظ الرسمي الفخم */
-    .save-btn {
-        display: block; width: 100%; padding: 18px;
-        background: #238636; color: white !important;
-        text-align: center; text-decoration: none !important;
-        border-radius: 12px; font-weight: bold; font-size: 20px;
-        border: 1px solid #ffffff; box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        margin-top: 15px;
+    /* زر الحفظ الداخلي المستقر */
+    .stDownloadButton > button {
+        background-color: #238636 !important;
+        color: white !important;
+        width: 100% !important;
+        height: 4.5em !important;
+        font-size: 20px !important;
+        font-weight: bold !important;
+        border-radius: 12px !important;
+        border: 2px solid #ffffff !important;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.4) !important;
     }
     </style>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="hero"><h1>🛡️ درع أيمن السيادي</h1><p>نظام المعالجة الرسمي v29.0</p></div>', unsafe_allow_html=True)
+st.markdown('<div class="hero"><h1>🛡️ درع أيمن السيادي</h1><p>نظام التحميل الداخلي v30.0</p></div>', unsafe_allow_html=True)
 
-# --- 2. محرك المعالجة الرسمي ---
+# --- 2. محرك المعالجة والتحميل الداخلي ---
 v_url = st.text_input("يرجى إدخال رابط الوسائط هنا:")
 
 if st.button("🚀 بدء المعالجة الرسمية"):
     if v_url:
-        # الرسالة الرسمية المطلوبة أثناء الجلب
         with st.spinner("جاري فحص وتجهيز البيانات، يرجى الانتظار..."):
             try:
                 # إعدادات المحرك لاستخراج الرابط
@@ -50,27 +53,29 @@ if st.button("🚀 بدء المعالجة الرسمية"):
                 with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                     info = ydl.extract_info(v_url, download=False)
                     direct_link = info.get('url', None)
-                    title = info.get('title', 'Video_File')
+                    title = info.get('title', 'Ayman_Video')
 
                 if direct_link:
-                    # عرض المعاينة
+                    # عرض المعاينة (تعمل داخلياً)
                     st.video(direct_link)
                     
                     st.markdown("---")
                     
-                    # الزر بالمسمى الرسمي الجديد (حفظ الفيديو في الاستوديو)
-                    # مع خاصية الفتح في متصفح خارجي لضمان التحميل في "الموقع المثبت"
-                    st.markdown(f"""
-                        <a href="{direct_link}" download="{title}.mp4" target="_blank" rel="noopener noreferrer" class="save-btn">
-                            📥 حفظ الفيديو في الاستوديو
-                        </a>
-                        <p style="text-align:center; color:#8b949e; margin-top:10px;">
-                            نظام الدرع: تم استخراج الرابط بنجاح، يرجى الضغط للحفظ.
-                        </p>
-                    """, unsafe_allow_html=True)
+                    # جلب الفيديو لذاكرة البرنامج مباشرة لتجنب الخروج للمتصفح
+                    video_response = requests.get(direct_link)
+                    video_bytes = video_response.content
                     
-                    st.success("✅ تمت معالجة الرابط بنجاح.")
+                    # زر التحميل الرسمي المدمج (لا يخرج من التطبيق)
+                    st.download_button(
+                        label="📥 حفظ الفيديو في الاستوديو",
+                        data=video_bytes,
+                        file_name=f"{title}.mp4",
+                        mime="video/mp4"
+                    )
+                    
+                    st.success("✅ تمت المعالجة. اضغط على الزر الأخضر للحفظ مباشرة.")
+                    
                 else:
-                    st.error("فشل النظام في استخراج البيانات، تأكد من صحة الرابط.")
+                    st.error("فشل النظام في استخراج البيانات.")
             except Exception as e:
                 st.error(f"تنبيه رسمي: حدث خطأ أثناء المعالجة ({e})")
