@@ -3,39 +3,37 @@ import requests
 import random
 import time
 
-# --- 1. إعدادات الهوية والديناميكية (التحكم الكامل) ---
+# --- 1. إعدادات الهوية والتحكم (مخزنة في الجلسة) ---
 if 'settings' not in st.session_state:
     st.session_state.settings = {
         'site_title': "🛡️ درع أيمن السيادي",
-        'site_sub': "نظام الحماية والاتصال الرسمي v45.0",
+        'site_sub': "نظام الحماية والاتصال الرسمي v47.0",
         'tab1': "🏠 الرئيسية", 'tab2': "🎬 مركز التحميل", 
         'tab3': "🔍 مركز الفحص", 'tab4': "🛡️ الحماية والدعم", 'tab5': "⚙️ الإدارة",
         'btn_process': "🚀 بدء المعالجة الرسمية",
-        'btn_tele': "💬 تليجرام الرسمي",
-        'btn_wa': "📱 واتساب الرسمي",
-        'btn_mail': "📧 البريد الإلكتروني"
+        'btn_tele': "💬 تليجرام الرسمي"
     }
 
 if 'is_admin' not in st.session_state: st.session_state.is_admin = False
 if 'auth_code' not in st.session_state: st.session_state.auth_code = None
 
-# --- 2. محرك إرسال الكود الحقيقي لبوت @Aiman_Guard_2026_bot ---
+# --- 2. محرك إرسال الكود الحقيقي إلى حساب أيمن الشخصي ---
 def send_telegram_code(code):
-    # التوكن الرسمي الذي أرسلته يا أيمن
+    # التوكن الخاص ببوتك @Aiman_Guard_2026_bot
     TOKEN = "8124974140:AAE3-UgIpkAKjcUyJrT3YWV99sug07WtniE"
-    # معرفك الشخصي المستخرج من الصورة
-    CHAT_ID = "8124974140"
     
-    message = f"🔐 مرحباً أيمن، كود الدخول للوحة الإدارة هو: {code}"
+    # رقم هويتك الشخصية (Id) الذي استخرجناه الآن
+    MY_PERSONAL_ID = "906233240" 
+    
+    message = f"🔐 مرحباً أيمن، كود التحقق للدخول إلى لوحة الإدارة هو: {code}"
     url = f"https://api.telegram.org/bot{TOKEN}/sendMessage"
     
     try:
-        response = requests.post(url, data={"chat_id": CHAT_ID, "text": message})
+        response = requests.post(url, data={"chat_id": MY_PERSONAL_ID, "text": message})
         if response.status_code == 200:
-            st.success("✅ تم إرسال الكود لهاتفك بنجاح عبر تليجرام!")
+            st.success("✅ ممتاز! تفقد تليجرام الآن، الكود وصل لحسابك الشخصي.")
         else:
-            error_details = response.json().get('description', 'خطأ غير معروف')
-            st.error(f"❌ خطأ من تليجرام: {error_details} (تأكد من الضغط على Start في البوت)")
+            st.error("❌ فشل الإرسال! تأكد من الضغط على Start داخل بوتك @Aiman_Guard_2026_bot")
     except Exception as e:
         st.error(f"⚠️ فشل الاتصال بالشبكة: {e}")
 
@@ -51,7 +49,7 @@ st.markdown(f"""
     </style>
 """, unsafe_allow_html=True)
 
-# --- 4. بناء الواجهة ---
+# --- 4. بناء الواجهة الديناميكية ---
 st.markdown(f'<div class="hero-section"><h1>{st.session_state.settings["site_title"]}</h1><p>{st.session_state.settings["site_sub"]}</p></div>', unsafe_allow_html=True)
 
 tabs = st.tabs([st.session_state.settings[f'tab{i}'] for i in range(1, 6)])
@@ -65,9 +63,9 @@ with tabs[4]:
         if st.button("🚀 طلب كود التحقق (2FA)"):
             if admin_pwd == "Ayman2026":
                 st.session_state.auth_code = str(random.randint(111111, 999999))
-                send_telegram_code(st.session_state.auth_code) # إرسال فعلي للبوت
+                send_telegram_code(st.session_state.auth_code) # الإرسال الفعلي
             else:
-                st.error("كلمة المرور خاطئة!")
+                st.error("كلمة المرور غير صحيحة!")
 
         if st.session_state.auth_code:
             v_code = st.text_input("أدخل الكود المستلم من التليجرام:")
@@ -80,10 +78,5 @@ with tabs[4]:
                 else:
                     st.error("كود التحقق خاطئ!")
     else:
-        st.success("🔓 لوحة التحكم الكاملة مفتوحة الآن.")
+        st.success("🔓 لوحة التحكم الكاملة مفتوحة الآن يا أيمن.")
         if st.button("🚪 خروج آمن"): st.session_state.is_admin = False; st.rerun()
-        
-        # هنا تضع مربعات تعديل مسميات الأزرار والتبويبات كما فعلنا في v40
-        st.markdown("### ⚙️ إدارة مسميات النظام")
-        st.session_state.settings['site_title'] = st.text_input("عنوان الموقع:", st.session_state.settings['site_title'])
-        # وبقية الأزرار...
