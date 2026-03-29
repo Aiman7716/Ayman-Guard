@@ -61,7 +61,7 @@ with tabs[4]:
         pwd = st.text_input("أدخل كلمة مرور المسؤول:", type="password")
         
         if st.button("🚀 طلب كود التحقق (2FA)"):
-            if pwd == "Ayman2026": # كلمة المرور الافتراضية
+            if pwd == "aiman2026": # كلمة المرور الافتراضية
                 st.session_state.auth_code = str(random.randint(1000, 9999))
                 # إرسال الكود للبوت (محاكاة الربط مع API التليجرام)
                 # ملاحظة: يتطلب توكن البوت الحقيقي لإرسال الرسالة فعلياً
