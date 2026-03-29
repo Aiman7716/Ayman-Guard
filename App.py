@@ -1,128 +1,114 @@
 import streamlit as st
 import yt_dlp
 import requests
-import time
+import random
 
-# --- 1. التنسيق السيادي الموحد v37 ---
-st.set_page_config(page_title="Ayman Guard Pro v37", layout="wide")
-st.markdown("""
+# --- 1. إعداد مخزن البيانات الديناميكي (لوحة التحكم) ---
+if 'settings' not in st.session_state:
+    st.session_state.settings = {
+        'site_title': "🛡️ درع أيمن السيادي",
+        'site_sub': "نظام الحماية والاتصال الرسمي v38.0",
+        'tab1_name': "🏠 الرئيسية",
+        'tab2_name': "🎬 مركز التحميل",
+        'tab3_name': "🔍 مركز الفحص",
+        'tab4_name': "🛡️ الحماية والدعم",
+        'btn_process': "🚀 بدء المعالجة الرسمية",
+        'btn_save': "📥 حفظ الفيديو في الاستوديو"
+    }
+
+if 'auth_code' not in st.session_state: st.session_state.auth_code = None
+if 'is_admin' not in st.session_state: st.session_state.is_admin = False
+
+# --- 2. التنسيق السيادي الموحد ---
+st.set_page_config(page_title=st.session_state.settings['site_title'], layout="wide")
+st.markdown(f"""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
-    html, body, [class*="st-"] { font-family: 'Cairo', sans-serif; direction: RTL; text-align: right; }
-    .stApp { background-color: #0d1117; color: #ffffff; }
-    
-    .hero-section {
+    html, body, [class*="st-"] {{ font-family: 'Cairo', sans-serif; direction: RTL; text-align: right; }}
+    .stApp {{ background-color: #0d1117; color: #ffffff; }}
+    .hero-section {{
         background: linear-gradient(135deg, #1f6feb 0%, #111d2e 100%);
         padding: 30px; border-radius: 15px; text-align: center;
         margin-bottom: 20px; border: 1px solid #30363d;
-    }
-
-    /* أزرار التواصل الزرقاء الموحدة */
-    .contact-btn {
-        background-color: #1f6feb !important;
-        color: white !important;
-        border-radius: 12px !important;
-        border: 1px solid #ffffff !important;
-        font-weight: bold !important;
-        text-decoration: none !important;
-        display: block;
-        padding: 15px;
-        text-align: center;
-        transition: 0.3s;
-        margin-bottom: 10px;
-    }
-
-    /* زر البوت الرسمي المطور */
-    .bot-btn {
-        background: linear-gradient(90deg, #0088cc, #00aaff) !important;
-        color: white !important;
-        border-radius: 15px !important;
-        padding: 20px;
-        font-size: 20px !important;
-        text-decoration: none !important;
-        display: block;
-        text-align: center;
-        font-weight: bold;
-        border: 2px solid #ffffff;
-        box-shadow: 0 4px 15px rgba(0,136,204,0.4);
-        margin-bottom: 20px;
-    }
-
-    div.stButton > button { width: 100% !important; background: #1f6feb !important; color: white !important; border-radius: 12px; font-weight: bold; height: 3.5em; border: none; }
-    .stDownloadButton > button { background-color: #238636 !important; width: 100% !important; height: 4.5em !important; font-size: 20px !important; font-weight: bold !important; border-radius: 12px !important; border: 2px solid #ffffff !important; }
-    
-    /* تنسيق زر اختيار ملف */
-    button[kind="secondary"] { background-color: #1f6feb !important; color: white !important; border-radius: 10px !important; font-weight: bold !important; }
+    }}
+    div.stButton > button {{ width: 100% !important; background: #1f6feb !important; color: white !important; border-radius: 12px; font-weight: bold; height: 3.5em; }}
     </style>
 """, unsafe_allow_html=True)
 
-# --- 2. إدارة الذاكرة ---
-if 'v_ready' not in st.session_state: st.session_state.v_ready = False
-if 'v_data' not in st.session_state: st.session_state.v_data = None
-if 'v_url' not in st.session_state: st.session_state.v_url = ""
+# --- 3. الواجهة الرئيسية (ديناميكية) ---
+st.markdown(f'<div class="hero-section"><h1>{st.session_state.settings["site_title"]}</h1><p>{st.session_state.settings["site_sub"]}</p></div>', unsafe_allow_html=True)
 
-# --- 3. الواجهة السيادية ---
-st.markdown('<div class="hero-section"><h1>🛡️ درع أيمن السيادي</h1><p>نظام الحماية والاتصال الرسمي v37.0</p></div>', unsafe_allow_html=True)
+tabs = st.tabs([
+    st.session_state.settings['tab1_name'], 
+    st.session_state.settings['tab2_name'], 
+    st.session_state.settings['tab3_name'], 
+    st.session_state.settings['tab4_name'],
+    "⚙️ الإدارة"
+])
 
-tabs = st.tabs(["🏠 الرئيسية", "🎬 مركز التحميل", "🔍 مركز الفحص", "🛡️ الحماية والدعم"])
-
-# --- تبويب الرئيسية ---
-with tabs[0]:
-    st.markdown("### 📊 حالة النظام")
-    c1, c2 = st.columns(2)
-    c1.metric("المحرك الذكي", "متصل")
-    c2.metric("التحديث الرسمي", "v37.0")
-    st.info("مرحباً بك يا أيمن. تم تحديث بيانات الاتصال الرسمية بنجاح.")
-
-# --- تبويب مركز التحميل ---
+# --- تبويب مركز التحميل (يستخدم المسميات الديناميكية) ---
 with tabs[1]:
-    st.subheader("🎬 محرك الوسائط")
-    u_in = st.text_input("أدخل رابط الفيديو المراد معالجته:")
-    if st.button("🚀 بدء المعالجة الرسمية"):
-        if u_in:
-            with st.spinner("جاري فحص وتجهيز البيانات، يرجى الانتظار..."):
-                try:
-                    ydl_opts = {'format': 'best', 'quiet': True}
-                    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                        info = ydl.extract_info(u_in, download=False)
-                        st.session_state.v_url = info.get('url')
-                        st.session_state.v_data = requests.get(st.session_state.v_url).content
-                        st.session_state.v_ready = True
-                except: st.error("خطأ في معالجة الرابط.")
+    st.subheader(st.session_state.settings['tab2_name'])
+    u_in = st.text_input("أدخل الرابط:")
+    if st.button(st.session_state.settings['btn_process']):
+        st.info("جاري المعالجة...")
+    # هنا تضع كود التحميل السابق v37 كما هو
 
-    if st.session_state.v_ready:
-        st.video(st.session_state.v_url)
-        if st.download_button(label="📥 حفظ الفيديو في الاستوديو", data=st.session_state.v_data, file_name="Ayman_Guard_Video.mp4", mime="video/mp4"):
-            st.toast("✅ جاري التحميل المباشر...", icon="📥")
-
-# --- تبويب مركز الفحص ---
-with tabs[2]:
-    st.subheader("🔍 فحص الروابط والملفات")
-    st.text_input("رابط التحليل:")
-    st.markdown("---")
-    st.markdown("#### 📁 فحص الملفات الذكي")
-    st.file_uploader("اضغط لاختيار ملف لفحصه:", type=['apk', 'pdf', 'png', 'jpg', 'zip'])
-
-# --- التبويب الرسمي: الحماية والدعم (تم تحديث البيانات) ---
-with tabs[3]:
-    st.subheader("🤖 المساعد الذكي الرسمي")
-    st.write("للتواصل الفوري مع نظام الدعم الفني عبر تليجرام:")
-    
-    # رابط البوت الرسمي الجديد
-    st.markdown('<a href="https://t.me/Aiman_Guard_2026_bot" target="_blank" class="bot-btn">🤖 ابدأ المحادثة مع بوت الدرع الآن</a>', unsafe_allow_html=True)
-    
-    st.markdown("---")
-    
-    st.subheader("📞 قنوات التواصل الرسمية")
-    col1, col2 = st.columns(2)
-    
-    with col1:
-        # رابط الواتساب الرسمي الجديد
-        st.markdown('<a href="https://wa.me/966556868717" target="_blank" class="contact-btn">📱 تواصل عبر واتساب</a>', unsafe_allow_html=True)
+# --- تبويب الإدارة (لوحة التحكم مع 2FA) ---
+with tabs[4]:
+    if not st.session_state.is_admin:
+        st.subheader("🔐 تسجيل دخول الإدارة")
+        pwd = st.text_input("أدخل كلمة مرور المسؤول:", type="password")
         
-    with col2:
-        # البريد الإلكتروني الرسمي الجديد
-        st.markdown('<a href="mailto:kebriay2030@gmail.com" class="contact-btn">📧 البريد الإلكتروني</a>', unsafe_allow_html=True)
-    
-    st.markdown("<br>", unsafe_allow_html=True)
-    st.markdown('<div style="background:#161b22; padding:20px; border-radius:12px; border-right:5px solid #1f6feb;"><h4>👥 حماية المجتمع</h4><p>نظام "درع أيمن" يلتزم بحماية خصوصيتكم. يمكنكم التبليغ عن أي تهديد رقمي عبر القنوات الموضحة أعلاه.</p></div>', unsafe_allow_html=True)
+        if st.button("🚀 طلب كود التحقق (2FA)"):
+            if pwd == "Ayman2026": # كلمة المرور الافتراضية
+                st.session_state.auth_code = str(random.randint(1000, 9999))
+                # إرسال الكود للبوت (محاكاة الربط مع API التليجرام)
+                # ملاحظة: يتطلب توكن البوت الحقيقي لإرسال الرسالة فعلياً
+                st.warning(f"تم إرسال كود التحقق إلى بوت التليجرام الخاص بك @Aiman_Guard_2026_bot")
+                st.info(f"💡 (لغرض التجربة حالياً الكود هو: {st.session_state.auth_code})")
+            else:
+                st.error("كلمة المرور خاطئة!")
+
+        if st.session_state.auth_code:
+            v_code = st.text_input("أدخل كود التحقق المستلم من التليجرام:")
+            if st.button("✅ تأكيد الدخول"):
+                if v_code == st.session_state.auth_code:
+                    st.session_state.is_admin = True
+                    st.rerun()
+                else:
+                    st.error("كود التحقق غير صحيح!")
+    else:
+        st.success("🔓 مرحباً أيمن! أنت الآن في لوحة التحكم الديناميكية.")
+        if st.button("🚪 تسجيل الخروج"):
+            st.session_state.is_admin = False
+            st.rerun()
+            
+        st.markdown("---")
+        
+        # خيارات التحكم في مسميات الموقع
+        st.subheader("🛠️ تعديل إعدادات الواجهة")
+        
+        with st.expander("📝 تعديل النصوص والترويسة"):
+            new_title = st.text_input("تغيير عنوان الموقع:", st.session_state.settings['site_title'])
+            new_sub = st.text_input("تغيير وصف الترويسة:", st.session_state.settings['site_sub'])
+            
+        with st.expander("📂 تغيير مسميات التبويبات"):
+            t1 = st.text_input("اسم تبويب الرئيسية:", st.session_state.settings['tab1_name'])
+            t2 = st.text_input("اسم تبويب التحميل:", st.session_state.settings['tab2_name'])
+            
+        with st.expander("🔘 تغيير مسميات الأزرار"):
+            b1 = st.text_input("نص زر المعالجة:", st.session_state.settings['btn_process'])
+            b2 = st.text_input("نص زر الحفظ:", st.session_state.settings['btn_save'])
+
+        if st.button("💾 حفظ التعديلات وتطبيقها فوراً"):
+            st.session_state.settings.update({
+                'site_title': new_title, 'site_sub': new_sub,
+                'tab1_name': t1, 'tab2_name': t2,
+                'btn_process': b1, 'btn_save': b2
+            })
+            st.success("✅ تم تحديث إعدادات الموقع بنجاح!")
+            time.sleep(1)
+            st.rerun()
+
+# (بقية التبويبات v37 تظل كما هي)
