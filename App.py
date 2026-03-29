@@ -93,56 +93,57 @@ with tabs[0]:
     st.image("https://img.freepik.com/free-vector/cyber-security-concept_23-2148532223.jpg", use_column_width=True)
 
 # --- التبويب 2: محرك الوسائط V50 (التحميل المباشر) ---
+# --- التبويب 2: محرك الوسائط V50 (التحميل المباشر والنهائي) ---
 with tabs[1]:
     st.subheader("🎬 محرك تحميل الفيديو السيادي")
-    v_url = st.text_input("ألصق الرابط هنا (تأكد من حذف أي رموز قبل https):")
+    v_url = st.text_input("ألصق الرابط هنا:")
     
     if st.button("🚀 معالجة وتجهيز الملف"):
         if v_url:
-            with st.spinner("جاري كسر التشفير وتجهيز الملف للتحميل..."):
+            # تنظيف الرابط آلياً من الشرطة الزائدة التي تظهر في صورتك
+            clean_url = v_url.strip().lstrip('/') 
+            
+            with st.spinner("جاري سحب الفيديو وتجهيزه..."):
                 try:
-                    # تنظيف الرابط
-                    clean_url = v_url.strip().lstrip('/')
-                    
-                    # إعدادات متقدمة جداً لاستخراج الفيديو مباشرة
                     ydl_opts = {
                         'format': 'best',
                         'quiet': True,
                         'no_warnings': True,
-                        'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
                         'nocheckcertificate': True,
+                        'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
                     }
                     
                     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                         info = ydl.extract_info(clean_url, download=False)
-                        video_url = info.get('url')
-                        video_title = info.get('title', 'Ayman_Guard_Video')
+                        video_direct_url = info.get('url')
+                        video_title = info.get('title', 'Ayman_Video')
                         
-                        # هذه الخطوة هي السر: سحب الفيديو كبيانات (Bytes)
-                        response = requests.get(video_url, stream=True, timeout=30)
+                        # سحب محتوى الفيديو كبيانات (Bytes) لتجاوز حظر المشغل
+                        video_response = requests.get(video_direct_url, stream=True, timeout=25)
                         
                         st.session_state.video_data = {
-                            "bytes": response.content,
+                            "content": video_response.content,
                             "title": video_title
                         }
-                        st.success("✅ الملف جاهز للتحميل الآن!")
+                        st.success("✅ الملف جاهز تماماً للحفظ!")
+                        st.balloons()
                 except Exception as e:
-                    st.error("❌ تيك توك يرفض الطلب حالياً. تأكد من أن الفيديو عام وليس خاصاً.")
+                    st.error("❌ تيك توك يرفض الطلب حالياً. جرب فيديو آخر.")
 
-    # إذا تم تجهيز الملف، نعرض زر التحميل فقط (لتجنب مشكلة المشغل المكسور)
-    if st.session_state.video_data and 'bytes' in st.session_state.video_data:
+    # إذا تم تجهيز البيانات، يظهر زر التحميل فقط (لتجن vision مشكلة المشغل المكسور)
+    if st.session_state.video_data and "content" in st.session_state.video_data:
         st.divider()
-        st.info(f"📁 تم جلب: {st.session_state.video_data['title']}")
+        st.info(f"📁 اسم الملف: {st.session_state.video_data['title']}")
         
-        # زر تحميل حقيقي يحفظ الملف فوراً في الاستوديو
+        # زر التحميل السيادي الذي يحفظ الفيديو في الاستوديو مباشرة
         st.download_button(
             label="📥 اضغط هنا لحفظ الفيديو في الاستوديو",
-            data=st.session_state.video_data['bytes'],
+            data=st.session_state.video_data['content'],
             file_name=f"{st.session_state.video_data['title']}.mp4",
             mime="video/mp4",
             use_container_width=True
         )
-        st.balloons() # احتفال بسيط عند نجاح الجلب
+
 
 
 # --- التبويب 3: مركز الفحص ---
