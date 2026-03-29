@@ -3,122 +3,105 @@ import yt_dlp
 import os
 import requests
 
-# --- 1. تصميم أيمن السيادي (بدون تعقيدات) ---
-st.set_page_config(page_title="Ayman Shield v48", layout="wide")
+# --- 1. الإعدادات الكلاسيكية (عودة التبويبات والمنطق القديم) ---
+st.set_page_config(page_title="Ayman Shield - Original", layout="wide")
 
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
     html, body, [class*="st-"] { font-family: 'Cairo', sans-serif; direction: RTL; text-align: right; }
     .stApp { background-color: #0d1117; color: #ffffff; }
-    [data-testid="stHeader"], [data-testid="stTabNav"] { display: none !important; }
     
-    .stButton>button { width: 100% !important; background: #1f6feb !important; color: white !important; border-radius: 12px; height: 4em; font-weight: bold; border: none; }
+    /* تنسيق زر اختيار ملف (الأزرق الأصلي) */
+    div[data-testid="stFileUploader"] section button { background-color: #1f6feb !important; color: white !important; border-radius: 8px !important; }
     
-    /* زر الملفات الأزرق المطلوب */
-    div[data-testid="stFileUploader"] section button { background-color: #1f6feb !important; color: white !important; }
+    /* تنسيق زر التنزيل الأخضر الذي كان يعمل بنجاح */
+    .stDownloadButton>button { background-color: #238636 !important; color: white !important; border-radius: 10px !important; height: 4em !important; width: 100% !important; font-weight: bold; border: 1px solid #ffffff; }
     
-    /* زر التنزيل الأخضر (نفس شكل النسخة القديمة) */
-    .stDownloadButton>button { background-color: #238636 !important; color: white !important; border-radius: 12px !important; height: 5em !important; font-size: 22px !important; font-weight: bold !important; border: 2px solid #ffffff !important; }
-    
-    .card { background: #161b22; padding: 25px; border-radius: 15px; border: 1px solid #30363d; margin-bottom: 20px; text-align: center; }
+    .main-title { text-align: center; color: #1f6feb; margin-bottom: 30px; border-bottom: 2px solid #30363d; padding-bottom: 10px; }
     </style>
 """, unsafe_allow_html=True)
 
-# --- 2. إدارة الصفحات والبوت ---
-if 'pg' not in st.session_state: st.session_state.pg = "home"
+st.markdown('<h1 class="main-title">🛡️ درع أيمن السيادي (النسخة المستعادة)</h1>', unsafe_allow_html=True)
 
-def nav(t):
-    st.session_state.pg = t
-    st.rerun()
-
+# --- 2. نظام البوت المستقر ---
 TOKEN = "8124974140:AAE3-UgIpkAKjcUyJrT3YWV99sug07WtniE"
 CHAT_ID = "906233240"
 
-def log_bot(msg):
-    try: requests.post(f"https://api.telegram.org/bot{TOKEN}/sendMessage", data={"chat_id": CHAT_ID, "text": msg}, timeout=2)
-    except: pass
+def send_to_telegram(message):
+    try:
+        requests.post(f"https://api.telegram.org/bot{TOKEN}/sendMessage", data={"chat_id": CHAT_ID, "text": message}, timeout=2)
+    except:
+        pass
 
-# --- 3. عرض المحتوى بنظام الأزرار ---
+# --- 3. عودة التبويبات (Tabs) كما كانت قبل يومين ---
+tab1, tab2, tab3, tab4 = st.tabs(["🎬 تحميل الفيديو", "🔍 مركز الفحص", "👥 تواصل معنا", "🔐 الإدارة"])
 
-if st.session_state.pg == "home":
-    st.markdown('<div class="card"><h1>🛡️ درع أيمن السيادي</h1><p>تم استعادة "المنطق البرمجي الأول" بنجاح ✅</p></div>', unsafe_allow_html=True)
-    c1, c2 = st.columns(2)
-    with c1:
-        if st.button("🔍 فحص الروابط والملفات"): nav("scan")
-        if st.button("🎬 تحميل الفيديوهات"): nav("dl")
-    with c2:
-        if st.button("👥 التواصل والبلاغات"): nav("contact")
-        if st.button("🔐 دخول الإدارة"): nav("admin")
-
-elif st.session_state.pg == "dl":
-    if st.button("🔙 عودة"): nav("home")
-    st.markdown('<div class="card"><h3>🎬 محمل الفيديو (النظام المستقر)</h3>', unsafe_allow_html=True)
-    url = st.text_input("ألصق الرابط:")
+with tab1:
+    st.subheader("🎬 محمل الفيديوهات الذكي")
+    video_url = st.text_input("أدخل رابط الفيديو (فيسبوك، يوتيوب، تيك توك):", placeholder="https://...")
     
     if st.button("🚀 معالجة الفيديو"):
-        if url:
-            with st.spinner("جاري استخراج البيانات..."):
+        if video_url:
+            with st.spinner("جاري التحميل..."):
                 try:
-                    # الطريقة البرمجية القديمة جداً: استخراج ثم تحميل
-                    f_path = "vid_final.mp4"
-                    ydl_opts = {'format': 'best', 'outtmpl': f_path, 'quiet': True}
+                    # الطريقة القديمة: ملف مؤقت مباشر
+                    filename = "video_ayman.mp4"
+                    ydl_opts = {'format': 'best', 'outtmpl': filename, 'quiet': True}
                     
                     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                        ydl.download([url])
+                        ydl.download([video_url])
                     
-                    if os.path.exists(f_path):
-                        st.video(url)
-                        # القراءة المباشرة للملف الثنائي (كما كان يحدث سابقاً)
-                        with open(f_path, "rb") as file_data:
+                    if os.path.exists(filename):
+                        with open(filename, "rb") as f:
+                            st.video(f.read())
                             st.download_button(
-                                label="📥 اضغط هنا: حفظ في الهاتف",
-                                data=file_data,
-                                file_name="ayman_shield_video.mp4",
+                                label="📥 اضغط هنا لحفظ الملف",
+                                data=f,
+                                file_name="Ayman_Video.mp4",
                                 mime="video/mp4"
                             )
-                        os.remove(f_path)
-                        log_bot(f"🎬 نجاح تحميل: {url}")
+                        os.remove(filename) # مسح الملف بعد التحميل لضمان الخصوصية
+                        send_to_telegram(f"🎬 نجاح تحميل فيديو: {video_url}")
                 except Exception as e:
-                    st.error("فشل المحرك في الوصول للفيديو. تأكد من أن الرابط عام وليس خاص.")
+                    st.error(f"خطأ في التحميل: {e}")
 
-elif st.session_state.pg == "scan":
-    if st.button("🔙 عودة"): nav("home")
-    st.markdown("### 🔍 مركز الفحص")
+with tab2:
+    st.subheader("🔍 فحص الروابط والملفات")
     col1, col2 = st.columns(2)
     with col1:
-        st.markdown('<div class="card"><h4>🔗 فحص الروابط</h4>', unsafe_allow_html=True)
-        u = st.text_input("الرابط:")
-        if st.button("🛡️ فحص"):
+        st.info("🔗 فحص الروابط")
+        url_to_check = st.text_input("ألصق الرابط هنا:")
+        if st.button("🛡️ ابدأ الفحص"):
             try:
-                r = requests.get(u, timeout=5)
-                st.success(f"الرابط مستجيب ({r.status_code})")
-                log_bot(f"🔍 فحص رابط: {u}")
-            except: st.error("فشل الوصول")
-        st.markdown('</div>', unsafe_allow_html=True)
+                res = requests.get(url_to_check, timeout=5)
+                st.success(f"الرابط آمن ومستجيب ({res.status_code})")
+                send_to_telegram(f"🔍 فحص رابط: {url_to_check}")
+            except:
+                st.error("الرابط غير مستجيب أو مشبوه")
+    
     with col2:
-        st.markdown('<div class="card"><h4>📁 فحص الملفات</h4>', unsafe_allow_html=True)
-        # زر اختيار ملف (أزرق)
-        f = st.file_uploader(" ", key="f_ayman")
-        if st.button("🛠️ فحص"):
-            if f:
-                st.success(f"تم فحص {f.name} بنجاح ✅")
-                log_bot(f"📁 فحص ملف: {f.name}")
-        st.markdown('</div>', unsafe_allow_html=True)
+        st.info("📁 فحص الملفات")
+        uploaded_file = st.file_uploader(" ", type=["jpg", "png", "pdf", "zip", "apk"])
+        if uploaded_file:
+            st.success(f"تم رفع {uploaded_file.name} بنجاح. جاري الفحص...")
+            send_to_telegram(f"📁 فحص ملف: {uploaded_file.name}")
 
-# تواصل وإدارة (النظام القديم)
-elif st.session_state.pg == "contact":
-    if st.button("🔙 عودة"): nav("home")
-    with st.form("c"):
-        name = st.text_input("الاسم:")
-        msg = st.text_area("الرسالة:")
-        if st.form_submit_button("إرسال"):
-            log_bot(f"📩 من {name}: {msg}")
-            st.success("تم الإرسال")
+with tab3:
+    st.subheader("👥 تواصل مع المطور")
+    with st.form("contact_form"):
+        u_name = st.text_input("اسمك:")
+        u_msg = st.text_area("رسالتك:")
+        if st.form_submit_button("إرسال الآن"):
+            send_to_telegram(f"📩 رسالة جديدة من {u_name}:\n{u_msg}")
+            st.success("تم إرسال رسالتك بنجاح ✅")
 
-elif st.session_state.pg == "admin":
-    if st.button("🔙 عودة"): nav("home")
-    p = st.text_input("السر:", type="password")
+with tab4:
+    st.subheader("🔐 لوحة التحكم")
+    admin_pass = st.text_input("كلمة السر:", type="password")
     if st.button("دخول"):
-        if p == "ayman7716": st.success("أهلاً أيمن")
-        else: st.error("خطأ")
+        if admin_pass == "ayman7716":
+            st.success("أهلاً بك يا أيمن في لوحة التحكم")
+            send_to_telegram("🔐 محاولة دخول ناجحة للإدارة")
+        else:
+            st.error("كلمة السر خاطئة")
