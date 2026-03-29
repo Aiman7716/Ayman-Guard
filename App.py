@@ -3,8 +3,8 @@ import yt_dlp
 import requests
 import io
 
-# --- 1. التصميم الجمالي السيادي (تنسيق أيمن المعتمد) ---
-st.set_page_config(page_title="Ayman Guard Ultra v24", layout="wide")
+# --- 1. التنسيق السيادي (UI) ---
+st.set_page_config(page_title="Ayman Guard Pro v25", layout="wide")
 st.markdown("""
     <style>
     @import url('https://fonts.googleapis.com/css2?family=Cairo:wght@400;700&display=swap');
@@ -12,25 +12,25 @@ st.markdown("""
     .stApp { background-color: #0d1117; color: #ffffff; }
     .hero { background: linear-gradient(135deg, #1f6feb 0%, #111d2e 100%); padding: 25px; border-radius: 15px; text-align: center; border: 1px solid #30363d; margin-bottom: 20px; }
     div.stButton > button { width: 100% !important; background: #1f6feb !important; color: white !important; border-radius: 10px; font-weight: bold; height: 3.5em; border: none; }
-    /* زر الحفظ الأخضر العملاق */
-    .stDownloadButton > button { background-color: #238636 !important; height: 4em !important; font-size: 18px !important; border: 2px solid #ffffff !important; }
+    /* زر الحفظ الأخضر السيادي */
+    .stDownloadButton > button { background-color: #238636 !important; height: 4.5em !important; font-size: 20px !important; border: 2px solid #ffffff !important; box-shadow: 0 4px 15px rgba(0,0,0,0.4); }
     </style>
 """, unsafe_allow_html=True)
 
-st.markdown('<div class="hero"><h1>🛡️ درع أيمن السيادي</h1><p>إصدار إصلاح المعاينة v24.0</p></div>', unsafe_allow_html=True)
+st.markdown('<div class="hero"><h1>🛡️ درع أيمن السيادي</h1><p>إصدار المعالجة المباشرة v25.0</p></div>', unsafe_allow_html=True)
 
-# --- 2. محرك التحميل الذكي (بدون ملفات مؤقتة) ---
+# --- 2. المحرك (معالجة البيانات في الذاكرة) ---
 t = st.tabs(["🎬 محمل الفيديو", "🏠 الرئيسية"])
 
 with t[0]:
-    st.subheader("🎬 مركز استخراج الوسائط")
-    v_url = st.text_input("أدخل رابط الفيديو (Facebook, YouTube, etc):")
+    st.subheader("🎬 مركز التحميل المباشر")
+    v_url = st.text_input("ألصق رابط الفيديو هنا:")
     
-    if st.button("🚀 تجهيز الفيديو للتحميل"):
+    if st.button("🚀 تجهيز الفيديو"):
         if v_url:
-            with st.spinner("جاري كسر الحماية وجلب البيانات..."):
+            with st.spinner("جاري استخراج البيانات وفك التشفير..."):
                 try:
-                    # إعدادات المحرك لجلب الرابط المباشر فقط
+                    # إعدادات المحرك لاستخراج الرابط المباشر فقط
                     ydl_opts = {
                         'format': 'best',
                         'quiet': True,
@@ -40,27 +40,31 @@ with t[0]:
                     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                         info = ydl.extract_info(v_url, download=False)
                         direct_url = info.get('url', None)
-                        title = info.get('title', 'ayman_video')
+                        v_title = info.get('title', 'Ayman_Shield_Video')
 
                     if direct_url:
-                        # حل مشكلة المعاينة: نرسل الرابط المباشر للمشغل
-                        st.video(direct_url)
+                        # الحل الجذري للمعاينة: جلب الفيديو كبيانات ثنائية
+                        # لضمان ظهوره في المشغل وتفعيل زر التحميل
+                        resp = requests.get(direct_url, stream=True)
+                        video_bytes = resp.content # تحميل البيانات للذاكرة
                         
-                        # حل مشكلة زر الحفظ: نقوم بتحميل الفيديو للذاكرة أولاً
-                        video_data = requests.get(direct_url).content
+                        # عرض الفيديو من الذاكرة (لحل مشكلة الشاشة السوداء)
+                        st.video(video_bytes)
                         
+                        st.markdown("---")
+                        
+                        # تفعيل زر التحميل المباشر من الذاكرة
                         st.download_button(
                             label="📥 اضغط هنا لحفظ الفيديو فوراً",
-                            data=video_data,
-                            file_name=f"{title}.mp4",
+                            data=video_bytes,
+                            file_name=f"{v_title}.mp4",
                             mime="video/mp4"
                         )
-                        st.success("✅ تم تجهيز الملف بنجاح! اضغط على الزر الأخضر أعلاه.")
+                        st.success("✅ تم استخراج الفيديو بنجاح! جاهز للحفظ.")
                     else:
-                        st.error("لم نتمكن من العثور على رابط مباشر.")
+                        st.error("فشل استخراج الرابط المباشر.")
                 except Exception as e:
                     st.error(f"حدث خطأ في المحرك: {e}")
-                    st.info("💡 جرب فتح التطبيق في متصفح Chrome للحصول على أفضل النتائج.")
 
 with t[1]:
-    st.write(f"مرحباً بك يا **أيمن**. هذا الإصدار يعالج مشكلة المعاينة عبر جلب البيانات مباشرة للذاكرة.")
+    st.write(f"يا **أيمن**، تم تحديث النظام ليعمل بنظام **'الضخ المباشر'**. هذا الكود يقرأ الفيديو كبيانات خام ويضعها في يدك مباشرة دون وسيط.")
