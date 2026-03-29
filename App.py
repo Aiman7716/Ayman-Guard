@@ -92,57 +92,58 @@ with tabs[0]:
     with c3: st.markdown(f'<div class="feature-card"><h2>🤖</h2><h4>بوت رسمي</h4><p>تحكم كامل عبر تليجرام</p></div>', unsafe_allow_html=True)
     st.image("https://img.freepik.com/free-vector/cyber-security-concept_23-2148532223.jpg", use_column_width=True)
 
-# --- التبويب 2: مركز الوسائط المطور V40 ---
+# --- التبويب 2: محرك الوسائط V50 (التحميل المباشر) ---
 with tabs[1]:
     st.subheader("🎬 محرك تحميل الفيديو السيادي")
-    v_url = st.text_input("ألصق الرابط هنا (TikTok, YouTube, FB):")
+    v_url = st.text_input("ألصق الرابط هنا (تأكد من حذف أي رموز قبل https):")
     
-    if st.button("🚀 جلب وتحميل الفيديو"):
+    if st.button("🚀 معالجة وتجهيز الملف"):
         if v_url:
-            with st.spinner("جاري استخراج الفيديو..."):
+            with st.spinner("جاري كسر التشفير وتجهيز الملف للتحميل..."):
                 try:
-                    # تنظيف الرابط من أي مسافات أو رموز زائدة
-                    target_url = v_url.strip()
+                    # تنظيف الرابط
+                    clean_url = v_url.strip().lstrip('/')
                     
-                    # إعدادات احترافية لتجاوز الحظر وتشفير TikTok
+                    # إعدادات متقدمة جداً لاستخراج الفيديو مباشرة
                     ydl_opts = {
                         'format': 'best',
                         'quiet': True,
                         'no_warnings': True,
-                        'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+                        'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
+                        'nocheckcertificate': True,
                     }
                     
                     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                        info = ydl.extract_info(target_url, download=False)
-                        video_direct_url = info.get('url')
-                        video_title = info.get('title', 'Ayman_Video')
+                        info = ydl.extract_info(clean_url, download=False)
+                        video_url = info.get('url')
+                        video_title = info.get('title', 'Ayman_Guard_Video')
+                        
+                        # هذه الخطوة هي السر: سحب الفيديو كبيانات (Bytes)
+                        response = requests.get(video_url, stream=True, timeout=30)
                         
                         st.session_state.video_data = {
-                            "url": video_direct_url,
+                            "bytes": response.content,
                             "title": video_title
                         }
-                        st.success("✅ تم استخراج الرابط بنجاح!")
+                        st.success("✅ الملف جاهز للتحميل الآن!")
                 except Exception as e:
-                    st.error("❌ فشل المحرك. تأكد من تحديث yt-dlp في ملف requirements")
+                    st.error("❌ تيك توك يرفض الطلب حالياً. تأكد من أن الفيديو عام وليس خاصاً.")
 
-    # عرض الفيديو والتحميل بطريقة تضمن العمل على الجوال
-    if st.session_state.video_data:
+    # إذا تم تجهيز الملف، نعرض زر التحميل فقط (لتجنب مشكلة المشغل المكسور)
+    if st.session_state.video_data and 'bytes' in st.session_state.video_data:
         st.divider()
-        # استخدام مشغل الفيديو الأساسي مع الرابط المباشر
-        st.video(st.session_state.video_data['url'])
+        st.info(f"📁 تم جلب: {st.session_state.video_data['title']}")
         
-        # زر التحميل المباشر لتحويله لملف في الاستوديو
-        try:
-            # نقوم بجلب محتوى الفيديو كبيانات (Bytes)
-            v_content = requests.get(st.session_state.video_data['url'], timeout=15).content
-            st.download_button(
-                label="📥 حفظ في الاستوديو (MP4)",
-                data=v_content,
-                file_name=f"{st.session_state.video_data['title']}.mp4",
-                mime="video/mp4"
-            )
-        except:
-            st.warning("⚠️ التحميل المباشر مقيد، جرب الضغط مطولاً على الفيديو.")
+        # زر تحميل حقيقي يحفظ الملف فوراً في الاستوديو
+        st.download_button(
+            label="📥 اضغط هنا لحفظ الفيديو في الاستوديو",
+            data=st.session_state.video_data['bytes'],
+            file_name=f"{st.session_state.video_data['title']}.mp4",
+            mime="video/mp4",
+            use_container_width=True
+        )
+        st.balloons() # احتفال بسيط عند نجاح الجلب
+
 
 # --- التبويب 3: مركز الفحص ---
 with tabs[2]:
