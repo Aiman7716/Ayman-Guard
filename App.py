@@ -91,51 +91,56 @@ with tabs[0]:
     with c2: st.markdown(f'<div class="feature-card"><h2>🚀</h2><h4>تحميل ذكي</h4><p>أسرع محرك جلب وسائط</p></div>', unsafe_allow_html=True)
     with c3: st.markdown(f'<div class="feature-card"><h2>🤖</h2><h4>بوت رسمي</h4><p>تحكم كامل عبر تليجرام</p></div>', unsafe_allow_html=True)
     st.image("https://img.freepik.com/free-vector/cyber-security-concept_23-2148532223.jpg", use_column_width=True)
-    # --- التبويب 2: محرك الوسائط العالمي V140 ---
-with tabs[1]:
-    st.subheader("🎬 محرك الوسائط الذكي (إصدار السيادة)")
-    v_url = st.text_input("ألصق الرابط هنا:")
     
-    if st.button("🚀 معالجة الرابط وتجهيز الملف"):
-        if v_url:
-            # تنظيف الرابط آلياً من الشرطة الزائدة /https
-            target = v_url.strip().replace("/https", "https").lstrip('/')
+    # --- التبويب 2: محرك الوسائط السيادي V150 ---
+with tabs[1]:
+    st.subheader("🎬 محرك عرض وتحميل الوسائط")
+    v_url = st.text_input("ألصق رابط (TikTok أو Facebook) هنا:")
+    
+    if v_url:
+        # تنظيف الرابط آلياً
+        clean_url = v_url.strip().replace("/https", "https").lstrip(':').lstrip('/')
+        
+        st.divider()
+        st.success("✅ تم تجهيز منصة العرض والتحميل")
+
+        # إنشاء واجهة احترافية باستخدام HTML و CSS
+        # هذه الواجهة تعمل في متصفح المستخدم وتتخطى حظر السيرفر نهائياً
+        html_code = f"""
+        <div style="background: #111; padding: 20px; border-radius: 15px; border: 1px solid #FFD700; text-align: center;">
+            <h4 style="color: #FFD700; margin-bottom: 15px;">📥 منصة التحكم بالتحميل</h4>
             
-            # عرض روابط تحميل احترافية تعمل مباشرة من متصفح المستخدم (لتجاوز حظر السيرفر)
-            st.divider()
-            st.success("✅ تم استخراج بوابات التحميل المباشرة!")
+            <div style="margin-bottom: 20px;">
+                <p style="color: #eee; font-size: 0.9rem;">اضغط على الزر المناسب للمنصة:</p>
+            </div>
+
+            <div style="display: flex; flex-direction: column; gap: 12px;">
+                
+                <a href="https://cobalt.tools/?url={clean_url}" target="_blank" style="text-decoration: none;">
+                    <button style="width: 100%; background: #FFD700; color: black; border: none; padding: 15px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 1rem;">
+                        🚀 تحميل فيديو (تيك توك / فيسبوك)
+                    </button>
+                </a>
+
+                <a href="https://snaptik.app/?url={clean_url}" target="_blank" style="text-decoration: none;">
+                    <button style="width: 100%; background: #222; color: white; border: 1px solid #444; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;">
+                        🎥 سيرفر احتياطي (بدون علامة مائية)
+                    </button>
+                </a>
+
+            </div>
             
-            # تصميم بطاقة تحميل احترافية
-            st.markdown(f"""
-                <div style="background: #1e1e1e; padding: 20px; border-radius: 15px; border: 1px solid #FFD700; text-align: center; margin-bottom: 20px;">
-                    <h4 style="color: #FFD700;">📂 الملف جاهز للاستخراج</h4>
-                    <p style="color: #aaa; font-size: 0.8rem;">استخدم إحدى البوابات التالية للحفظ في الاستوديو مباشرة:</p>
-                    
-                    <div style="display: flex; flex-direction: column; gap: 10px;">
-                        <a href="https://cobalt.tools" target="_blank" style="text-decoration: none;">
-                            <button style="width: 100%; background: #FFD700; color: black; border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer;">
-                                🛡️ البوابة الأساسية (تجاوز الحظر)
-                            </button>
-                        </a>
-                        
-                        <a href="https://snaptik.app" target="_blank" style="text-decoration: none;">
-                            <button style="width: 100%; background: #242424; color: white; border: 1px solid #444; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer;">
-                                🚀 بوابة تيك توك السريعة
-                            </button>
-                        </a>
-                        
-                        <a href="https://fdown.net" target="_blank" style="text-decoration: none;">
-                            <button style="width: 100%; background: #242424; color: white; border: 1px solid #444; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer;">
-                                📘 بوابة فيسبوك المباشرة
-                            </button>
-                        </a>
-                    </div>
-                    
-                    <p style="color: #FFD700; font-size: 0.7rem; margin-top: 15px;">⚠️ انسخ الرابط الخاص بك واستخدمه في البوابة المناسبة للحصول على أفضل جودة.</p>
-                </div>
-            """, unsafe_allow_html=True)
-            
-            st.info("💡 ملاحظة: تيك توك يمنع المواقع من سحب الفيديوهات بشكل آلي لضمان الأمان، لذا نستخدم هذه البوابات كحل سيادي.")
+            <p style="color: #888; font-size: 0.75rem; margin-top: 15px;">
+                💡 نصيحة: عند فتح الرابط، سيظهر لك خيار "Download" فوراً.
+            </p>
+        </div>
+        """
+        
+        # تشغيل الكود (هذا السطر هو الأهم)
+        st.components.v1.html(html_code, height=350)
+
+    else:
+        st.info("💡 الرجاء لصق الرابط ليبدأ المحرك بالعمل.")
 
 
 
