@@ -92,55 +92,61 @@ with tabs[0]:
     with c3: st.markdown(f'<div class="feature-card"><h2>🤖</h2><h4>بوت رسمي</h4><p>تحكم كامل عبر تليجرام</p></div>', unsafe_allow_html=True)
     st.image("https://img.freepik.com/free-vector/cyber-security-concept_23-2148532223.jpg", use_column_width=True)
     
-    # --- التبويب 2: محرك الوسائط السيادي V150 ---
+    # --- التبويب 2: مركز الوسائط (الإصدار المستقر العام) ---
 with tabs[1]:
-    st.subheader("🎬 محرك عرض وتحميل الوسائط")
-    v_url = st.text_input("ألصق رابط (TikTok أو Facebook) هنا:")
+    st.subheader("🎬 محرك تحميل الفيديو")
+    v_url = st.text_input("ألصق الرابط هنا (YouTube, FB, etc):", key="v_input")
     
-    if v_url:
-        # تنظيف الرابط آلياً
-        clean_url = v_url.strip().replace("/https", "https").lstrip(':').lstrip('/')
-        
+    if st.button("🚀 جلب وتحميل الفيديو"):
+        if v_url:
+            with st.spinner("جاري استخراج الفيديو..."):
+                try:
+                    # تنظيف الرابط من أي مسافات زائدة
+                    target_url = v_url.strip()
+                    
+                    # إعدادات yt-dlp القياسية لتحميل أفضل جودة MP4
+                    ydl_opts = {
+                        'format': 'best[ext=mp4]/best',
+                        'quiet': True,
+                        'no_warnings': True,
+                    }
+                    
+                    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                        info = ydl.extract_info(target_url, download=False)
+                        video_direct_url = info.get('url')
+                        video_title = info.get('title', 'Ayman_Video')
+                        
+                        st.session_state.video_data = {
+                            "url": video_direct_url,
+                            "title": video_title
+                        }
+                        st.success("✅ تم جلب الرابط بنجاح!")
+                        
+                except Exception as e:
+                    st.error("❌ فشل المحرك في هذا الرابط. قد يكون الرابط خاصاً أو محمياً.")
+
+    # عرض المعاينة وزر التحميل إذا وجدنا البيانات
+    if st.session_state.video_data:
         st.divider()
-        st.success("✅ تم تجهيز منصة العرض والتحميل")
-
-        # إنشاء واجهة احترافية باستخدام HTML و CSS
-        # هذه الواجهة تعمل في متصفح المستخدم وتتخطى حظر السيرفر نهائياً
-        html_code = f"""
-        <div style="background: #111; padding: 20px; border-radius: 15px; border: 1px solid #FFD700; text-align: center;">
-            <h4 style="color: #FFD700; margin-bottom: 15px;">📥 منصة التحكم بالتحميل</h4>
-            
-            <div style="margin-bottom: 20px;">
-                <p style="color: #eee; font-size: 0.9rem;">اضغط على الزر المناسب للمنصة:</p>
-            </div>
-
-            <div style="display: flex; flex-direction: column; gap: 12px;">
-                
-                <a href="https://cobalt.tools/?url={clean_url}" target="_blank" style="text-decoration: none;">
-                    <button style="width: 100%; background: #FFD700; color: black; border: none; padding: 15px; border-radius: 10px; font-weight: bold; cursor: pointer; font-size: 1rem;">
-                        🚀 تحميل فيديو (تيك توك / فيسبوك)
-                    </button>
-                </a>
-
-                <a href="https://snaptik.app/?url={clean_url}" target="_blank" style="text-decoration: none;">
-                    <button style="width: 100%; background: #222; color: white; border: 1px solid #444; padding: 12px; border-radius: 10px; font-weight: bold; cursor: pointer;">
-                        🎥 سيرفر احتياطي (بدون علامة مائية)
-                    </button>
-                </a>
-
-            </div>
-            
-            <p style="color: #888; font-size: 0.75rem; margin-top: 15px;">
-                💡 نصيحة: عند فتح الرابط، سيظهر لك خيار "Download" فوراً.
-            </p>
-        </div>
-        """
+        st.markdown(f"📌 **العنوان:** {st.session_state.video_data['title']}")
         
-        # تشغيل الكود (هذا السطر هو الأهم)
-        st.components.v1.html(html_code, height=350)
-
-    else:
-        st.info("💡 الرجاء لصق الرابط ليبدأ المحرك بالعمل.")
+        # المعاينة المباشرة
+        st.video(st.session_state.video_data['url'])
+        
+        # زر التحميل المباشر
+        try:
+            # محاولة سحب الفيديو كملف للتحميل المباشر
+            video_bytes = requests.get(st.session_state.video_data['url'], timeout=10).content
+            st.download_button(
+                label="📥 حفظ في الاستوديو (MP4)",
+                data=video_bytes,
+                file_name=f"{st.session_state.video_data['title']}.mp4",
+                mime="video/mp4",
+                use_container_width=True
+            )
+        except:
+            # إذا فشل السحب المباشر، نعطي المستخدم الرابط الخام
+            st.warning("⚠️ التحميل المباشر مقيد، يمكنك الضغط مطولاً على الفيديو للحفظ.")
 
 
 
