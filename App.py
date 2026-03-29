@@ -92,59 +92,57 @@ with tabs[0]:
     with c3: st.markdown(f'<div class="feature-card"><h2>🤖</h2><h4>بوت رسمي</h4><p>تحكم كامل عبر تليجرام</p></div>', unsafe_allow_html=True)
     st.image("https://img.freepik.com/free-vector/cyber-security-concept_23-2148532223.jpg", use_column_width=True)
     
-# --- التبويب 2: محرك الوسائط المتعددة (إصدار الاستقرار الداخلي) ---
+# --- التبويب 2: المحرك السيادي المطور V120 (تحميل داخلي كامل) ---
 with tabs[1]:
-    st.subheader("🎬 محرك الوسائط الذكي")
-    v_url = st.text_input("ألصق الرابط هنا (YouTube, FB, Instagram):")
+    st.subheader("🎬 محرك الوسائط الذكي (إصدار السيادة)")
+    v_url = st.text_input("ألصق الرابط هنا:")
     
     if st.button("🚀 جلب وتحميل الفيديو"):
         if v_url:
-            # تنظيف الرابط آلياً من أي أخطاء كتابية
+            # تنظيف الرابط آلياً من أي أخطاء (مثل /https)
             target = v_url.strip().replace("/https", "https").lstrip('/')
             
-            with st.spinner("جاري الاتصال بالسيرفر الآمن..."):
+            with st.spinner("جاري سحب الملف وتأمينه داخلياً..."):
                 try:
-                    # إعدادات احترافية لـ yt-dlp لتجاوز حظر السيرفرات
+                    # إعدادات متقدمة جداً لاستخراج الفيديو
                     ydl_opts = {
-                        'format': 'best',
+                        'format': 'bestvideo[ext=mp4]+bestaudio[ext=m4a]/best[ext=mp4]/best',
                         'quiet': True,
-                        'no_warnings': True,
                         'nocheckcertificate': True,
                         'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
                     }
                     
                     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                         info = ydl.extract_info(target, download=False)
-                        video_url = info.get('url')
-                        title = info.get('title', 'Ayman_Media')
-                        
-                        # محاولة سحب الفيديو إلى ذاكرة الموقع ليبقى المستخدم بالداخل
-                        headers = {'User-Agent': 'Mozilla/5.0'}
-                        video_data = requests.get(video_url, headers=headers, stream=True, timeout=20).content
-                        
-                        st.session_state.video_data = {
-                            "content": video_data,
-                            "title": title
-                        }
-                        st.success("✅ تم تجهيز الفيديو بنجاح!")
-                        
-                except Exception as e:
-                    # إذا فشل الجلب الداخلي، نعرض رسالة ذكية
-                    st.error("⚠️ عذراً، هذا الرابط محمي بواسطة المنصة الأصلية أو السيرفر مضغوط.")
-                    st.info("💡 نصيحة: روابط يوتيوب وفيسبوك تعمل الآن بشكل أفضل.")
+                        direct_url = info.get('url')
+                        title = info.get('title', 'Ayman_Video')
 
-    # عرض النتائج (داخل الموقع 100%)
-    if st.session_state.video_data and "content" in st.session_state.video_data:
+                        # الحرك السري: سحب الفيديو للسيرفر كملف Bytes
+                        # هذا يكسر حظر تيك توك للمشغل
+                        r = requests.get(direct_url, timeout=30)
+                        if r.status_code == 200:
+                            st.session_state.video_data = {
+                                "bytes": r.content, # تخزين الفيديو الفعلي وليس الرابط
+                                "title": title
+                            }
+                            st.success("✅ تم تأمين الملف داخلياً!")
+                        else:
+                            st.error("❌ تيك توك رفض تسليم الملف للسيرفر.")
+                except Exception as e:
+                    st.error("❌ عذراً، هذا الرابط محمي بتشفير عالي حالياً.")
+
+    # العرض والتحميل (داخلي 100%)
+    if st.session_state.video_data and 'bytes' in st.session_state.video_data:
         st.divider()
-        st.markdown(f"**📌 العنوان:** {st.session_state.video_data['title']}")
+        st.info(f"📌 العنوان: {st.session_state.video_data['title']}")
         
-        # المعاينة الداخلية
-        st.video(st.session_state.video_data['content'])
+        # تشغيل الفيديو من الذاكرة (لن يظهر مكسوراً بعد الآن)
+        st.video(st.session_state.video_data['bytes'])
         
-        # زر الحفظ في الاستوديو
+        # زر التحميل المباشر من الذاكرة
         st.download_button(
             label="📥 حفظ في الاستوديو (MP4)",
-            data=st.session_state.video_data['content'],
+            data=st.session_state.video_data['bytes'],
             file_name=f"{st.session_state.video_data['title']}.mp4",
             mime="video/mp4",
             use_container_width=True
