@@ -92,62 +92,65 @@ with tabs[0]:
     with c3: st.markdown(f'<div class="feature-card"><h2>🤖</h2><h4>بوت رسمي</h4><p>تحكم كامل عبر تليجرام</p></div>', unsafe_allow_html=True)
     st.image("https://img.freepik.com/free-vector/cyber-security-concept_23-2148532223.jpg", use_column_width=True)
     
-# # --- التبويب 2: المحرك السيادي العابر للحظر V80 ---
+# --- التبويب 2: محرك الوسائط V100 (البقاء داخل الموقع) ---
 with tabs[1]:
-    st.subheader("🎬 المحرك العابر للحظر (V80)")
+    st.subheader("🎬 محرك الوسائط المتعددة (داخلي)")
     v_url = st.text_input("ألصق الرابط هنا:")
     
-    if st.button("🚀 كسر الحماية والجلب"):
+    if st.button("🚀 جلب وتحميل الفيديو"):
         if v_url:
-            # تنظيف الرابط من أي رموز زائدة (مثل / التي تظهر في صورك)
+            # تصحيح الرابط آلياً (حل مشكلة الشرطة المائلة الزائدة في صورتك)
             target = v_url.strip().replace("/https", "https").lstrip('/')
             
-            with st.spinner("جاري كسر التشفير عبر محركات الطوارئ..."):
+            with st.spinner("جاري جلب البيانات بأمان..."):
                 try:
-                    # المحرك الأساسي: Cobalt (الأكثر استقراراً للروابط المحمية)
+                    # استخدام محرك Cobalt مع رأس طلبات (Header) لمحاكاة متصفح حقيقي
+                    # لضمان عدم خروج المستخدم، سنقوم بسحب الفيديو للسيرفر ثم تقديمه
+                    api_url = "https://api.cobalt.tools/api/json"
+                    headers = {
+                        "Accept": "application/json",
+                        "Content-Type": "application/json",
+                        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0 Safari/537.36"
+                    }
                     payload = {"url": target, "videoQuality": "720"}
-                    headers = {"Accept": "application/json", "Content-Type": "application/json"}
-                    r = requests.post("https://api.cobalt.tools/api/json", json=payload, headers=headers, timeout=10)
+                    
+                    r = requests.post(api_url, json=payload, headers=headers, timeout=15)
                     
                     if r.status_code == 200:
-                        res = r.json()
-                        st.session_state.video_data = {"url": res['url'], "title": "Ayman_Guard_Video"}
-                        st.success("✅ تم كسر الحماية بنجاح!")
+                        video_direct_url = r.json()['url']
+                        
+                        # الخطوة الذهبية: سحب الفيديو داخل السيرفر ليبقى المستخدم في موقعك
+                        video_response = requests.get(video_direct_url, stream=True, timeout=30)
+                        
+                        if video_response.status_code == 200:
+                            st.session_state.video_data = {
+                                "content": video_response.content,
+                                "title": "Ayman_Video"
+                            }
+                            st.success("✅ تم التجهيز! الفيديو متاح الآن للمشاهدة والتحميل.")
+                        else:
+                            st.error("❌ فشل السيرفر في سحب الملف. حاول مرة أخرى.")
                     else:
-                        # إذا فشل Cobalt، نستخدم محرك احتياطي مباشر
-                        ydl_opts = {'format': 'best', 'quiet': True}
-                        with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                            info = ydl.extract_info(target, download=False)
-                            st.session_state.video_data = {"url": info['url'], "title": info.get('title', 'Video')}
-                            st.success("✅ تم الجلب عبر المحرك الاحتياطي")
+                        st.error("❌ المحرك مشغول حالياً، يرجى المحاولة بعد قليل.")
                 except Exception as e:
-                    st.error("❌ تيك توك يرفض طلبات السيرفر حالياً. استخدم 'الرابط الذهبي' أدناه.")
+                    st.error("❌ حماية تيك توك قوية جداً لهذا الفيديو، جرب فيديو آخر.")
 
-    # عرض النتائج بطريقة تضمن التحميل
-    if st.session_state.video_data:
+    # عرض الفيديو والتحميل داخل الموقع 100%
+    if st.session_state.video_data and "content" in st.session_state.video_data:
         st.divider()
-        # محاولة عرض الفيديو للمعاينة
-        st.video(st.session_state.video_data['url'])
+        # عرض المعاينة داخل الموقع
+        st.video(st.session_state.video_data['content'])
         
-        # خيار 1: التحميل المباشر (قد يظهر بحجم صغير إذا انحظر السيرفر)
-        try:
-            st.download_button("📥 تحميل سريع (إذا كان متاحاً)", 
-                               requests.get(st.session_state.video_data['url']).content, 
-                               file_name="Ayman_Video.mp4")
-        except: pass
+        # زر التحميل المباشر (يحفظ الملف فوراً في الاستوديو دون فتح نافذة جديدة)
+        st.download_button(
+            label="📥 حفظ في الاستوديو (MP4)",
+            data=st.session_state.video_data['content'],
+            file_name=f"Ayman_Shield_{int(time.time())}.mp4",
+            mime="video/mp4",
+            use_container_width=True
+        )
+        st.balloons()
 
-        # خيار 2: (الرابط الذهبي) - هذا هو الحل الوحيد الذي سيعمل معك 100%
-        st.markdown(f"""
-            <div style="background: #121212; padding: 20px; border-radius: 15px; border: 1px dashed #FFD700; text-align: center;">
-                <p style="color: #FFD700; font-weight: bold;">⚠️ إذا فشل التحميل أعلاه أو ظهر حجمه صغير:</p>
-                <a href="{st.session_state.video_data['url']}" target="_blank" style="text-decoration: none;">
-                    <button style="background: #FFD700; color: black; border: none; padding: 15px 30px; border-radius: 10px; font-weight: bold; cursor: pointer; width: 100%;">
-                        🔗 فتح مجرى الفيديو الأصلي (قسري)
-                    </button>
-                </a>
-                <p style="font-size: 0.8rem; margin-top: 10px; color: #888;">بعد فتح الرابط، اضغط مطولاً على الفيديو واختر 'تنزيل'.</p>
-            </div>
-        """, unsafe_allow_html=True)
 
 
 
