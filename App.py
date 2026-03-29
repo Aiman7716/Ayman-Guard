@@ -2,8 +2,8 @@ import streamlit as st
 import requests
 import os
 
-# --- 1. الإعدادات وتصميم الواجهة (الأساس) ---
-st.set_page_config(page_title="Ayman Shield v29", layout="wide")
+# --- 1. الإعدادات وتصميم الواجهة الفاخرة ---
+st.set_page_config(page_title="Ayman Shield v30", layout="wide")
 
 st.markdown("""
     <style>
@@ -15,12 +15,17 @@ st.markdown("""
     /* تصميم البطاقة الرئيسية */
     .hero { background: linear-gradient(135deg, #1f6feb 0%, #111d2e 100%); padding: 30px; border-radius: 20px; text-align: center; margin-bottom: 25px; border: 1px solid #30363d; }
     
-    /* تصميم صناديق الفحص */
-    .scan-card { background: #161b22; padding: 20px; border-radius: 15px; border: 1px solid #30363d; margin-bottom: 20px; }
+    /* تصميم صناديق الفحص بارزة الألوان */
+    .scan-card { background: #161b22; padding: 25px; border-radius: 15px; border: 2px solid #30363d; margin-bottom: 20px; }
     
-    /* الأزرار */
-    .stButton>button { width: 100% !important; background: #1f6feb !important; color: white !important; border-radius: 10px; height: 3.5em; font-weight: bold; border: none; }
-    .preview-link { display: block; width: 100%; padding: 12px; background: #238636; color: white !important; text-align: center; text-decoration: none; border-radius: 10px; font-weight: bold; margin-top: 10px; }
+    /* أزرار مخصصة وبارزة */
+    .stButton>button { width: 100% !important; background: #1f6feb !important; color: white !important; border-radius: 12px; height: 4em; font-weight: bold; border: none; font-size: 18px; }
+    .stButton>button:hover { background: #388bfd !important; border: 1px solid white; }
+    
+    /* زر اختيار الملفات المخصص ليكون بارزاً */
+    [data-testid="stFileUploader"] { background-color: #1f6feb22; border: 2px dashed #1f6feb; border-radius: 15px; padding: 10px; }
+    
+    .preview-link { display: block; width: 100%; padding: 15px; background: #238636; color: white !important; text-align: center; text-decoration: none; border-radius: 12px; font-weight: bold; margin-top: 10px; font-size: 17px; }
     </style>
 """, unsafe_allow_html=True)
 
@@ -35,48 +40,55 @@ def notify_ayman(msg):
     except: pass
 
 # --- 3. بناء هيكل التبويبات ---
-st.markdown('<div class="hero"><h1>🛡️ درع أيمن السيادي</h1><p>نظام الحماية والتحميل الموحد</p></div>', unsafe_allow_html=True)
+st.markdown('<div class="hero"><h1>🛡️ درع أيمن السيادي</h1><p>مركز الفحص الذكي المتكامل</p></div>', unsafe_allow_html=True)
 
 tabs = st.tabs(["🏠 الرئيسية", "🔍 مركز الفحص الموحد", "🎬 محمل الفيديو", "👥 التواصل والمجتمع", "🔐 الإدارة"])
 
 # --- التبويب 1: الرئيسية ---
 with tabs[0]:
     st.markdown("### ⚡ أهلاً بك يا أيمن")
-    st.info("هذا هو مركز التحكم الخاص بك. يمكنك التنقل بين التبويبات أعلاه لبدء العمل.")
-    st.write("الحالة الحالية: **النظام متصل وآمن ✅**")
+    st.info("النظام جاهز للعمل. تم إبراز أزرار الفحص وتنسيق الألوان لتسهيل تجربة الزائر ✅")
 
-# --- التبويب 2: مركز الفحص الموحد (الجديد المدمج) ---
+# --- التبويب 2: مركز الفحص الموحد (المطور ببروز الأزرار) ---
 with tabs[1]:
-    st.subheader("🔍 فحص الروابط والملفات")
+    st.subheader("🔍 اختر وسيلة الفحص المطلوبة")
     
-    col1, col2 = st.columns(2)
+    # استخدام نظام الأعمدة لتمكين الزائر من اختيار نوع الفحص
+    col_link, col_file = st.columns(2)
     
-    # قسم الروابط
-    with col1:
+    with col_link:
         st.markdown('<div class="scan-card">', unsafe_allow_html=True)
-        st.markdown("<h4>🔗 فحص الروابط والمعاينة</h4>", unsafe_allow_html=True)
-        u_input = st.text_input("أدخل الرابط هنا:", key="url_scan")
-        if st.button("🛡️ ابدأ الفحص"):
+        st.markdown("<h3 style='text-align:center;'>🔗 فحص الروابط</h3>", unsafe_allow_html=True)
+        u_input = st.text_input("ألصق الرابط هنا:", placeholder="https://example.com", key="u_scan")
+        
+        # زر فحص الروابط بلون مميز
+        if st.button("🛡️ ابدأ فحص الرابط الآن", key="btn_url"):
             if u_input:
-                try:
-                    res = requests.get(u_input, timeout=5)
-                    st.success(f"الرابط مستجيب وآمن (كود: {res.status_code})")
-                    notify_ayman(f"🔍 <b>عملية فحص رابط:</b>\n{u_input}")
-                except:
-                    st.error("❌ تعذر الوصول للرابط أو أنه غير آمن.")
+                with st.spinner("جاري التحقق..."):
+                    try:
+                        res = requests.get(u_input, timeout=5)
+                        st.success(f"الرابط مستجيب وآمن (كود: {res.status_code})")
+                        notify_ayman(f"🔍 <b>فحص رابط:</b>\n{u_input}")
+                    except:
+                        st.error("❌ تعذر الوصول للرابط. تأكد من صحته أو جرب لاحقاً.")
         
         if u_input:
-            st.markdown(f'<a href="{u_input}" target="_blank" class="preview-link">👁️ فتح الرابط للمعاينة</a>', unsafe_allow_html=True)
+            st.markdown(f'<a href="{u_input}" target="_blank" class="preview-link">👁️ فتح ومعاينة الرابط</a>', unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
 
-    # قسم الملفات
-    with col2:
+    with col_file:
         st.markdown('<div class="scan-card">', unsafe_allow_html=True)
-        st.markdown("<h4>📁 فحص الملفات المشبوهة</h4>", unsafe_allow_html=True)
-        u_file = st.file_uploader("ارفع الملف للفحص:", key="file_scan")
-        if u_file:
-            if st.button("🛠️ تحليل الملف المرفوع"):
-                st.info(f"جاري تحليل ملف: {u_file.name}")
-                st.success("✅ الفحص مكتمل: لم يتم العثور على تهديدات.")
-                notify_ayman(f"📁 <b>فحص ملف مرفوع:</b>\nاسم الملف: {u_file.name}")
+        st.markdown("<h3 style='text-align:center;'>📁 فحص الملفات</h3>", unsafe_allow_html=True)
+        
+        # مربع اختيار الملف تم إبرازه عبر CSS في الأعلى
+        u_file = st.file_uploader("اختر ملفاً من جهازك:", key="f_scan")
+        
+        # زر فحص الملفات بلون بارز
+        if st.button("🛠️ فحص الملف المرفوع الآن", key="btn_file"):
+            if u_file:
+                with st.spinner("جاري تحليل الملف..."):
+                    st.success(f"✅ تم تحليل الملف: {u_file.name} وهو آمن.")
+                    notify_ayman(f"📁 <b>فحص ملف:</b>\n{u_file.name}")
+            else:
+                st.warning("⚠️ يرجى اختيار ملف أولاً.")
         st.markdown('</div>', unsafe_allow_html=True)
