@@ -92,64 +92,63 @@ with tabs[0]:
     with c3: st.markdown(f'<div class="feature-card"><h2>🤖</h2><h4>بوت رسمي</h4><p>تحكم كامل عبر تليجرام</p></div>', unsafe_allow_html=True)
     st.image("https://img.freepik.com/free-vector/cyber-security-concept_23-2148532223.jpg", use_column_width=True)
     
-# --- التبويب 2: محرك الوسائط V100 (البقاء داخل الموقع) ---
+# --- التبويب 2: محرك الوسائط المتعددة (إصدار الاستقرار الداخلي) ---
 with tabs[1]:
-    st.subheader("🎬 محرك الوسائط المتعددة (داخلي)")
-    v_url = st.text_input("ألصق الرابط هنا:")
+    st.subheader("🎬 محرك الوسائط الذكي")
+    v_url = st.text_input("ألصق الرابط هنا (YouTube, FB, Instagram):")
     
     if st.button("🚀 جلب وتحميل الفيديو"):
         if v_url:
-            # تصحيح الرابط آلياً (حل مشكلة الشرطة المائلة الزائدة في صورتك)
+            # تنظيف الرابط آلياً من أي أخطاء كتابية
             target = v_url.strip().replace("/https", "https").lstrip('/')
             
-            with st.spinner("جاري جلب البيانات بأمان..."):
+            with st.spinner("جاري الاتصال بالسيرفر الآمن..."):
                 try:
-                    # استخدام محرك Cobalt مع رأس طلبات (Header) لمحاكاة متصفح حقيقي
-                    # لضمان عدم خروج المستخدم، سنقوم بسحب الفيديو للسيرفر ثم تقديمه
-                    api_url = "https://api.cobalt.tools/api/json"
-                    headers = {
-                        "Accept": "application/json",
-                        "Content-Type": "application/json",
-                        "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/120.0.0.0 Safari/537.36"
+                    # إعدادات احترافية لـ yt-dlp لتجاوز حظر السيرفرات
+                    ydl_opts = {
+                        'format': 'best',
+                        'quiet': True,
+                        'no_warnings': True,
+                        'nocheckcertificate': True,
+                        'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
                     }
-                    payload = {"url": target, "videoQuality": "720"}
                     
-                    r = requests.post(api_url, json=payload, headers=headers, timeout=15)
-                    
-                    if r.status_code == 200:
-                        video_direct_url = r.json()['url']
+                    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                        info = ydl.extract_info(target, download=False)
+                        video_url = info.get('url')
+                        title = info.get('title', 'Ayman_Media')
                         
-                        # الخطوة الذهبية: سحب الفيديو داخل السيرفر ليبقى المستخدم في موقعك
-                        video_response = requests.get(video_direct_url, stream=True, timeout=30)
+                        # محاولة سحب الفيديو إلى ذاكرة الموقع ليبقى المستخدم بالداخل
+                        headers = {'User-Agent': 'Mozilla/5.0'}
+                        video_data = requests.get(video_url, headers=headers, stream=True, timeout=20).content
                         
-                        if video_response.status_code == 200:
-                            st.session_state.video_data = {
-                                "content": video_response.content,
-                                "title": "Ayman_Video"
-                            }
-                            st.success("✅ تم التجهيز! الفيديو متاح الآن للمشاهدة والتحميل.")
-                        else:
-                            st.error("❌ فشل السيرفر في سحب الملف. حاول مرة أخرى.")
-                    else:
-                        st.error("❌ المحرك مشغول حالياً، يرجى المحاولة بعد قليل.")
+                        st.session_state.video_data = {
+                            "content": video_data,
+                            "title": title
+                        }
+                        st.success("✅ تم تجهيز الفيديو بنجاح!")
+                        
                 except Exception as e:
-                    st.error("❌ حماية تيك توك قوية جداً لهذا الفيديو، جرب فيديو آخر.")
+                    # إذا فشل الجلب الداخلي، نعرض رسالة ذكية
+                    st.error("⚠️ عذراً، هذا الرابط محمي بواسطة المنصة الأصلية أو السيرفر مضغوط.")
+                    st.info("💡 نصيحة: روابط يوتيوب وفيسبوك تعمل الآن بشكل أفضل.")
 
-    # عرض الفيديو والتحميل داخل الموقع 100%
+    # عرض النتائج (داخل الموقع 100%)
     if st.session_state.video_data and "content" in st.session_state.video_data:
         st.divider()
-        # عرض المعاينة داخل الموقع
+        st.markdown(f"**📌 العنوان:** {st.session_state.video_data['title']}")
+        
+        # المعاينة الداخلية
         st.video(st.session_state.video_data['content'])
         
-        # زر التحميل المباشر (يحفظ الملف فوراً في الاستوديو دون فتح نافذة جديدة)
+        # زر الحفظ في الاستوديو
         st.download_button(
             label="📥 حفظ في الاستوديو (MP4)",
             data=st.session_state.video_data['content'],
-            file_name=f"Ayman_Shield_{int(time.time())}.mp4",
+            file_name=f"{st.session_state.video_data['title']}.mp4",
             mime="video/mp4",
             use_container_width=True
         )
-        st.balloons()
 
 
 
