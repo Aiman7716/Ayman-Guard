@@ -3,8 +3,8 @@ import yt_dlp
 import os
 import requests
 
-# --- 1. إعدادات الواجهة (العودة للبساطة التي كانت تعمل) ---
-st.set_page_config(page_title="Ayman Shield v47", layout="wide")
+# --- 1. تصميم أيمن السيادي (بدون تعقيدات) ---
+st.set_page_config(page_title="Ayman Shield v48", layout="wide")
 
 st.markdown("""
     <style>
@@ -13,20 +13,19 @@ st.markdown("""
     .stApp { background-color: #0d1117; color: #ffffff; }
     [data-testid="stHeader"], [data-testid="stTabNav"] { display: none !important; }
     
-    /* تصميم الأزرار الزرقاء المستقرة */
     .stButton>button { width: 100% !important; background: #1f6feb !important; color: white !important; border-radius: 12px; height: 4em; font-weight: bold; border: none; }
     
-    /* زر اختيار الملف الأزرق */
-    div[data-testid="stFileUploader"] section button { background-color: #1f6feb !important; color: white !important; border-radius: 8px !important; }
+    /* زر الملفات الأزرق المطلوب */
+    div[data-testid="stFileUploader"] section button { background-color: #1f6feb !important; color: white !important; }
     
-    /* زر التنزيل الأخضر الأصلي */
-    .stDownloadButton>button { background-color: #238636 !important; color: white !important; border-radius: 12px !important; height: 4.5em !important; font-size: 20px !important; border: 1px solid #ffffff !important; }
+    /* زر التنزيل الأخضر (نفس شكل النسخة القديمة) */
+    .stDownloadButton>button { background-color: #238636 !important; color: white !important; border-radius: 12px !important; height: 5em !important; font-size: 22px !important; font-weight: bold !important; border: 2px solid #ffffff !important; }
     
-    .card { background: #161b22; padding: 20px; border-radius: 15px; border: 1px solid #30363d; margin-bottom: 20px; text-align: center; }
+    .card { background: #161b22; padding: 25px; border-radius: 15px; border: 1px solid #30363d; margin-bottom: 20px; text-align: center; }
     </style>
 """, unsafe_allow_html=True)
 
-# --- 2. محرك التنقل والبوت ---
+# --- 2. إدارة الصفحات والبوت ---
 if 'pg' not in st.session_state: st.session_state.pg = "home"
 
 def nav(t):
@@ -36,14 +35,14 @@ def nav(t):
 TOKEN = "8124974140:AAE3-UgIpkAKjcUyJrT3YWV99sug07WtniE"
 CHAT_ID = "906233240"
 
-def notify_bot(msg):
+def log_bot(msg):
     try: requests.post(f"https://api.telegram.org/bot{TOKEN}/sendMessage", data={"chat_id": CHAT_ID, "text": msg}, timeout=2)
     except: pass
 
-# --- 3. الصفحات بنظام الأزرار (الطريقة القديمة في البرمجة) ---
+# --- 3. عرض المحتوى بنظام الأزرار ---
 
 if st.session_state.pg == "home":
-    st.markdown('<div class="card"><h1>🛡️ درع أيمن السيادي</h1><p>تم استعادة المحرك البرمجي الأصلي بنسبة 100% ✅</p></div>', unsafe_allow_html=True)
+    st.markdown('<div class="card"><h1>🛡️ درع أيمن السيادي</h1><p>تم استعادة "المنطق البرمجي الأول" بنجاح ✅</p></div>', unsafe_allow_html=True)
     c1, c2 = st.columns(2)
     with c1:
         if st.button("🔍 فحص الروابط والملفات"): nav("scan")
@@ -54,37 +53,34 @@ if st.session_state.pg == "home":
 
 elif st.session_state.pg == "dl":
     if st.button("🔙 عودة"): nav("home")
-    st.markdown('<div class="card"><h3>🎬 محمل الفيديو الأصلي</h3>', unsafe_allow_html=True)
-    v_url = st.text_input("ألصق الرابط:")
+    st.markdown('<div class="card"><h3>🎬 محمل الفيديو (النظام المستقر)</h3>', unsafe_allow_html=True)
+    url = st.text_input("ألصق الرابط:")
     
-    if st.button("🚀 بدء المعالجة"):
-        if v_url:
-            with st.spinner("جاري التجهيز..."):
+    if st.button("🚀 معالجة الفيديو"):
+        if url:
+            with st.spinner("جاري استخراج البيانات..."):
                 try:
-                    # هذه هي الطريقة البرمجية القديمة التي كانت تنجح معك دائماً
-                    ydl_opts = {
-                        'format': 'best',
-                        'outtmpl': 'video_ayman.mp4',
-                        'no_warnings': True,
-                        'quiet': True
-                    }
+                    # الطريقة البرمجية القديمة جداً: استخراج ثم تحميل
+                    f_path = "vid_final.mp4"
+                    ydl_opts = {'format': 'best', 'outtmpl': f_path, 'quiet': True}
                     
                     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                        ydl.download([v_url])
+                        ydl.download([url])
                     
-                    if os.path.exists('video_ayman.mp4'):
-                        with open('video_ayman.mp4', 'rb') as f:
-                            st.video(v_url)
+                    if os.path.exists(f_path):
+                        st.video(url)
+                        # القراءة المباشرة للملف الثنائي (كما كان يحدث سابقاً)
+                        with open(f_path, "rb") as file_data:
                             st.download_button(
-                                label="📥 حفظ الفيديو في الجهاز",
-                                data=f,
-                                file_name="ayman_shield.mp4",
+                                label="📥 اضغط هنا: حفظ في الهاتف",
+                                data=file_data,
+                                file_name="ayman_shield_video.mp4",
                                 mime="video/mp4"
                             )
-                        os.remove('video_ayman.mp4')
-                        notify_bot(f"🎬 نجاح تحميل: {v_url}")
+                        os.remove(f_path)
+                        log_bot(f"🎬 نجاح تحميل: {url}")
                 except Exception as e:
-                    st.error("حدث خطأ. تأكد من جودة اتصالك بالإنترنت.")
+                    st.error("فشل المحرك في الوصول للفيديو. تأكد من أن الرابط عام وليس خاص.")
 
 elif st.session_state.pg == "scan":
     if st.button("🔙 عودة"): nav("home")
@@ -93,36 +89,36 @@ elif st.session_state.pg == "scan":
     with col1:
         st.markdown('<div class="card"><h4>🔗 فحص الروابط</h4>', unsafe_allow_html=True)
         u = st.text_input("الرابط:")
-        if st.button("🛡️ فحص الآن"):
+        if st.button("🛡️ فحص"):
             try:
                 r = requests.get(u, timeout=5)
-                st.success(f"الرابط يعمل ({r.status_code})")
-                notify_bot(f"🔍 فحص رابط: {u}")
+                st.success(f"الرابط مستجيب ({r.status_code})")
+                log_bot(f"🔍 فحص رابط: {u}")
             except: st.error("فشل الوصول")
         st.markdown('</div>', unsafe_allow_html=True)
     with col2:
         st.markdown('<div class="card"><h4>📁 فحص الملفات</h4>', unsafe_allow_html=True)
-        # الزر الأزرق المطلوب
-        f = st.file_uploader(" ", key="f_up")
-        if st.button("🛠️ فحص الملف"):
+        # زر اختيار ملف (أزرق)
+        f = st.file_uploader(" ", key="f_ayman")
+        if st.button("🛠️ فحص"):
             if f:
-                st.success(f"تم فحص {f.name} وهو آمن ✅")
-                notify_bot(f"📁 فحص ملف: {f.name}")
+                st.success(f"تم فحص {f.name} بنجاح ✅")
+                log_bot(f"📁 فحص ملف: {f.name}")
         st.markdown('</div>', unsafe_allow_html=True)
 
-# تواصل وإدارة (المستقرة)
+# تواصل وإدارة (النظام القديم)
 elif st.session_state.pg == "contact":
     if st.button("🔙 عودة"): nav("home")
     with st.form("c"):
         name = st.text_input("الاسم:")
         msg = st.text_area("الرسالة:")
         if st.form_submit_button("إرسال"):
-            notify_bot(f"📩 من {name}: {msg}")
+            log_bot(f"📩 من {name}: {msg}")
             st.success("تم الإرسال")
 
 elif st.session_state.pg == "admin":
     if st.button("🔙 عودة"): nav("home")
     p = st.text_input("السر:", type="password")
-    if st.button("🔐 دخول"):
+    if st.button("دخول"):
         if p == "ayman7716": st.success("أهلاً أيمن")
         else: st.error("خطأ")
