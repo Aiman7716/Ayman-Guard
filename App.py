@@ -92,57 +92,52 @@ with tabs[0]:
     with c3: st.markdown(f'<div class="feature-card"><h2>🤖</h2><h4>بوت رسمي</h4><p>تحكم كامل عبر تليجرام</p></div>', unsafe_allow_html=True)
     st.image("https://img.freepik.com/free-vector/cyber-security-concept_23-2148532223.jpg", use_column_width=True)
     
-    # --- التبويب 2: مركز الوسائط (الإصدار المستقر العام) ---
-with# استبدل قسم "مركز الوسائط" بهذا الكود المطور والمقاوم للحظر:
-
+    # --- التبويب 2: مركز الوسائط (الإصدار المستقر) ---
 with tabs[1]:
-    st.subheader("🎬 محرك تحميل الفيديو السيادي")
-    v_url = st.text_input("ألصق الرابط هنا (تأكد أنه يبدأ بـ https مباشرة):")
+    st.subheader("🎬 محرك تحميل الفيديو")
+    v_url = st.text_input("ألصق الرابط هنا (TikTok, YouTube, FB):")
     
     if st.button("🚀 جلب وتحميل الفيديو"):
         if v_url:
-            # تنظيف الرابط من أي رموز زائدة في البداية
-            clean_url = v_url.strip().lstrip('/') 
-            
-            with st.spinner("جاري فك التشفير وجلب الرابط المباشر..."):
+            with st.spinner("جاري المعالجة..."):
                 try:
+                    # تنظيف الرابط من أي شوائب كتابية
+                    target = v_url.strip().replace("/https", "https").lstrip('/')
+                    
                     ydl_opts = {
-                        'format': 'best', 
+                        'format': 'best',
                         'quiet': True,
                         'no_warnings': True,
-                        # هذه الهوية ضرورية جداً لتجاوز حماية تيك توك الجديدة
-                        'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
-                        'extract_flat': False,
                     }
+                    
                     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                        info = ydl.extract_info(clean_url, download=False)
-                        # جلب الرابط المباشر بدقة
-                        direct_link = info.get('url')
-                        
+                        info = ydl.extract_info(target, download=False)
                         st.session_state.video_data = {
-                            "url": direct_link,
-                            "title": info.get('title', 'Ayman_Guard_Video')
+                            "url": info['url'], 
+                            "title": info.get('title', 'Ayman_Video')
                         }
-                        st.success("✅ الفيديو جاهز الآن!")
+                        st.success("✅ الفيديو جاهز!")
+                        
                 except Exception as e:
-                    st.error("❌ فشل المحرك. تأكد من جودة الاتصال أو تحديث مكتبة yt-dlp.")
+                    st.error("❌ عذراً، هذا الرابط محمي جداً أو السيرفر مضغوط.")
 
+    # عرض المعاينة والتحميل
     if st.session_state.video_data:
         st.divider()
-        # عرض الفيديو باستخدام الرابط المباشر المستخرج
         st.video(st.session_state.video_data['url'])
         
-        # زر التحميل المباشر لتحويله لملف في الاستوديو
         try:
-            video_file = requests.get(st.session_state.video_data['url']).content
+            # محاولة جلب الفيديو للتحميل المباشر
+            v_content = requests.get(st.session_state.video_data['url'], timeout=10).content
             st.download_button(
-                label="📥 حفظ في الاستوديو",
-                data=video_file,
-                file_name=f"{st.session_state.video_data['title']}.mp4",
+                label="📥 حفظ في الاستوديو (MP4)",
+                data=v_content,
+                file_name="Ayman_Guard.mp4",
                 mime="video/mp4"
             )
         except:
-            st.info("💡 إذا لم يعمل الزر، اضغط مطولاً على الفيديو واختر 'تنزيل'.")
+            st.warning("⚠️ التحميل المباشر مقيد، يمكنك الحفظ من مشغل الفيديو أعلاه.")
+
 
 
 
