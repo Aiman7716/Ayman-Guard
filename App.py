@@ -101,33 +101,30 @@ with tabs[0]:
             with st.spinner("⏳ جاري المعالجة..."):
                 try:
                     import random
-                    target_url = v_url.strip()
-                    ua_list = [
-                        'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
-                        'Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1'
-                    ]
-                    ydl_opts = {
+                    t_url = v_url.strip()
+                    ua = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36'
+                    y_opts = {
                         'format': 'best',
                         'quiet': True,
                         'no_warnings': True,
-                        'user_agent': random.choice(ua_list),
+                        'user_agent': ua,
                         'referer': 'https://www.google.com/'
                     }
-                    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                        info = ydl.extract_info(target_url, download=False)
+                    with yt_dlp.YoutubeDL(y_opts) as ydl:
+                        inf = ydl.extract_info(t_url, download=False)
                         st.session_state.video_data = {
-                            "url": info.get('url'),
-                            "title": info.get('title', 'Video_Ayman')
+                            "url": inf.get('url'),
+                            "title": inf.get('title', 'Video')
                         }
                     st.success("✅ الفيديو جاهز")
-                except Exception as e:
-                    st.error("❌ الرابط محمي أو السيرفر محظور حالياً.")
+                except:
+                    st.error("❌ عذراً، هذا الرابط محمي أو غير مدعوم حالياً.")
 
     if st.session_state.video_data:
         st.divider()
         st.video(st.session_state.video_data['url'])
         try:
-            v_content = requests.get(st.session_state.video_data['url'], timeout=10).content
+            res = requests.get(st.session_state.video_data['url'], timeout=10)
             st.markdown("""
                 <style>
                 div.stDownloadButton > button {
@@ -142,13 +139,13 @@ with tabs[0]:
             """, unsafe_allow_html=True)
             st.download_button(
                 label="📥 حفظ في الاستوديو",
-                data=v_content,
+                data=res.content,
                 file_name="AymanGuard.mp4",
                 mime="video/mp4",
                 use_container_width=True
             )
         except:
-            st.warning("📥 استخدم خيار الحفظ من مشغل الفيديو أعلاه.")
+            st.info("💡 اضغط مطولاً على الفيديو لحفظه.")
 
 
 
