@@ -92,61 +92,31 @@ with tabs[0]:
     with c3: st.markdown(f'<div class="feature-card"><h2>🤖</h2><h4>بوت رسمي</h4><p>تحكم كامل عبر تليجرام</p></div>', unsafe_allow_html=True)
     st.image("https://img.freepik.com/free-vector/cyber-security-concept_23-2148532223.jpg", use_column_width=True)
     
-    with tabs[1]:
+with tabs[1]:
     st.subheader("🎬 محرك تحميل الفيديو")
     v_url = st.text_input("ألصق الرابط هنا:", key="v_input")
-    
     if st.button("🚀 جلب وتحميل الفيديو"):
         if v_url:
             with st.spinner("⏳ جاري المعالجة..."):
                 try:
                     import random
-                    t_url = v_url.strip()
-                    ua = 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36'
-                    y_opts = {
-                        'format': 'best',
-                        'quiet': True,
-                        'no_warnings': True,
-                        'user_agent': ua,
-                        'referer': 'https://www.google.com/'
-                    }
-                    with yt_dlp.YoutubeDL(y_opts) as ydl:
-                        inf = ydl.extract_info(t_url, download=False)
-                        st.session_state.video_data = {
-                            "url": inf.get('url'),
-                            "title": inf.get('title', 'Video')
-                        }
-                    st.success("✅ الفيديو جاهز")
+                    u_a = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
+                    y_o = {"format": "best", "quiet": True, "no_warnings": True, "user_agent": u_a}
+                    with yt_dlp.YoutubeDL(y_o) as ydl:
+                        inf = ydl.extract_info(v_url.strip(), download=False)
+                        st.session_state.video_data = {"url": inf.get("url"), "title": inf.get("title", "Video")}
+                    st.success("✅ جاهز")
                 except:
-                    st.error("❌ عذراً، هذا الرابط محمي أو غير مدعوم حالياً.")
-
+                    st.error("❌ فشل الجلب")
     if st.session_state.video_data:
         st.divider()
-        st.video(st.session_state.video_data['url'])
+        st.video(st.session_state.video_data["url"])
         try:
-            res = requests.get(st.session_state.video_data['url'], timeout=10)
-            st.markdown("""
-                <style>
-                div.stDownloadButton > button {
-                    background-color: #FFD700 !important;
-                    color: black !important;
-                    font-weight: bold !important;
-                    width: 100% !important;
-                    border-radius: 12px !important;
-                    height: 50px !important;
-                }
-                </style>
-            """, unsafe_allow_html=True)
-            st.download_button(
-                label="📥 حفظ في الاستوديو",
-                data=res.content,
-                file_name="AymanGuard.mp4",
-                mime="video/mp4",
-                use_container_width=True
-            )
+            r = requests.get(st.session_state.video_data["url"], timeout=10)
+            st.markdown("<style>div.stDownloadButton>button{background-color:#FFD700!important;color:black!important;width:100%!important;font-weight:bold;border-radius:10px;height:50px;}</style>", unsafe_allow_html=True)
+            st.download_button(label="📥 حفظ الفيديو", data=r.content, file_name="Ayman.mp4", mime="video/mp4")
         except:
-            st.info("💡 اضغط مطولاً على الفيديو لحفظه.")
-
+            st.info("💡 احفظ الفيديو من المشغل أعلاه")
 
 
 # --- التبويب 3: مركز الفحص ---
