@@ -92,34 +92,77 @@ with tabs[0]:
     with c3: st.markdown(f'<div class="feature-card"><h2>🤖</h2><h4>بوت رسمي</h4><p>تحكم كامل عبر تليجرام</p></div>', unsafe_allow_html=True)
     st.image("https://img.freepik.com/free-vector/cyber-security-concept_23-2148532223.jpg", use_column_width=True)
     
-        # قسم معالجة الرابط المطور لإنستجرام وغيره
-    if st.button("🚀 جلب وتحمـيل الفيديو"):
+        # --- التبويب 2: مركز الوسائط (المحرك الشامل V37.0) ---
+with tabs[1]:
+    st.subheader("🎬 محرك تحميل الفيديو")
+    v_url = st.text_input("ألصق الرابط هنا (YouTube, FB, Instagram, TikTok):", key="v_input")
+    
+    if st.button("🚀 جلب وتحميل الفيديو"):
         if v_url:
             with st.spinner("⏳ الدرع يخترق حماية المنصة..."):
                 try:
-                    # تنظيف وتجهيز الرابط
-                    clean_url = v_url.strip()
-                    
-                    # إعدادات متقدمة لتجاوز حظر إنستجرام
+                    target_url = v_url.strip()
+                    # إعدادات متقدمة لتجاوز حظر المنصات
                     ydl_opts = {
                         'format': 'best',
                         'quiet': True,
                         'no_warnings': True,
                         'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
-                        'add_header': ['Referer:https://www.instagram.com/'],
+                        'add_header': ['Referer:https://www.google.com/'],
                     }
                     
                     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                        info = ydl.extract_info(clean_url, download=False)
+                        info = ydl.extract_info(target_url, download=False)
                         st.session_state.video_data = {
                             "url": info.get('url'),
                             "title": info.get('title', 'Ayman_Guard_Video')
                         }
-                    st.success("✅ الفيديو جاهز!") # كما يظهر في صورتك الناجحة
+                    st.success("✅ الفيديو جاهز للعرض والتحميل!")
                         
                 except Exception as e:
-                    st.error("❌ فشل المحرك. الرابط قد يكون محمياً أو يتطلب تسجيل دخول.")
+                    st.error(f"❌ فشل المحرك. الرابط قد يكون محمياً أو خاصاً.")
 
+    # --- الجزء المفقود: عرض الفيديو وزر التحميل الذهبي ---
+    if st.session_state.video_data:
+        st.divider()
+        st.markdown(f"📌 **العنوان:** {st.session_state.video_data['title']}")
+        
+        # عرض مشغل الفيديو
+        st.video(st.session_state.video_data['url'])
+        
+        try:
+            # جلب الفيديو كبيانات للتحميل
+            v_content = requests.get(st.session_state.video_data['url'], timeout=15).content
+            
+            # تنسيق الزر الذهبي العريض
+            st.markdown("""
+                <style>
+                div.stDownloadButton > button {
+                    background-color: #FFD700 !important;
+                    color: black !important;
+                    font-weight: bold !important;
+                    font-size: 18px !important;
+                    padding: 15px !important;
+                    width: 100% !important;
+                    border-radius: 12px !important;
+                    border: none !important;
+                    box-shadow: 0px 4px 15px rgba(255, 215, 0, 0.4) !important;
+                }
+                </style>
+            """, unsafe_allow_html=True)
+
+            # زر التحميل الفعلي
+            st.download_button(
+                label="📥 حفظ الفيديو في الاستوديو",
+                data=v_content,
+                file_name=f"AymanGuard_{int(time.time())}.mp4",
+                mime="video/mp4",
+                use_container_width=True
+            )
+            st.balloons()
+            
+        except:
+            st.warning("⚠️ جلب الملف المباشر مقيد، يمكنك الحفظ بالضغط مطولاً على الفيديو أعلاه.")
 
 
 
