@@ -92,7 +92,7 @@ with tabs[0]:
     with c3: st.markdown(f'<div class="feature-card"><h2>🤖</h2><h4>بوت رسمي</h4><p>تحكم كامل عبر تليجرام</p></div>', unsafe_allow_html=True)
     st.image("https://img.freepik.com/free-vector/cyber-security-concept_23-2148532223.jpg", use_column_width=True)
     
-        # --- التبويب 2: مركز الوسائط (المحرك الشامل V37.0) ---
+       # --- التبويب 2: مركز الوسائط (الإصدار الاحترافي الكامل) ---
 with tabs[1]:
     st.subheader("🎬 محرك تحميل الفيديو")
     v_url = st.text_input("ألصق الرابط هنا (YouTube, FB, Instagram, TikTok):", key="v_input")
@@ -101,18 +101,21 @@ with tabs[1]:
         if v_url:
             with st.spinner("⏳ الدرع يخترق حماية المنصة..."):
                 try:
+                    # تنظيف الرابط
                     target_url = v_url.strip()
-                    # إعدادات متقدمة لتجاوز حظر المنصات
+                    
+                    # إعدادات متطورة لتجاوز حظر المنصات (إنستجرام وغيره)
                     ydl_opts = {
                         'format': 'best',
                         'quiet': True,
                         'no_warnings': True,
-                        'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                        'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/110.0.0.0 Safari/537.36',
                         'add_header': ['Referer:https://www.google.com/'],
                     }
                     
                     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                         info = ydl.extract_info(target_url, download=False)
+                        # تخزين البيانات في الجلسة لضمان بقائها بعد التحديث
                         st.session_state.video_data = {
                             "url": info.get('url'),
                             "title": info.get('title', 'Ayman_Guard_Video')
@@ -120,38 +123,41 @@ with tabs[1]:
                     st.success("✅ الفيديو جاهز للعرض والتحميل!")
                         
                 except Exception as e:
-                    st.error(f"❌ فشل المحرك. الرابط قد يكون محمياً أو خاصاً.")
+                    st.error("❌ فشل المحرك. الرابط قد يكون محمياً أو يتطلب تسجيل دخول.")
 
-    # --- الجزء المفقود: عرض الفيديو وزر التحميل الذهبي ---
+    # --- الجزء المهم: عرض النتائج (الفيديو والزر الذهبي) ---
     if st.session_state.video_data:
         st.divider()
         st.markdown(f"📌 **العنوان:** {st.session_state.video_data['title']}")
         
-        # عرض مشغل الفيديو
+        # 1. عرض مشغل الفيديو
         st.video(st.session_state.video_data['url'])
         
         try:
-            # جلب الفيديو كبيانات للتحميل
+            # 2. جلب الفيديو للتحميل المباشر
             v_content = requests.get(st.session_state.video_data['url'], timeout=15).content
             
-            # تنسيق الزر الذهبي العريض
+            # 3. تنسيق CSS لجعل الزر ذهبي وبعرض كامل الفيديو
             st.markdown("""
                 <style>
                 div.stDownloadButton > button {
-                    background-color: #FFD700 !important;
+                    background-color: #FFD700 !important; /* لون ذهبي */
                     color: black !important;
                     font-weight: bold !important;
                     font-size: 18px !important;
                     padding: 15px !important;
-                    width: 100% !important;
+                    width: 100% !important; /* عرض كامل */
                     border-radius: 12px !important;
                     border: none !important;
                     box-shadow: 0px 4px 15px rgba(255, 215, 0, 0.4) !important;
                 }
+                div.stDownloadButton > button:hover {
+                    background-color: #e6c200 !important;
+                }
                 </style>
             """, unsafe_allow_html=True)
 
-            # زر التحميل الفعلي
+            # 4. زر التحميل
             st.download_button(
                 label="📥 حفظ الفيديو في الاستوديو",
                 data=v_content,
@@ -159,11 +165,10 @@ with tabs[1]:
                 mime="video/mp4",
                 use_container_width=True
             )
-            st.balloons()
+            st.balloons() # حركة احتفالية
             
         except:
-            st.warning("⚠️ جلب الملف المباشر مقيد، يمكنك الحفظ بالضغط مطولاً على الفيديو أعلاه.")
-
+            st.warning("⚠️ التحميل المباشر مقيد حالياً، جرب الضغط مطولاً على الفيديو لحفظه.")
 
 
 
