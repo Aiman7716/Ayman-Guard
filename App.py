@@ -94,45 +94,57 @@ with tabs[0]:
     
     # --- تبويب تحميل الوسائط ---
 withwith tabs[1]:
-    st.markdown("<h2 style='text-align: center;'>🎬 محرك جلب الوسائط</h2>", unsafe_allow_html=True)
-    v_url = st.text_input("أدخل الرابط هنا:", key="v_url_fix")
+    st.markdown("<h2 style='text-align: center;'>🎬 محرك جلب الوسائط الشامل</h2>", unsafe_allow_html=True)
     
-    if st.button("🚀 جلب وتحميل الفيديو", key="btn_fix"):
+    # خانة إدخال الرابط (تحديد تلقائي عند الضغط)
+    v_url = st.text_input("ألصق الرابط هنا (يوتيوب، فيسبوك، إنستا، تيك توك، تويتر):", key="global_dl_input")
+    
+    if st.button("🚀 بدء الجلب الفوري"):
         if v_url:
-            with st.spinner("⏳ جاري استخراج رابط التحميل..."):
+            with st.spinner("⏳ جاري كسر الحماية واستخراج الفيديو..."):
                 try:
+                    # أقوى إعدادات لتجاوز الحظر في أغلب المواقع
                     ydl_opts = {
                         'format': 'best',
                         'quiet': True,
-                        'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
+                        'no_warnings': True,
+                        'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/123.0.0.0 Safari/537.36',
+                        'referer': 'https://www.google.com/',
                     }
+                    
                     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                         info = ydl.extract_info(v_url, download=False)
-                        direct_link = info.get('url')
-                        title = info.get('title', 'video')
-
-                        st.success(f"✅ تم العثور على: {title[:50]}...")
+                        direct_url = info.get('url')
+                        title = info.get('title', 'Video_File')
                         
-                        # الحل البديل: زر تحميل مباشر بدلاً من المشغل المعطل
+                        st.success(f"✅ تم الجلب بنجاح: {title[:50]}...")
+                        st.balloons()
+                        
+                        # زر التحميل المباشر (الحل القاضي للشاشة الرمادية)
                         st.markdown(f"""
-                            <div style="text-align: center; margin-top: 20px;">
-                                <a href="{direct_link}" target="_blank" style="
-                                    background-color: #238636; 
+                            <div style="text-align: center; background: #1a1c23; padding: 20px; border-radius: 15px; border: 1px solid #1e90ff;">
+                                <p style="color: #00d4ff; font-weight: bold;">📦 الفيديو جاهز للتحميل</p>
+                                <a href="{direct_url}" target="_blank" style="
+                                    background: linear-gradient(90deg, #238636, #2ea043);
                                     color: white; 
-                                    padding: 15px 25px; 
+                                    padding: 12px 25px; 
                                     text-decoration: none; 
-                                    border-radius: 10px; 
+                                    border-radius: 8px; 
                                     font-weight: bold;
                                     display: inline-block;
-                                ">📥 اضغط هنا لفتح وتحميل الفيديو مباشرة</a>
+                                ">📥 اضغط هنا للتحميل أو المشاهدة المباشرة</a>
                             </div>
                         """, unsafe_allow_html=True)
                         
-                        # عرض المشغل الاحتياطي
+                        # مشغل احتياطي
                         st.video(v_url)
                         
                 except Exception as e:
-                    st.error("❌ الرابط محمي بواسطة الموقع الأصلي. حاول مع رابط آخر.")
+                    st.error("❌ عذراً، هذا الرابط محمي جداً أو يحتاج لتسجيل دخول.")
+                    st.info("💡 نصيحة: تأكد أن الفيديو 'عام' وليس في حساب خاص.")
+        else:
+            st.warning("⚠️ الرجاء وضع الرابط أولاً.")
+
 
 
 
