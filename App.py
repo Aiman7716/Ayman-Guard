@@ -93,61 +93,47 @@ with tabs[0]:
     st.image("https://img.freepik.com/free-vector/cyber-security-concept_23-2148532223.jpg", use_column_width=True)
     
     # --- تبويب تحميل الوسائط ---
-with tabs[1]:
+withwith tabs[1]:
     st.markdown("<h2 style='text-align: center;'>🎬 محرك جلب الوسائط</h2>", unsafe_allow_html=True)
+    v_url = st.text_input("أدخل الرابط هنا:", key="v_url_fix")
     
-    # خانة إدخال الرابط بتصميم نظيف
-    v_url = st.text_input("أدخل رابط الفيديو (إنستجرام، يوتيوب، فيسبوك):", placeholder="https://...", key="video_downloader_input")
-    
-    # الزر الأزرق الشهير للجلب والتحميل
-    if st.button("🚀 جلب وتحميل الفيديو", key="run_downloader_btn"):
+    if st.button("🚀 جلب وتحميل الفيديو", key="btn_fix"):
         if v_url:
-            with st.spinner("⏳ جاري تحليل الرابط واستخراج البيانات..."):
+            with st.spinner("⏳ جاري استخراج رابط التحميل..."):
                 try:
-                    # إعدادات المحرك المستقرة جداً لتجاوز الحظر
                     ydl_opts = {
                         'format': 'best',
                         'quiet': True,
-                        'no_warnings': True,
                         'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/122.0.0.0 Safari/537.36',
-                        'referer': 'https://www.google.com/',
                     }
-                    
                     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
-                        # استخراج معلومات الفيديو (العنوان، المعاينة)
                         info = ydl.extract_info(v_url, download=False)
-                        video_title = info.get('title', 'فيديو بدون عنوان')
+                        direct_link = info.get('url')
+                        title = info.get('title', 'video')
+
+                        st.success(f"✅ تم العثور على: {title[:50]}...")
                         
-                        # عرض النجاح والجماليات (البالونات)
-                        st.success(f"✅ تم العثور على الفيديو: {video_title}")
-                        st.balloons()
+                        # الحل البديل: زر تحميل مباشر بدلاً من المشغل المعطل
+                        st.markdown(f"""
+                            <div style="text-align: center; margin-top: 20px;">
+                                <a href="{direct_link}" target="_blank" style="
+                                    background-color: #238636; 
+                                    color: white; 
+                                    padding: 15px 25px; 
+                                    text-decoration: none; 
+                                    border-radius: 10px; 
+                                    font-weight: bold;
+                                    display: inline-block;
+                                ">📥 اضغط هنا لفتح وتحميل الفيديو مباشرة</a>
+                            </div>
+                        """, unsafe_allow_html=True)
                         
-                        # عرض الفيديو للمعاينة والتشغيل المباشر
+                        # عرض المشغل الاحتياطي
                         st.video(v_url)
                         
-                        st.info("💡 يمكنك الآن الضغط على النقاط الثلاث في مشغل الفيديو واختيار 'Download' إذا كان متصفحك يدعم ذلك.")
-                        
                 except Exception as e:
-                    # رسالة الخطأ التي ظهرت لك في الصورة السابقة مع تنسيقها
-                    st.error("❌ فشل الجلب. تأكد من صحة الرابط أو جرب رابطاً آخر.")
-                    st.toast("حدث خطأ أثناء المحاولة", icon="⚠️")
-        else:
-            st.warning("⚠️ الرجاء وضع رابط الفيديو أولاً قبل الضغط على الزر.")
+                    st.error("❌ الرابط محمي بواسطة الموقع الأصلي. حاول مع رابط آخر.")
 
-# --- جماليات إضافية لزر التحميل (CSS) ---
-st.markdown("""
-    <style>
-    div.stButton > button:first-child {
-        background: linear-gradient(to right, #1e90ff, #00d4ff);
-        color: white;
-        border-radius: 10px;
-        border: none;
-        height: 3em;
-        font-size: 18px;
-        font-weight: bold;
-    }
-    </style>
-""", unsafe_allow_html=True)
 
 
 
