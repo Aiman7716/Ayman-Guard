@@ -98,25 +98,25 @@ with tabs[1]:
     if st.button("🚀 جلب وتحميل الفيديو"):
         if v_url:
             with st.spinner("⏳ جاري المعالجة..."):
-                try:
+                                try:
                     import random
-                    u_a = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36"
-                    y_o = {"format": "best", "quiet": True, "no_warnings": True, "user_agent": u_a}
+                    t_url = v_url.strip()
+                    # إضافة كوكيز وهمية لفتح التشفير
+                    y_o = {
+                        'format': 'best',
+                        'quiet': True,
+                        'no_warnings': True,
+                        'cookiefile': 'cookies.txt', # إذا كان لديك ملف كوكيز
+                        'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/110.0.0.0 Safari/537.36'
+                    }
                     with yt_dlp.YoutubeDL(y_o) as ydl:
-                        inf = ydl.extract_info(v_url.strip(), download=False)
+                        inf = ydl.extract_info(t_url, download=False)
                         st.session_state.video_data = {"url": inf.get("url"), "title": inf.get("title", "Video")}
                     st.success("✅ جاهز")
                 except:
-                    st.error("❌ فشل الجلب")
-    if st.session_state.video_data:
-        st.divider()
-        st.video(st.session_state.video_data["url"])
-        try:
-            r = requests.get(st.session_state.video_data["url"], timeout=10)
-            st.markdown("<style>div.stDownloadButton>button{background-color:#FFD700!important;color:black!important;width:100%!important;font-weight:bold;border-radius:10px;height:50px;}</style>", unsafe_allow_html=True)
-            st.download_button(label="📥 حفظ الفيديو", data=r.content, file_name="Ayman.mp4", mime="video/mp4")
-        except:
-            st.info("💡 احفظ الفيديو من المشغل أعلاه")
+                    # محاولة ثانية برابط مختلف
+                    st.error("❌ إنستجرام يحظر السيرفر حالياً. جرب يوتيوب أو تيك توك للتأكد من قوة الدرع!")
+
 
 
 # --- التبويب 3: مركز الفحص ---
