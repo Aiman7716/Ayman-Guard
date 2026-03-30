@@ -3,6 +3,5 @@ pandas
 requests
 tldextract
 xlsxwriter
-yt-dlp
 beautifulsoup4
 yt-dlp>=2024.03.10
