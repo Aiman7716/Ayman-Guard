@@ -92,7 +92,7 @@ with tabs[0]:
     with c3: st.markdown(f'<div class="feature-card"><h2>🤖</h2><h4>بوت رسمي</h4><p>تحكم كامل عبر تليجرام</p></div>', unsafe_allow_html=True)
     st.image("https://img.freepik.com/free-vector/cyber-security-concept_23-2148532223.jpg", use_column_width=True)
     
-       with tabs[1]:
+    with tabs[1]:
     st.subheader("🎬 محرك تحميل الفيديو")
     v_url = st.text_input("ألصق الرابط هنا:", key="v_input")
     
