@@ -93,35 +93,39 @@ with tabs[0]:
     st.image("https://img.freepik.com/free-vector/cyber-security-concept_23-2148532223.jpg", use_column_width=True)
     
 with tabs[1]:
-    import random, yt_dlp, requests, time
+    import yt_dlp, requests
     st.subheader("🎬 محرك تحميل الفيديو")
     v_url = st.text_input("ألصق الرابط هنا:", key="v_input")
     
     if st.button("🚀 جلب وتحميل الفيديو"):
         if v_url:
-            with st.spinner("⏳ الدرع يحاول الاختراق..."):
+            with st.spinner("⏳ الدرع يحاول الالتفاف على الحظر..."):
                 try:
-                    # إعدادات التمويه لتجاوز الحظر
-                    u_a = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
-                    y_o = {"format": "best", "quiet": True, "no_warnings": True, "user_agent": u_a, "referer": "https://www.google.com/"}
-                    
+                    # إعدادات متقدمة جداً لتجاوز حظر السيرفرات السحابية
+                    y_o = {
+                        'format': 'best',
+                        'quiet': True,
+                        'no_warnings': True,
+                        'source_address': '0.0.0.0', # إجبار السيرفر على استخدام مسار محدد
+                        'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/122.0.0.0 Safari/537.36',
+                    }
                     with yt_dlp.YoutubeDL(y_o) as ydl:
                         inf = ydl.extract_info(v_url.strip(), download=False)
-                        st.session_state.video_data = {"url": inf.get("url"), "title": inf.get("title", "Video")}
-                    st.success("✅ نجح الجلب")
-                except:
-                    st.error("❌ المنصة حظرت السيرفر. جرب رابط يوتيوب أو تيك توك الآن.")
+                        st.session_state.video_data = {"url": inf.get("url"), "title": inf.get("title", "Guard_Video")}
+                    st.success("✅ نجح الاختراق!")
+                except Exception as e:
+                    st.error("❌ السيرفر الحالي مكشوف للمنصة. الحل: جرب منصة Render أو Hugging Face.")
 
     if st.session_state.video_data:
         st.divider()
         st.video(st.session_state.video_data["url"])
+        st.markdown("<style>div.stDownloadButton>button{background-color:#FFD700!important;color:black!important;width:100%!;font-weight:bold;height:50px;border-radius:10px;}</style>", unsafe_allow_html=True)
         try:
             r = requests.get(st.session_state.video_data["url"], timeout=10)
-            st.markdown("<style>div.stDownloadButton>button{background-color:#FFD700!important;color:black!important;width:100%!important;font-weight:bold;border-radius:10px;height:50px;}</style>", unsafe_allow_html=True)
             st.download_button(label="📥 حفظ الفيديو الذهبي", data=r.content, file_name="AymanGuard.mp4", mime="video/mp4")
             st.balloons()
         except:
-            st.info("💡 الرابط محمي، احفظه من المشغل أعلاه")
+            st.info("💡 الرابط محمي، احفظه بالضغط المطول على الفيديو")
 
 
 
