@@ -92,53 +92,40 @@ with tabs[0]:
     with c3: st.markdown(f'<div class="feature-card"><h2>🤖</h2><h4>بوت رسمي</h4><p>تحكم كامل عبر تليجرام</p></div>', unsafe_allow_html=True)
     st.image("https://img.freepik.com/free-vector/cyber-security-concept_23-2148532223.jpg", use_column_width=True)
     
-       # --- التبويب 2: مركز الوسائط (المحرك المطور للمنصات المحمية) ---
-with ta# --- التبويب 2: مركز الوسائط (تجاوز حظر السيرفرات) ---
-with tabs[1]:
+       with tabs[1]:
     st.subheader("🎬 محرك تحميل الفيديو")
-    v_url = st.text_input("ألصق الرابط هنا (YouTube, FB, Instagram, TikTok):", key="v_input")
+    v_url = st.text_input("ألصق الرابط هنا:", key="v_input")
     
     if st.button("🚀 جلب وتحميل الفيديو"):
         if v_url:
-            with st.spinner("⏳ الدرع يحاول الالتفاف على حظر المنصة..."):
+            with st.spinner("⏳ جاري المعالجة..."):
                 try:
-                    target_url = v_url.strip()
-                    
-                    # إعدادات قوية جداً لمحاكاة متصفحات مختلفة في كل محاولة
                     import random
-                    user_agents = [
+                    target_url = v_url.strip()
+                    ua_list = [
                         'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/119.0.0.0 Safari/537.36',
-                        'Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1',
-                        'Mozilla/5.0 (Linux; Android 13; SM-S918B) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/116.0.0.0 Mobile Safari/537.36'
+                        'Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1'
                     ]
-
                     ydl_opts = {
                         'format': 'best',
                         'quiet': True,
                         'no_warnings': True,
-                        'user_agent': random.choice(user_agents),
-                        'add_header': ['Accept: text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,*/*;q=0.8'],
-                        'referer': 'https://www.instagram.com/',
-                        'sleep_interval': 2, # تأخير بسيط لتجنب كشف البوت
+                        'user_agent': random.choice(ua_list),
+                        'referer': 'https://www.google.com/'
                     }
-                    
                     with yt_dlp.YoutubeDL(ydl_opts) as ydl:
                         info = ydl.extract_info(target_url, download=False)
                         st.session_state.video_data = {
                             "url": info.get('url'),
-                            "title": info.get('title', 'Ayman_Guard_Video')
+                            "title": info.get('title', 'Video_Ayman')
                         }
-                    st.success("✅ تم الاختراق بنجاح! الفيديو جاهز.")
-                        
+                    st.success("✅ الفيديو جاهز")
                 except Exception as e:
-                    st.error("⚠️ فشل المحرك: المنصة تفرض حماية مشددة على هذا الرابط حالياً. جرب رابطاً آخر أو انتظر قليلاً.")
+                    st.error("❌ الرابط محمي أو السيرفر محظور حالياً.")
 
-    # --- عرض النتائج والزر الذهبي ---
     if st.session_state.video_data:
         st.divider()
-        st.markdown(f"📌 **العنوان:** {st.session_state.video_data['title']}")
         st.video(st.session_state.video_data['url'])
-        
         try:
             v_content = requests.get(st.session_state.video_data['url'], timeout=10).content
             st.markdown("""
@@ -149,21 +136,19 @@ with tabs[1]:
                     font-weight: bold !important;
                     width: 100% !important;
                     border-radius: 12px !important;
-                    height: 55px !important;
+                    height: 50px !important;
                 }
                 </style>
             """, unsafe_allow_html=True)
-
             st.download_button(
                 label="📥 حفظ في الاستوديو",
                 data=v_content,
-                file_name=f"Guard_{int(time.time())}.mp4",
+                file_name="AymanGuard.mp4",
                 mime="video/mp4",
                 use_container_width=True
             )
-            st.balloons()
         except:
-            st.warning("📥 الرابط المباشر محمي، استخدم 'حفظ الفيديو باسم' من المشغل أعلاه.")
+            st.warning("📥 استخدم خيار الحفظ من مشغل الفيديو أعلاه.")
 
 
 
