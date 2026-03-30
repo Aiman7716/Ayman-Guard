@@ -92,40 +92,33 @@ with tabs[0]:
     with c3: st.markdown(f'<div class="feature-card"><h2>🤖</h2><h4>بوت رسمي</h4><p>تحكم كامل عبر تليجرام</p></div>', unsafe_allow_html=True)
     st.image("https://img.freepik.com/free-vector/cyber-security-concept_23-2148532223.jpg", use_column_width=True)
     
-with tabs[1]:
-    import yt_dlp, requests
-    st.subheader("🎬 محرك تحميل الفيديو")
-    v_url = st.text_input("ألصق الرابط هنا:", key="v_input")
-    
-    if st.button("🚀 جلب وتحميل الفيديو"):
+    # قسم معالجة الرابط المطور لإنستجرام وغيره
+    if st.button("🚀 جلب وتحمـيل الفيديو"):
         if v_url:
-            with st.spinner("⏳ الدرع يحاول الالتفاف على الحظر..."):
+            with st.spinner("⏳ الدرع يخترق حماية المنصة..."):
                 try:
-                    # إعدادات متقدمة جداً لتجاوز حظر السيرفرات السحابية
-                    y_o = {
+                    # تنظيف وتجهيز الرابط
+                    clean_url = v_url.strip()
+                    
+                    # إعدادات متقدمة لتجاوز حظر إنستجرام
+                    ydl_opts = {
                         'format': 'best',
                         'quiet': True,
                         'no_warnings': True,
-                        'source_address': '0.0.0.0', # إجبار السيرفر على استخدام مسار محدد
-                        'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) Chrome/122.0.0.0 Safari/537.36',
+                        'user_agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36',
+                        'add_header': ['Referer:https://www.instagram.com/'],
                     }
-                    with yt_dlp.YoutubeDL(y_o) as ydl:
-                        inf = ydl.extract_info(v_url.strip(), download=False)
-                        st.session_state.video_data = {"url": inf.get("url"), "title": inf.get("title", "Guard_Video")}
-                    st.success("✅ نجح الاختراق!")
+                    
+                    with yt_dlp.YoutubeDL(ydl_opts) as ydl:
+                        info = ydl.extract_info(clean_url, download=False)
+                        st.session_state.video_data = {
+                            "url": info.get('url'),
+                            "title": info.get('title', 'Ayman_Guard_Video')
+                        }
+                    st.success("✅ الفيديو جاهز!") # كما يظهر في صورتك الناجحة
+                        
                 except Exception as e:
-                    st.error("❌ السيرفر الحالي مكشوف للمنصة. الحل: جرب منصة Render أو Hugging Face.")
-
-    if st.session_state.video_data:
-        st.divider()
-        st.video(st.session_state.video_data["url"])
-        st.markdown("<style>div.stDownloadButton>button{background-color:#FFD700!important;color:black!important;width:100%!;font-weight:bold;height:50px;border-radius:10px;}</style>", unsafe_allow_html=True)
-        try:
-            r = requests.get(st.session_state.video_data["url"], timeout=10)
-            st.download_button(label="📥 حفظ الفيديو الذهبي", data=r.content, file_name="AymanGuard.mp4", mime="video/mp4")
-            st.balloons()
-        except:
-            st.info("💡 الرابط محمي، احفظه بالضغط المطول على الفيديو")
+                    st.error("❌ فشل المحرك. الرابط قد يكون محمياً أو يتطلب تسجيل دخول.")
 
 
 
