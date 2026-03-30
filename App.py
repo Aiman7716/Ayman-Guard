@@ -93,7 +93,7 @@ with tabs[0]:
     st.image("https://img.freepik.com/free-vector/cyber-security-concept_23-2148532223.jpg", use_column_width=True)
     
     # --- تبويب تحميل الوسائط ---
-withwith tabs[1]:
+with tabs[1]:
     st.markdown("<h2 style='text-align: center;'>🎬 محرك جلب الوسائط الشامل</h2>", unsafe_allow_html=True)
     
     # خانة إدخال الرابط (تحديد تلقائي عند الضغط)
